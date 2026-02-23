@@ -11,7 +11,7 @@ import { $getNodeByKey, $getRoot } from "lexical";
 import { createPortal } from "react-dom";
 
 // LUCIDE
-import { GripVertical } from "lucide-react";
+import { DotsSixVertical } from "@phosphor-icons/react";
 
 interface BlockInfo {
   key: string;
@@ -320,7 +320,7 @@ export function OverlayPortal({ namespace }: OverlayPortalProps) {
           visibility: "hidden",
         }}
       >
-        <GripVertical size={16} />
+        <DotsSixVertical size={16} weight="bold" />
       </div>
 
       {/* Drop indicator line — always in DOM, positioned imperatively */}
