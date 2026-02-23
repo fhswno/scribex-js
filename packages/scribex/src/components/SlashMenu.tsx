@@ -24,22 +24,49 @@ import { $createListNode, $createListItemNode } from "@lexical/list";
 // REACT DOM
 import { createPortal } from "react-dom";
 
-// LUCIDE
+// PHOSPHOR ICONS — Duotone wrappers for the slash menu
 import {
-  Heading1,
-  Heading2,
-  Heading3,
-  Quote,
-  List,
-  ListOrdered,
-  CheckSquare,
-  Code,
-  Minus,
-  ImageIcon,
-} from "lucide-react";
+  TextHOne,
+  TextHTwo,
+  TextHThree,
+  Quotes,
+  ListBullets,
+  ListNumbers,
+  MinusSquare,
+  ImageSquare,
+} from "@phosphor-icons/react";
 
 // COMMANDS
 import { OPEN_SLASH_MENU_COMMAND, INSERT_IMAGE_COMMAND } from "../commands";
+
+// ── Duotone icon wrappers (stable references, no re-creation) ───────────────
+
+const IconH1 = ({ size }: { size?: number }) => (
+  <TextHOne size={size} weight="duotone" />
+);
+const IconH2 = ({ size }: { size?: number }) => (
+  <TextHTwo size={size} weight="duotone" />
+);
+const IconH3 = ({ size }: { size?: number }) => (
+  <TextHThree size={size} weight="duotone" />
+);
+const IconQuote = ({ size }: { size?: number }) => (
+  <Quotes size={size} weight="duotone" />
+);
+const IconBulletList = ({ size }: { size?: number }) => (
+  <ListBullets size={size} weight="duotone" />
+);
+const IconNumberedList = ({ size }: { size?: number }) => (
+  <ListNumbers size={size} weight="duotone" />
+);
+const IconDivider = ({ size }: { size?: number }) => (
+  <MinusSquare size={size} weight="duotone" />
+);
+const IconImage = ({ size }: { size?: number }) => (
+  <ImageSquare size={size} weight="duotone" />
+);
+
+// ── Public interface ────────────────────────────────────────────────────────
 
 export interface SlashMenuItem {
   id: string;
@@ -48,6 +75,67 @@ export interface SlashMenuItem {
   icon: React.ComponentType<{ size?: number }>;
   onSelect: () => void;
 }
+
+// ── Markdown shortcut hints (shown on the right of each item) ───────────────
+
+const SHORTCUT_HINTS: Record<string, string> = {
+  "heading-1": "#",
+  "heading-2": "##",
+  "heading-3": "###",
+  quote: ">",
+  "bullet-list": "-",
+  "numbered-list": "1.",
+  divider: "---",
+};
+
+// ── Category color system ───────────────────────────────────────────────────
+
+interface CategoryStyle {
+  bg: string;
+  icon: string;
+}
+
+const CATEGORY_COLORS: Record<string, CategoryStyle> = {
+  headings: { bg: "linear-gradient(135deg, #EEF2FF, #E0E7FF)", icon: "#6366F1" },
+  blocks: { bg: "linear-gradient(135deg, #F5F3FF, #EDE9FE)", icon: "#8B5CF6" },
+  lists: { bg: "linear-gradient(135deg, #ECFDF5, #D1FAE5)", icon: "#10B981" },
+  media: { bg: "linear-gradient(135deg, #FFF7ED, #FFEDD5)", icon: "#F59E0B" },
+  other: { bg: "linear-gradient(135deg, #F9FAFB, #F3F4F6)", icon: "#6B7280" },
+};
+
+function getCategoryForId(id: string): string {
+  if (id.startsWith("heading")) return "headings";
+  if (id === "quote" || id === "divider" || id === "code") return "blocks";
+  if (id === "bullet-list" || id === "numbered-list" || id === "check-list")
+    return "lists";
+  if (id === "image") return "media";
+  return "other";
+}
+
+// ── Injected CSS for animations ─────────────────────────────────────────────
+
+const SLASH_MENU_STYLES = `
+@keyframes scribex-menu-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes scribex-icon-lift {
+  0%, 100% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-2px) scale(1.08); }
+  70% { transform: translateY(0.5px) scale(0.98); }
+}
+[data-testid="slash-menu"]::-webkit-scrollbar {
+  display: none;
+}
+`;
+
+// ── Default items factory ───────────────────────────────────────────────────
 
 function getDefaultItems(
   editor: ReturnType<typeof useLexicalComposerContext>[0],
@@ -73,7 +161,6 @@ function getDefaultItems(
 
       const newNode = createNode();
       if ($isRootNode(block)) {
-        // anchor was the root itself — append
         $getRoot().append(newNode);
       } else if (
         "getChildrenSize" in block &&
@@ -93,35 +180,35 @@ function getDefaultItems(
       id: "heading-1",
       label: "Heading 1",
       description: "Large heading",
-      icon: Heading1,
+      icon: IconH1,
       onSelect: () => replaceCurrentBlock(() => $createHeadingNode("h1")),
     },
     {
       id: "heading-2",
       label: "Heading 2",
       description: "Medium heading",
-      icon: Heading2,
+      icon: IconH2,
       onSelect: () => replaceCurrentBlock(() => $createHeadingNode("h2")),
     },
     {
       id: "heading-3",
       label: "Heading 3",
       description: "Small heading",
-      icon: Heading3,
+      icon: IconH3,
       onSelect: () => replaceCurrentBlock(() => $createHeadingNode("h3")),
     },
     {
       id: "quote",
       label: "Quote",
       description: "Blockquote",
-      icon: Quote,
+      icon: IconQuote,
       onSelect: () => replaceCurrentBlock(() => $createQuoteNode()),
     },
     {
       id: "bullet-list",
       label: "Bullet List",
       description: "Unordered list",
-      icon: List,
+      icon: IconBulletList,
       onSelect: () =>
         replaceCurrentBlock(() => {
           const list = $createListNode("bullet");
@@ -134,7 +221,7 @@ function getDefaultItems(
       id: "numbered-list",
       label: "Numbered List",
       description: "Ordered list",
-      icon: ListOrdered,
+      icon: IconNumberedList,
       onSelect: () =>
         replaceCurrentBlock(() => {
           const list = $createListNode("number");
@@ -147,16 +234,15 @@ function getDefaultItems(
       id: "divider",
       label: "Divider",
       description: "Horizontal rule",
-      icon: Minus,
+      icon: IconDivider,
       onSelect: () => replaceCurrentBlock(() => $createParagraphNode()),
     },
     {
       id: "image",
       label: "Image",
       description: "Upload an image",
-      icon: ImageIcon,
+      icon: IconImage,
       onSelect: () => {
-        // Remove the "/" trigger text first
         editor.update(() => {
           const selection = $getSelection();
           if (!$isRangeSelection(selection)) return;
@@ -165,7 +251,6 @@ function getDefaultItems(
             anchor.remove();
           }
         });
-        // Open file picker
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
@@ -180,6 +265,47 @@ function getDefaultItems(
     },
   ];
 }
+
+// ── Item grouping ───────────────────────────────────────────────────────────
+
+interface ItemGroup {
+  label: string;
+  category: string;
+  items: SlashMenuItem[];
+}
+
+function groupItems(items: SlashMenuItem[]): ItemGroup[] {
+  const buckets: Record<string, SlashMenuItem[]> = {};
+  const categoryLabels: Record<string, string> = {
+    headings: "Headings",
+    blocks: "Blocks",
+    lists: "Lists",
+    media: "Media",
+    other: "Other",
+  };
+  const order = ["headings", "blocks", "lists", "media", "other"];
+
+  for (const item of items) {
+    const cat = getCategoryForId(item.id);
+    if (!buckets[cat]) buckets[cat] = [];
+    buckets[cat]!.push(item);
+  }
+
+  const groups: ItemGroup[] = [];
+  for (const cat of order) {
+    const bucket = buckets[cat];
+    if (bucket && bucket.length > 0) {
+      groups.push({
+        label: categoryLabels[cat] ?? cat,
+        category: cat,
+        items: bucket,
+      });
+    }
+  }
+  return groups;
+}
+
+// ── Component ───────────────────────────────────────────────────────────────
 
 interface SlashMenuProps {
   items?: SlashMenuItem[];
@@ -214,6 +340,15 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
       )
     : allItems;
 
+  // Group and flatten for sectioned display
+  const groupedItems = groupItems(filteredItems);
+  const flatItems: SlashMenuItem[] = [];
+  for (const group of groupedItems) {
+    for (const item of group.items) {
+      flatItems.push(item);
+    }
+  }
+
   const close = useCallback(() => {
     setIsOpen(false);
     setQuery("");
@@ -222,13 +357,13 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
 
   const selectItem = useCallback(
     (index: number) => {
-      const item = filteredItems[index];
+      const item = flatItems[index];
       if (item) {
         close();
         item.onSelect();
       }
     },
-    [filteredItems, close],
+    [flatItems, close],
   );
 
   // Listen for the slash menu command
@@ -243,7 +378,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
         const rect = range.getBoundingClientRect();
 
         setPosition({
-          top: rect.bottom + 4,
+          top: rect.bottom + 6,
           left: rect.left,
         });
         setIsOpen(true);
@@ -255,7 +390,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
     );
   }, [editor]);
 
-  // Track text typed after "/" to use as filter query
+  // Track text typed after "/"
   useEffect(() => {
     if (!isOpen) return;
 
@@ -273,7 +408,6 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
             setQuery(text.slice(1));
             setSelectedIndex(0);
           } else if (text === "") {
-            // User deleted the "/"
             close();
           } else {
             close();
@@ -291,9 +425,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
       KEY_ARROW_DOWN_COMMAND,
       (event) => {
         event?.preventDefault();
-        setSelectedIndex((prev) =>
-          Math.min(prev + 1, filteredItems.length - 1),
-        );
+        setSelectedIndex((prev) => Math.min(prev + 1, flatItems.length - 1));
         return true;
       },
       COMMAND_PRIORITY_LOW,
@@ -334,9 +466,22 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
       removeEnter();
       removeEscape();
     };
-  }, [editor, isOpen, filteredItems.length, selectedIndex, selectItem, close]);
+  }, [editor, isOpen, flatItems.length, selectedIndex, selectItem, close]);
+
+  // Auto-scroll the selected item into view
+  useEffect(() => {
+    if (!isOpen || !menuRef.current) return;
+    const selected = menuRef.current.querySelector(
+      '[aria-selected="true"]',
+    ) as HTMLElement | null;
+    if (selected) {
+      selected.scrollIntoView({ block: "nearest" });
+    }
+  }, [isOpen, selectedIndex]);
 
   if (!isOpen || !portalContainer) return null;
+
+  let flatIndex = 0;
 
   return createPortal(
     <div
@@ -347,64 +492,172 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
       style={{
         position: "fixed",
         zIndex: 50,
-        width: "256px",
-        maxHeight: "320px",
+        width: "248px",
+        maxHeight: "min(380px, 60vh)",
         overflow: "auto",
-        borderRadius: "8px",
-        border: "1px solid var(--scribex-border, #e2e8f0)",
-        backgroundColor: "var(--scribex-background, #ffffff)",
-        padding: "4px",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+        borderRadius: "12px",
+        border: "1px solid rgba(0, 0, 0, 0.06)",
+        backgroundColor: "rgba(255, 255, 255, 0.78)",
+        backdropFilter: "blur(24px) saturate(190%)",
+        WebkitBackdropFilter: "blur(24px) saturate(190%)",
+        padding: "6px",
+        boxShadow: [
+          "0 0 0 0.5px rgba(0, 0, 0, 0.04)",
+          "0 12px 48px -4px rgba(0, 0, 0, 0.13)",
+          "0 4px 12px rgba(0, 0, 0, 0.05)",
+        ].join(", "),
         top: `${position.top}px`,
         left: `${position.left}px`,
-        fontFamily: "var(--scribex-font-sans, system-ui, sans-serif)",
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif',
+        letterSpacing: "-0.01em",
+        animation: "scribex-menu-enter 180ms cubic-bezier(0.2, 0.9, 0.3, 1)",
+        scrollbarWidth: "none" as const,
+        msOverflowStyle: "none" as const,
       }}
     >
-      {filteredItems.length === 0 ? (
+      <style>{SLASH_MENU_STYLES}</style>
+
+      {flatItems.length === 0 ? (
         <div
-          style={{ padding: "8px 12px", fontSize: "14px", color: "#9ca3af" }}
+          style={{
+            padding: "20px 12px",
+            fontSize: "12.5px",
+            color: "rgba(0, 0, 0, 0.3)",
+            textAlign: "center",
+            fontWeight: 400,
+          }}
         >
-          No results
+          No matching commands
         </div>
       ) : (
-        filteredItems.map((item, index) => (
-          <button
-            key={item.id}
-            type="button"
-            role="option"
-            aria-selected={index === selectedIndex}
-            data-testid={`slash-menu-item-${item.id}`}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              selectItem(index);
-            }}
-            onMouseEnter={() => setSelectedIndex(index)}
-            style={{
-              display: "flex",
-              width: "100%",
-              alignItems: "center",
-              gap: "12px",
-              borderRadius: "6px",
-              padding: "8px 12px",
-              textAlign: "left",
-              fontSize: "14px",
-              border: "none",
-              cursor: "pointer",
-              backgroundColor:
-                index === selectedIndex
-                  ? "var(--scribex-muted, #f1f5f9)"
-                  : "transparent",
-              color: "var(--scribex-foreground, #0f172a)",
-            }}
-          >
-            <item.icon size={18} />
-            <div>
-              <div style={{ fontWeight: 500 }}>{item.label}</div>
-              <div style={{ fontSize: "12px", color: "#9ca3af" }}>
-                {item.description}
+        groupedItems.map((group, groupIdx) => (
+          <div key={group.label}>
+            {/* Section separator */}
+            {groupIdx > 0 && (
+              <div
+                style={{
+                  height: "0.5px",
+                  backgroundColor: "rgba(0, 0, 0, 0.07)",
+                  margin: "4px 10px",
+                }}
+              />
+            )}
+
+            {/* Section header — only when not filtering */}
+            {!query && (
+              <div
+                style={{
+                  padding: "7px 10px 4px",
+                  fontSize: "10.5px",
+                  fontWeight: 600,
+                  color: "rgba(0, 0, 0, 0.28)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  userSelect: "none",
+                }}
+              >
+                {group.label}
               </div>
-            </div>
-          </button>
+            )}
+
+            {group.items.map((item) => {
+              const idx = flatIndex++;
+              const isActive = idx === selectedIndex;
+              const category = getCategoryForId(item.id);
+              const colors = CATEGORY_COLORS[category] ?? CATEGORY_COLORS.other!;
+              const shortcut = SHORTCUT_HINTS[item.id];
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="option"
+                  aria-selected={isActive}
+                  data-testid={`slash-menu-item-${item.id}`}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    selectItem(idx);
+                  }}
+                  onMouseEnter={() => setSelectedIndex(idx)}
+                  style={{
+                    display: "flex",
+                    width: "100%",
+                    alignItems: "center",
+                    gap: "10px",
+                    borderRadius: "8px",
+                    padding: "5px 8px",
+                    textAlign: "left",
+                    fontSize: "13px",
+                    border: "none",
+                    cursor: "default",
+                    backgroundColor: isActive
+                      ? "var(--scribex-accent, #007AFF)"
+                      : "transparent",
+                    color: isActive
+                      ? "#fff"
+                      : "var(--scribex-foreground, #1d1d1f)",
+                    transition: "background-color 80ms ease",
+                  }}
+                >
+                  {/* Icon tile */}
+                  <div
+                    style={{
+                      width: "30px",
+                      height: "30px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "7px",
+                      background: isActive
+                        ? "rgba(255, 255, 255, 0.2)"
+                        : colors.bg,
+                      flexShrink: 0,
+                      color: isActive ? "#fff" : colors.icon,
+                      animation: isActive
+                        ? "scribex-icon-lift 400ms cubic-bezier(0.34, 1.56, 0.64, 1)"
+                        : "none",
+                    }}
+                  >
+                    <item.icon size={16} />
+                  </div>
+
+                  {/* Label */}
+                  <div
+                    style={{
+                      flex: 1,
+                      fontWeight: 450,
+                      lineHeight: "18px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {item.label}
+                  </div>
+
+                  {/* Markdown shortcut hint */}
+                  {shortcut && (
+                    <div
+                      style={{
+                        fontSize: "10.5px",
+                        fontFamily:
+                          '"SF Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace',
+                        fontWeight: 400,
+                        color: isActive
+                          ? "rgba(255, 255, 255, 0.55)"
+                          : "rgba(0, 0, 0, 0.18)",
+                        flexShrink: 0,
+                        paddingRight: "2px",
+                      }}
+                    >
+                      {shortcut}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         ))
       )}
     </div>,
