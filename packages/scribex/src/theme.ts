@@ -1,3 +1,4 @@
+// LEXICAL
 import type { EditorThemeClasses } from 'lexical';
 
 export const scribexTheme: EditorThemeClasses = {
