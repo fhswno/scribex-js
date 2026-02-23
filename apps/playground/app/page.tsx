@@ -5,6 +5,7 @@ import {
   EditorRoot,
   FloatingToolbar,
   SlashMenu,
+  OverlayPortal,
   InputRulePlugin,
   useEditorState,
 } from "@scribex/core";
@@ -41,11 +42,12 @@ export default function Page() {
 
       <EditorRoot
         namespace="playground-editor"
-        className="relative min-h-50 p-4 border rounded"
+        className="relative min-h-50 p-4 border rounded ml-8"
       >
         <FloatingToolbar />
         <InputRulePlugin />
         <SlashMenu />
+        <OverlayPortal namespace="playground-editor" />
         <EditorStateDisplay />
       </EditorRoot>
 
@@ -55,11 +57,12 @@ export default function Page() {
         </h2>
         <EditorRoot
           namespace="playground-editor-b"
-          className="relative min-h-50 p-4 border rounded"
+          className="relative min-h-50 p-4 border rounded ml-8"
         >
           <FloatingToolbar />
           <InputRulePlugin />
           <SlashMenu />
+          <OverlayPortal namespace="playground-editor-b" />
           <EditorStateDisplay />
         </EditorRoot>
       </div>
