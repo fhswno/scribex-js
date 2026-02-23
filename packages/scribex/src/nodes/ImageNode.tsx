@@ -1,7 +1,10 @@
 "use client";
 
+// REACT
 import { useCallback, useRef, useState } from "react";
 import type { ReactElement } from "react";
+
+// LEXICAL
 import type {
   DOMConversionMap,
   DOMConversionOutput,
