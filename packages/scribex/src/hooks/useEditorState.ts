@@ -1,6 +1,9 @@
 'use client';
 
+// REACT
 import { useEffect, useState } from 'react';
+
+// LEXICAL
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 
 interface UseEditorStateOptions {
