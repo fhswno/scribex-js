@@ -1,7 +1,10 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+// REACT
+import { useCallback, useEffect, useRef, useState } from "react";
+
+// LEXICAL
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $createParagraphNode,
   $getSelection,
@@ -12,10 +15,14 @@ import {
   KEY_ENTER_COMMAND,
   KEY_ESCAPE_COMMAND,
   TextNode,
-} from 'lexical';
-import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
-import { $createListNode, $createListItemNode } from '@lexical/list';
-import { createPortal } from 'react-dom';
+} from "lexical";
+import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
+import { $createListNode, $createListItemNode } from "@lexical/list";
+
+// REACT DOM
+import { createPortal } from "react-dom";
+
+// LUCIDE
 import {
   Heading1,
   Heading2,
@@ -26,8 +33,10 @@ import {
   CheckSquare,
   Code,
   Minus,
-} from 'lucide-react';
-import { OPEN_SLASH_MENU_COMMAND } from '../commands';
+} from "lucide-react";
+
+// COMMANDS
+import { OPEN_SLASH_MENU_COMMAND } from "../commands";
 
 export interface SlashMenuItem {
   id: string;
@@ -37,8 +46,12 @@ export interface SlashMenuItem {
   onSelect: () => void;
 }
 
-function getDefaultItems(editor: ReturnType<typeof useLexicalComposerContext>[0]): SlashMenuItem[] {
-  const replaceCurrentBlock = (createNode: () => import('lexical').ElementNode) => {
+function getDefaultItems(
+  editor: ReturnType<typeof useLexicalComposerContext>[0],
+): SlashMenuItem[] {
+  const replaceCurrentBlock = (
+    createNode: () => import("lexical").ElementNode,
+  ) => {
     editor.update(() => {
       const selection = $getSelection();
       if (!$isRangeSelection(selection)) return;
@@ -63,37 +76,37 @@ function getDefaultItems(editor: ReturnType<typeof useLexicalComposerContext>[0]
 
   return [
     {
-      id: 'heading-1',
-      label: 'Heading 1',
-      description: 'Large heading',
+      id: "heading-1",
+      label: "Heading 1",
+      description: "Large heading",
       icon: Heading1,
-      onSelect: () => replaceCurrentBlock(() => $createHeadingNode('h1')),
+      onSelect: () => replaceCurrentBlock(() => $createHeadingNode("h1")),
     },
     {
-      id: 'heading-2',
-      label: 'Heading 2',
-      description: 'Medium heading',
+      id: "heading-2",
+      label: "Heading 2",
+      description: "Medium heading",
       icon: Heading2,
-      onSelect: () => replaceCurrentBlock(() => $createHeadingNode('h2')),
+      onSelect: () => replaceCurrentBlock(() => $createHeadingNode("h2")),
     },
     {
-      id: 'heading-3',
-      label: 'Heading 3',
-      description: 'Small heading',
+      id: "heading-3",
+      label: "Heading 3",
+      description: "Small heading",
       icon: Heading3,
-      onSelect: () => replaceCurrentBlock(() => $createHeadingNode('h3')),
+      onSelect: () => replaceCurrentBlock(() => $createHeadingNode("h3")),
     },
     {
-      id: 'quote',
-      label: 'Quote',
-      description: 'Blockquote',
+      id: "quote",
+      label: "Quote",
+      description: "Blockquote",
       icon: Quote,
       onSelect: () => replaceCurrentBlock(() => $createQuoteNode()),
     },
     {
-      id: 'bullet-list',
-      label: 'Bullet List',
-      description: 'Unordered list',
+      id: "bullet-list",
+      label: "Bullet List",
+      description: "Unordered list",
       icon: List,
       onSelect: () => {
         editor.update(() => {
@@ -103,7 +116,7 @@ function getDefaultItems(editor: ReturnType<typeof useLexicalComposerContext>[0]
           const parent = anchor.getParent();
           if (!parent) return;
           if (anchor instanceof TextNode) anchor.remove();
-          const list = $createListNode('bullet');
+          const list = $createListNode("bullet");
           const item = $createListItemNode();
           list.append(item);
           if (parent.getChildrenSize() === 0) {
@@ -116,9 +129,9 @@ function getDefaultItems(editor: ReturnType<typeof useLexicalComposerContext>[0]
       },
     },
     {
-      id: 'numbered-list',
-      label: 'Numbered List',
-      description: 'Ordered list',
+      id: "numbered-list",
+      label: "Numbered List",
+      description: "Ordered list",
       icon: ListOrdered,
       onSelect: () => {
         editor.update(() => {
@@ -128,7 +141,7 @@ function getDefaultItems(editor: ReturnType<typeof useLexicalComposerContext>[0]
           const parent = anchor.getParent();
           if (!parent) return;
           if (anchor instanceof TextNode) anchor.remove();
-          const list = $createListNode('number');
+          const list = $createListNode("number");
           const item = $createListItemNode();
           list.append(item);
           if (parent.getChildrenSize() === 0) {
@@ -141,9 +154,9 @@ function getDefaultItems(editor: ReturnType<typeof useLexicalComposerContext>[0]
       },
     },
     {
-      id: 'divider',
-      label: 'Divider',
-      description: 'Horizontal rule',
+      id: "divider",
+      label: "Divider",
+      description: "Horizontal rule",
       icon: Minus,
       onSelect: () => {
         editor.update(() => {
@@ -176,18 +189,22 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
   const [editor] = useLexicalComposerContext();
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
+    null,
+  );
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     setPortalContainer(document.body);
   }, []);
 
   const defaultItems = getDefaultItems(editor);
-  const allItems = externalItems ? [...defaultItems, ...externalItems] : defaultItems;
+  const allItems = externalItems
+    ? [...defaultItems, ...externalItems]
+    : defaultItems;
 
   const filteredItems = query
     ? allItems.filter(
@@ -199,7 +216,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
 
   const close = useCallback(() => {
     setIsOpen(false);
-    setQuery('');
+    setQuery("");
     setSelectedIndex(0);
   }, []);
 
@@ -230,7 +247,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
           left: rect.left,
         });
         setIsOpen(true);
-        setQuery('');
+        setQuery("");
         setSelectedIndex(0);
         return true;
       },
@@ -252,10 +269,10 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
         const anchor = selection.anchor.getNode();
         if (anchor instanceof TextNode) {
           const text = anchor.getTextContent();
-          if (text.startsWith('/')) {
+          if (text.startsWith("/")) {
             setQuery(text.slice(1));
             setSelectedIndex(0);
-          } else if (text === '') {
+          } else if (text === "") {
             // User deleted the "/"
             close();
           } else {
@@ -274,7 +291,9 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
       KEY_ARROW_DOWN_COMMAND,
       (event) => {
         event?.preventDefault();
-        setSelectedIndex((prev) => Math.min(prev + 1, filteredItems.length - 1));
+        setSelectedIndex((prev) =>
+          Math.min(prev + 1, filteredItems.length - 1),
+        );
         return true;
       },
       COMMAND_PRIORITY_LOW,
@@ -326,23 +345,25 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
       aria-label="Slash menu"
       data-testid="slash-menu"
       style={{
-        position: 'fixed',
+        position: "fixed",
         zIndex: 50,
-        width: '256px',
-        maxHeight: '320px',
-        overflow: 'auto',
-        borderRadius: '8px',
-        border: '1px solid var(--scribex-border, #e2e8f0)',
-        backgroundColor: 'var(--scribex-background, #ffffff)',
-        padding: '4px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        width: "256px",
+        maxHeight: "320px",
+        overflow: "auto",
+        borderRadius: "8px",
+        border: "1px solid var(--scribex-border, #e2e8f0)",
+        backgroundColor: "var(--scribex-background, #ffffff)",
+        padding: "4px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
         top: `${position.top}px`,
         left: `${position.left}px`,
-        fontFamily: 'var(--scribex-font-sans, system-ui, sans-serif)',
+        fontFamily: "var(--scribex-font-sans, system-ui, sans-serif)",
       }}
     >
       {filteredItems.length === 0 ? (
-        <div style={{ padding: '8px 12px', fontSize: '14px', color: '#9ca3af' }}>
+        <div
+          style={{ padding: "8px 12px", fontSize: "14px", color: "#9ca3af" }}
+        >
           No results
         </div>
       ) : (
@@ -359,26 +380,27 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
             }}
             onMouseEnter={() => setSelectedIndex(index)}
             style={{
-              display: 'flex',
-              width: '100%',
-              alignItems: 'center',
-              gap: '12px',
-              borderRadius: '6px',
-              padding: '8px 12px',
-              textAlign: 'left',
-              fontSize: '14px',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: index === selectedIndex
-                ? 'var(--scribex-muted, #f1f5f9)'
-                : 'transparent',
-              color: 'var(--scribex-foreground, #0f172a)',
+              display: "flex",
+              width: "100%",
+              alignItems: "center",
+              gap: "12px",
+              borderRadius: "6px",
+              padding: "8px 12px",
+              textAlign: "left",
+              fontSize: "14px",
+              border: "none",
+              cursor: "pointer",
+              backgroundColor:
+                index === selectedIndex
+                  ? "var(--scribex-muted, #f1f5f9)"
+                  : "transparent",
+              color: "var(--scribex-foreground, #0f172a)",
             }}
           >
             <item.icon size={18} />
             <div>
               <div style={{ fontWeight: 500 }}>{item.label}</div>
-              <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+              <div style={{ fontSize: "12px", color: "#9ca3af" }}>
                 {item.description}
               </div>
             </div>
