@@ -7,11 +7,27 @@ import {
   SlashMenu,
   OverlayPortal,
   InputRulePlugin,
+  ImagePlugin,
   useEditorState,
 } from "@scribex/core";
 
 // REACT
 import { useCallback, useState } from "react";
+
+// TYPES
+import type { UploadHandler } from "@scribex/core";
+
+/** Mock upload handler — simulates a 500ms upload and returns a placeholder URL */
+const mockUploadHandler: UploadHandler = async (file: File): Promise<string> => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  // Return a data URL from the file for demo purposes
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+};
 
 function EditorStateDisplay() {
   // States
@@ -48,6 +64,7 @@ export default function Page() {
         <InputRulePlugin />
         <SlashMenu />
         <OverlayPortal namespace="playground-editor" />
+        <ImagePlugin uploadHandler={mockUploadHandler} />
         <EditorStateDisplay />
       </EditorRoot>
 
@@ -63,6 +80,7 @@ export default function Page() {
           <InputRulePlugin />
           <SlashMenu />
           <OverlayPortal namespace="playground-editor-b" />
+          <ImagePlugin uploadHandler={mockUploadHandler} />
           <EditorStateDisplay />
         </EditorRoot>
       </div>
