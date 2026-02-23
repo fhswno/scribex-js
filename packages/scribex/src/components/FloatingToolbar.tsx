@@ -15,22 +15,30 @@ import {
 } from "lexical";
 
 // REACT DOM
-import { Bold, Italic, Underline, Strikethrough, Code } from "lucide-react";
 import { createPortal } from "react-dom";
+
+// PHOSPHOR ICONS
+import {
+  TextB,
+  TextItalic,
+  TextUnderline,
+  TextStrikethrough,
+  Code,
+} from "@phosphor-icons/react";
 
 type TextFormat = "bold" | "italic" | "underline" | "strikethrough" | "code";
 
 interface ToolbarButton {
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
+  icon: React.ComponentType<{ size?: number; weight?: string }>;
   format: TextFormat;
   label: string;
 }
 
 const TOOLBAR_BUTTONS: ToolbarButton[] = [
-  { icon: Bold, format: "bold", label: "Bold" },
-  { icon: Italic, format: "italic", label: "Italic" },
-  { icon: Underline, format: "underline", label: "Underline" },
-  { icon: Strikethrough, format: "strikethrough", label: "Strikethrough" },
+  { icon: TextB, format: "bold", label: "Bold" },
+  { icon: TextItalic, format: "italic", label: "Italic" },
+  { icon: TextUnderline, format: "underline", label: "Underline" },
+  { icon: TextStrikethrough, format: "strikethrough", label: "Strikethrough" },
   { icon: Code, format: "code", label: "Inline Code" },
 ];
 
@@ -159,15 +167,20 @@ export function FloatingToolbar() {
         zIndex: 50,
         display: "flex",
         alignItems: "center",
-        gap: "2px",
-        padding: "4px",
-        borderRadius: "8px",
-        border: "1px solid var(--scribex-border, #e2e8f0)",
-        backgroundColor: "var(--scribex-background, #ffffff)",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+        gap: "1px",
+        padding: "3px",
+        borderRadius: "10px",
+        border: "1px solid rgba(0, 0, 0, 0.06)",
+        backgroundColor: "rgba(255, 255, 255, 0.82)",
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        boxShadow:
+          "0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)",
         top: `${position.top}px`,
         left: `${position.left}px`,
         transform: transformValue,
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
       }}
     >
       {TOOLBAR_BUTTONS.map(({ icon: Icon, format, label }) => (
@@ -179,7 +192,6 @@ export function FloatingToolbar() {
           aria-pressed={activeFormats.has(format)}
           data-testid={`toolbar-${format}`}
           onMouseDown={(e) => {
-            // Prevent the button click from stealing focus from the editor
             e.preventDefault();
             handleFormat(format);
           }}
@@ -187,18 +199,24 @@ export function FloatingToolbar() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            width: "32px",
-            height: "32px",
-            borderRadius: "4px",
+            width: "30px",
+            height: "30px",
+            borderRadius: "7px",
             border: "none",
-            cursor: "pointer",
+            cursor: "default",
             backgroundColor: activeFormats.has(format)
-              ? "var(--scribex-muted, #f1f5f9)"
+              ? "var(--scribex-accent, #007AFF)"
               : "transparent",
-            color: "var(--scribex-foreground, #0f172a)",
+            color: activeFormats.has(format)
+              ? "#fff"
+              : "rgba(0, 0, 0, 0.55)",
+            transition: "background-color 80ms ease, color 80ms ease",
           }}
         >
-          <Icon size={16} strokeWidth={2} />
+          <Icon
+            size={15}
+            weight={activeFormats.has(format) ? "bold" : "regular"}
+          />
         </button>
       ))}
     </div>,
