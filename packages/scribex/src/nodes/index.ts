@@ -1,10 +1,14 @@
 import type { Klass, LexicalNode } from 'lexical';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
+import { ImageNode } from './ImageNode';
+import { LoadingImageNode } from './LoadingImageNode';
 
 export const ALL_NODES: Array<Klass<LexicalNode>> = [
   HeadingNode,
   QuoteNode,
   ListNode,
   ListItemNode,
+  ImageNode,
+  LoadingImageNode,
 ];
