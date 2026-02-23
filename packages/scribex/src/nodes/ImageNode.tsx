@@ -1,7 +1,7 @@
 "use client";
 
 // REACT
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { ReactElement } from "react";
 
 // LEXICAL
@@ -15,8 +15,18 @@ import type {
   SerializedLexicalNode,
   Spread,
 } from "lexical";
-import { DecoratorNode, $getNodeByKey } from "lexical";
+import {
+  $getNodeByKey,
+  $getSelection,
+  $isNodeSelection,
+  CLICK_COMMAND,
+  COMMAND_PRIORITY_LOW,
+  DecoratorNode,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DELETE_COMMAND,
+} from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
 
 export interface ImagePayload {
   src: string;
@@ -167,25 +177,66 @@ function ImageComponent({
   nodeKey: NodeKey;
 }) {
   const [editor] = useLexicalComposerContext();
-  const [isSelected, setIsSelected] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const [isSelected, setSelected, clearSelection] =
+    useLexicalNodeSelection(nodeKey);
+  const imgRef = useRef<HTMLDivElement>(null);
 
-  const handleClick = useCallback(() => {
-    editor.update(() => {
-      const node = $getNodeByKey(nodeKey);
-      if (node) {
-        node.selectEnd();
+  // Handle click to select this node
+  useEffect(() => {
+    return editor.registerCommand(
+      CLICK_COMMAND,
+      (event: MouseEvent) => {
+        if (imgRef.current?.contains(event.target as Node)) {
+          if (!event.shiftKey) {
+            clearSelection();
+          }
+          setSelected(true);
+          return true;
+        }
+        return false;
+      },
+      COMMAND_PRIORITY_LOW,
+    );
+  }, [editor, clearSelection, setSelected]);
+
+  // Handle Delete/Backspace to remove the selected image
+  const onDelete = useCallback(
+    (event: KeyboardEvent) => {
+      if (isSelected) {
+        event.preventDefault();
+        editor.update(() => {
+          const node = $getNodeByKey(nodeKey);
+          if (node) {
+            node.remove();
+          }
+        });
+        return true;
       }
-    });
-    setIsSelected(true);
-  }, [editor, nodeKey]);
+      return false;
+    },
+    [editor, isSelected, nodeKey],
+  );
 
-  const handleBlur = useCallback(() => {
-    setIsSelected(false);
-  }, []);
+  useEffect(() => {
+    const unregisterBackspace = editor.registerCommand(
+      KEY_BACKSPACE_COMMAND,
+      onDelete,
+      COMMAND_PRIORITY_LOW,
+    );
+    const unregisterDelete = editor.registerCommand(
+      KEY_DELETE_COMMAND,
+      onDelete,
+      COMMAND_PRIORITY_LOW,
+    );
+    return () => {
+      unregisterBackspace();
+      unregisterDelete();
+    };
+  }, [editor, onDelete]);
 
   return (
     <div
+      ref={imgRef}
       data-testid="image-node"
       style={{
         display: "inline-block",
@@ -193,14 +244,10 @@ function ImageComponent({
         position: "relative",
         cursor: "pointer",
       }}
-      onClick={handleClick}
-      onBlur={handleBlur}
-      tabIndex={0}
       role="img"
       aria-label={altText}
     >
       <img
-        ref={imgRef}
         src={src}
         alt={altText}
         width={width}
