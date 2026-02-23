@@ -1,0 +1,39 @@
+:root {
+  /* Surface */
+  --scribex-background: hsl(0 0% 100%);
+  --scribex-foreground: hsl(222.2 84% 4.9%);
+
+  /* Editor chrome */
+  --scribex-border: hsl(214.3 31.8% 91.4%);
+  --scribex-ring: hsl(221.2 83.2% 53.3%);
+  --scribex-muted: hsl(210 40% 96.1%);
+  --scribex-muted-foreground: hsl(215.4 16.3% 46.9%);
+
+  /* Interactive */
+  --scribex-accent: hsl(221.2 83.2% 53.3%);
+  --scribex-accent-foreground: hsl(0 0% 100%);
+
+  /* Status */
+  --scribex-destructive: hsl(0 84.2% 60.2%);
+  --scribex-ai-stream: hsl(262 83% 58%);
+
+  /* Radius */
+  --scribex-radius: 0.5rem;
+
+  /* Typography */
+  --scribex-font-sans: ui-sans-serif, system-ui, sans-serif;
+  --scribex-font-mono: ui-monospace, monospace;
+}
+
+.dark {
+  --scribex-background: hsl(222.2 84% 4.9%);
+  --scribex-foreground: hsl(210 40% 98%);
+  --scribex-border: hsl(217.2 32.6% 17.5%);
+  --scribex-ring: hsl(224.3 76.3% 48%);
+  --scribex-muted: hsl(217.2 32.6% 17.5%);
+  --scribex-muted-foreground: hsl(215 20.2% 65.1%);
+  --scribex-accent: hsl(224.3 76.3% 48%);
+  --scribex-accent-foreground: hsl(210 40% 98%);
+  --scribex-destructive: hsl(0 62.8% 30.6%);
+  --scribex-ai-stream: hsl(262 83% 58%);
+}
