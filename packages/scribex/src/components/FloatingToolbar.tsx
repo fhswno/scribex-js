@@ -19,27 +19,28 @@ import { createPortal } from "react-dom";
 
 // PHOSPHOR ICONS
 import {
-  TextB,
-  TextItalic,
-  TextUnderline,
-  TextStrikethrough,
-  Code,
+  TextBIcon,
+  TextItalicIcon,
+  TextUnderlineIcon,
+  TextStrikethroughIcon,
+  CodeIcon,
 } from "@phosphor-icons/react";
+import type { IconWeight } from "@phosphor-icons/react";
 
 type TextFormat = "bold" | "italic" | "underline" | "strikethrough" | "code";
 
 interface ToolbarButton {
-  icon: React.ComponentType<{ size?: number; weight?: string }>;
+  icon: React.ComponentType<{ size?: number; weight?: IconWeight }>;
   format: TextFormat;
   label: string;
 }
 
 const TOOLBAR_BUTTONS: ToolbarButton[] = [
-  { icon: TextB, format: "bold", label: "Bold" },
-  { icon: TextItalic, format: "italic", label: "Italic" },
-  { icon: TextUnderline, format: "underline", label: "Underline" },
-  { icon: TextStrikethrough, format: "strikethrough", label: "Strikethrough" },
-  { icon: Code, format: "code", label: "Inline Code" },
+  { icon: TextBIcon, format: "bold", label: "Bold" },
+  { icon: TextItalicIcon, format: "italic", label: "Italic" },
+  { icon: TextUnderlineIcon, format: "underline", label: "Underline" },
+  { icon: TextStrikethroughIcon, format: "strikethrough", label: "Strikethrough" },
+  { icon: CodeIcon, format: "code", label: "Inline Code" },
 ];
 
 export function FloatingToolbar() {
