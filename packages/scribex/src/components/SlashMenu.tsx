@@ -7,8 +7,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $createParagraphNode,
+  $getRoot,
   $getSelection,
   $isRangeSelection,
+  $isRootNode,
   COMMAND_PRIORITY_LOW,
   KEY_ARROW_DOWN_COMMAND,
   KEY_ARROW_UP_COMMAND,
@@ -33,10 +35,11 @@ import {
   CheckSquare,
   Code,
   Minus,
+  ImageIcon,
 } from "lucide-react";
 
 // COMMANDS
-import { OPEN_SLASH_MENU_COMMAND } from "../commands";
+import { OPEN_SLASH_MENU_COMMAND, INSERT_IMAGE_COMMAND } from "../commands";
 
 export interface SlashMenuItem {
   id: string;
@@ -56,8 +59,12 @@ function getDefaultItems(
       const selection = $getSelection();
       if (!$isRangeSelection(selection)) return;
       const anchor = selection.anchor.getNode();
-      const parent = anchor.getParent();
-      if (!parent) return;
+
+      // Walk up to find the top-level block BEFORE removing anything
+      let block: import("lexical").LexicalNode = anchor;
+      while (block.getParent() && !$isRootNode(block.getParent())) {
+        block = block.getParent()!;
+      }
 
       // Remove the "/" text
       if (anchor instanceof TextNode) {
@@ -65,10 +72,17 @@ function getDefaultItems(
       }
 
       const newNode = createNode();
-      if (parent.getChildrenSize() === 0) {
-        parent.replace(newNode);
+      if ($isRootNode(block)) {
+        // anchor was the root itself — append
+        $getRoot().append(newNode);
+      } else if (
+        "getChildrenSize" in block &&
+        typeof block.getChildrenSize === "function" &&
+        (block.getChildrenSize as () => number)() === 0
+      ) {
+        block.replace(newNode);
       } else {
-        parent.insertAfter(newNode);
+        block.insertAfter(newNode);
       }
       newNode.selectEnd();
     });
@@ -108,74 +122,60 @@ function getDefaultItems(
       label: "Bullet List",
       description: "Unordered list",
       icon: List,
-      onSelect: () => {
-        editor.update(() => {
-          const selection = $getSelection();
-          if (!$isRangeSelection(selection)) return;
-          const anchor = selection.anchor.getNode();
-          const parent = anchor.getParent();
-          if (!parent) return;
-          if (anchor instanceof TextNode) anchor.remove();
+      onSelect: () =>
+        replaceCurrentBlock(() => {
           const list = $createListNode("bullet");
           const item = $createListItemNode();
           list.append(item);
-          if (parent.getChildrenSize() === 0) {
-            parent.replace(list);
-          } else {
-            parent.insertAfter(list);
-          }
-          item.selectEnd();
-        });
-      },
+          return list;
+        }),
     },
     {
       id: "numbered-list",
       label: "Numbered List",
       description: "Ordered list",
       icon: ListOrdered,
-      onSelect: () => {
-        editor.update(() => {
-          const selection = $getSelection();
-          if (!$isRangeSelection(selection)) return;
-          const anchor = selection.anchor.getNode();
-          const parent = anchor.getParent();
-          if (!parent) return;
-          if (anchor instanceof TextNode) anchor.remove();
+      onSelect: () =>
+        replaceCurrentBlock(() => {
           const list = $createListNode("number");
           const item = $createListItemNode();
           list.append(item);
-          if (parent.getChildrenSize() === 0) {
-            parent.replace(list);
-          } else {
-            parent.insertAfter(list);
-          }
-          item.selectEnd();
-        });
-      },
+          return list;
+        }),
     },
     {
       id: "divider",
       label: "Divider",
       description: "Horizontal rule",
       icon: Minus,
+      onSelect: () => replaceCurrentBlock(() => $createParagraphNode()),
+    },
+    {
+      id: "image",
+      label: "Image",
+      description: "Upload an image",
+      icon: ImageIcon,
       onSelect: () => {
+        // Remove the "/" trigger text first
         editor.update(() => {
           const selection = $getSelection();
           if (!$isRangeSelection(selection)) return;
           const anchor = selection.anchor.getNode();
-          const parent = anchor.getParent();
-          if (!parent) return;
-          if (anchor instanceof TextNode) anchor.remove();
-          // For now, insert a paragraph with "---" text as a placeholder
-          // A proper HorizontalRuleNode would be added in a later phase
-          const paragraph = $createParagraphNode();
-          if (parent.getChildrenSize() === 0) {
-            parent.replace(paragraph);
-          } else {
-            parent.insertAfter(paragraph);
+          if (anchor instanceof TextNode) {
+            anchor.remove();
           }
-          paragraph.selectEnd();
         });
+        // Open file picker
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.onchange = () => {
+          const file = input.files?.[0];
+          if (file) {
+            editor.dispatchCommand(INSERT_IMAGE_COMMAND, file);
+          }
+        };
+        input.click();
       },
     },
   ];
