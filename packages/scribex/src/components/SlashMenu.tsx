@@ -26,14 +26,14 @@ import { createPortal } from "react-dom";
 
 // PHOSPHOR ICONS — Duotone wrappers for the slash menu
 import {
-  TextHOne,
-  TextHTwo,
-  TextHThree,
-  Quotes,
-  ListBullets,
-  ListNumbers,
-  MinusSquare,
-  ImageSquare,
+  TextHOneIcon,
+  TextHTwoIcon,
+  TextHThreeIcon,
+  QuotesIcon,
+  ListBulletsIcon,
+  ListNumbersIcon,
+  MinusSquareIcon,
+  ImageSquareIcon,
 } from "@phosphor-icons/react";
 
 // COMMANDS
@@ -42,28 +42,28 @@ import { OPEN_SLASH_MENU_COMMAND, INSERT_IMAGE_COMMAND } from "../commands";
 // ── Duotone icon wrappers (stable references, no re-creation) ───────────────
 
 const IconH1 = ({ size }: { size?: number }) => (
-  <TextHOne size={size} weight="duotone" />
+  <TextHOneIcon size={size} weight="duotone" />
 );
 const IconH2 = ({ size }: { size?: number }) => (
-  <TextHTwo size={size} weight="duotone" />
+  <TextHTwoIcon size={size} weight="duotone" />
 );
 const IconH3 = ({ size }: { size?: number }) => (
-  <TextHThree size={size} weight="duotone" />
+  <TextHThreeIcon size={size} weight="duotone" />
 );
 const IconQuote = ({ size }: { size?: number }) => (
-  <Quotes size={size} weight="duotone" />
+  <QuotesIcon size={size} weight="duotone" />
 );
 const IconBulletList = ({ size }: { size?: number }) => (
-  <ListBullets size={size} weight="duotone" />
+  <ListBulletsIcon size={size} weight="duotone" />
 );
 const IconNumberedList = ({ size }: { size?: number }) => (
-  <ListNumbers size={size} weight="duotone" />
+  <ListNumbersIcon size={size} weight="duotone" />
 );
 const IconDivider = ({ size }: { size?: number }) => (
-  <MinusSquare size={size} weight="duotone" />
+  <MinusSquareIcon size={size} weight="duotone" />
 );
 const IconImage = ({ size }: { size?: number }) => (
-  <ImageSquare size={size} weight="duotone" />
+  <ImageSquareIcon size={size} weight="duotone" />
 );
 
 // ── Public interface ────────────────────────────────────────────────────────
