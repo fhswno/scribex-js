@@ -23,6 +23,45 @@
   /* Typography */
   --scribex-font-sans: ui-sans-serif, system-ui, sans-serif;
   --scribex-font-mono: ui-monospace, monospace;
+
+  /* Text colors */
+  --scribex-text-gray: #9b9a97;
+  --scribex-text-brown: #64473a;
+  --scribex-text-orange: #d9730d;
+  --scribex-text-yellow: #dfab01;
+  --scribex-text-green: #0f7b6c;
+  --scribex-text-blue: #0b6e99;
+  --scribex-text-purple: #6940a5;
+  --scribex-text-pink: #ad1a72;
+  --scribex-text-red: #e03e3e;
+
+  /* Highlight / background colors */
+  --scribex-highlight-gray: #ebeced;
+  --scribex-highlight-brown: #e9e5e3;
+  --scribex-highlight-orange: #faebdd;
+  --scribex-highlight-yellow: #fbf3db;
+  --scribex-highlight-green: #ddedea;
+  --scribex-highlight-blue: #ddebf1;
+  --scribex-highlight-purple: #eae4f2;
+  --scribex-highlight-pink: #f4dfeb;
+  --scribex-highlight-red: #fbe4e4;
+
+  /* Table */
+  --scribex-table-border: hsl(214.3 31.8% 91.4%);
+  --scribex-table-header-bg: hsl(210 40% 96.1%);
+  --scribex-table-selection: hsla(221.2 83.2% 53.3% / 0.1);
+  --scribex-table-resize-handle: hsl(221.2 83.2% 53.3%);
+
+  /* Table cell background colors */
+  --scribex-cell-bg-gray: #f1f1ef;
+  --scribex-cell-bg-brown: #f4f0ee;
+  --scribex-cell-bg-orange: #fbecdd;
+  --scribex-cell-bg-yellow: #fbf3db;
+  --scribex-cell-bg-green: #edf3ec;
+  --scribex-cell-bg-blue: #e7f3f8;
+  --scribex-cell-bg-purple: #f4f0f7;
+  --scribex-cell-bg-pink: #f9f0f5;
+  --scribex-cell-bg-red: #fdebec;
 }
 
 .dark {
@@ -36,4 +75,43 @@
   --scribex-accent-foreground: hsl(210 40% 98%);
   --scribex-destructive: hsl(0 62.8% 30.6%);
   --scribex-ai-stream: hsl(262 83% 58%);
+
+  /* Text colors — brighter for dark backgrounds */
+  --scribex-text-gray: #979a9b;
+  --scribex-text-brown: #937264;
+  --scribex-text-orange: #ffa344;
+  --scribex-text-yellow: #ffdc49;
+  --scribex-text-green: #4dab9a;
+  --scribex-text-blue: #529cca;
+  --scribex-text-purple: #9a6dd7;
+  --scribex-text-pink: #d44c91;
+  --scribex-text-red: #ff7369;
+
+  /* Highlight / background colors — muted for dark backgrounds */
+  --scribex-highlight-gray: hsl(0 0% 20%);
+  --scribex-highlight-brown: hsl(20 15% 18%);
+  --scribex-highlight-orange: hsl(30 30% 18%);
+  --scribex-highlight-yellow: hsl(45 30% 18%);
+  --scribex-highlight-green: hsl(160 20% 16%);
+  --scribex-highlight-blue: hsl(200 25% 18%);
+  --scribex-highlight-purple: hsl(270 20% 20%);
+  --scribex-highlight-pink: hsl(330 20% 20%);
+  --scribex-highlight-red: hsl(0 25% 20%);
+
+  /* Table */
+  --scribex-table-border: hsl(217.2 32.6% 22%);
+  --scribex-table-header-bg: hsl(217.2 32.6% 15%);
+  --scribex-table-selection: hsla(224.3 76.3% 48% / 0.15);
+  --scribex-table-resize-handle: hsl(224.3 76.3% 48%);
+
+  /* Table cell background colors */
+  --scribex-cell-bg-gray: hsl(0 0% 15%);
+  --scribex-cell-bg-brown: hsl(20 10% 14%);
+  --scribex-cell-bg-orange: hsl(30 20% 14%);
+  --scribex-cell-bg-yellow: hsl(45 20% 14%);
+  --scribex-cell-bg-green: hsl(160 15% 13%);
+  --scribex-cell-bg-blue: hsl(200 18% 14%);
+  --scribex-cell-bg-purple: hsl(270 15% 16%);
+  --scribex-cell-bg-pink: hsl(330 15% 16%);
+  --scribex-cell-bg-red: hsl(0 18% 16%);
 }

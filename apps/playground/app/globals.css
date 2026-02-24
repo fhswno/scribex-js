@@ -157,6 +157,65 @@
 }
 
 /* ============================================
+   Table
+   ============================================ */
+.scribex-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5em 0;
+  table-layout: fixed;
+  overflow: hidden;
+}
+
+.scribex-table-row {
+  /* Row styling if needed */
+}
+
+.scribex-table-cell {
+  border: 1px solid var(--scribex-table-border);
+  padding: 8px 12px;
+  vertical-align: top;
+  min-width: 60px;
+  position: relative;
+}
+
+.scribex-table-cell-header {
+  border: 1px solid var(--scribex-table-border);
+  padding: 8px 12px;
+  vertical-align: top;
+  min-width: 60px;
+  position: relative;
+  background-color: var(--scribex-table-header-bg);
+  font-weight: 600;
+}
+
+.scribex-table-selection {
+  background-color: var(--scribex-table-selection);
+}
+
+/* Table cell paragraph — no margins inside cells */
+.scribex-table-cell .scribex-paragraph,
+.scribex-table-cell-header .scribex-paragraph {
+  margin: 0;
+}
+
+/* Column resize handle */
+.scribex-table-cell-resizer {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  z-index: 10;
+}
+
+.scribex-table-cell-resizer:hover,
+.scribex-table-cell-resizer.active {
+  background-color: var(--scribex-table-resize-handle);
+}
+
+/* ============================================
    JSON state panel — dark theme scrollbar
    ============================================ */
 .json-panel-scroll::-webkit-scrollbar {
