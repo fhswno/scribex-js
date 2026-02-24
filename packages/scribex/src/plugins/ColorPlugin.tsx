@@ -5,6 +5,7 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import {
   $getSelection,
   $isRangeSelection,
+  $isTextNode,
   COMMAND_PRIORITY_LOW,
 } from "lexical";
 import { SET_TEXT_COLOR_COMMAND, SET_HIGHLIGHT_COLOR_COMMAND } from "../commands";
@@ -24,14 +25,10 @@ export function ColorPlugin() {
           // Empty string means "default" — remove the color property
           const nodes = selection.getNodes();
           for (const node of nodes) {
-            if ("getStyle" in node && typeof node.getStyle === "function") {
-              const existing = (node as { getStyle: () => string }).getStyle();
-              const merged = mergeInlineStyle(
-                existing,
-                "color",
-                color || null,
-              );
-              (node as { setStyle: (s: string) => void }).setStyle(merged);
+            if ($isTextNode(node)) {
+              const existing = node.getStyle();
+              const merged = mergeInlineStyle(existing, "color", color || null);
+              node.setStyle(merged);
             }
           }
         });
@@ -51,14 +48,14 @@ export function ColorPlugin() {
 
           const nodes = selection.getNodes();
           for (const node of nodes) {
-            if ("getStyle" in node && typeof node.getStyle === "function") {
-              const existing = (node as { getStyle: () => string }).getStyle();
+            if ($isTextNode(node)) {
+              const existing = node.getStyle();
               const merged = mergeInlineStyle(
                 existing,
                 "background-color",
                 color || null,
               );
-              (node as { setStyle: (s: string) => void }).setStyle(merged);
+              node.setStyle(merged);
             }
           }
         });
