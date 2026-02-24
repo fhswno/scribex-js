@@ -35,6 +35,7 @@ import {
   MinusSquareIcon,
   ImageSquareIcon,
   SparkleIcon,
+  CodeSimpleIcon,
 } from "@phosphor-icons/react";
 
 // COMMANDS
@@ -43,6 +44,8 @@ import {
   INSERT_IMAGE_COMMAND,
   OPEN_AI_PROMPT_COMMAND,
 } from "../commands";
+
+import { $createCodeBlockNode } from "../nodes/CodeBlockNode";
 
 // ── Duotone icon wrappers (stable references, no re-creation) ───────────────
 
@@ -70,6 +73,9 @@ const IconDivider = ({ size }: { size?: number }) => (
 const IconImage = ({ size }: { size?: number }) => (
   <ImageSquareIcon size={size} weight="duotone" />
 );
+const IconCode = ({ size }: { size?: number }) => (
+  <CodeSimpleIcon size={size} weight="duotone" />
+);
 const IconAI = ({ size }: { size?: number }) => (
   <SparkleIcon size={size} weight="duotone" />
 );
@@ -94,6 +100,7 @@ const SHORTCUT_HINTS: Record<string, string> = {
   "bullet-list": "-",
   "numbered-list": "1.",
   divider: "---",
+  code: "```",
 };
 
 // ── Category color system ───────────────────────────────────────────────────
@@ -265,6 +272,44 @@ function getDefaultItems(
       description: "Horizontal rule",
       icon: IconDivider,
       onSelect: () => replaceCurrentBlock(() => $createParagraphNode()),
+    },
+    {
+      id: "code",
+      label: "Code Block",
+      description: "Syntax highlighted code",
+      icon: IconCode,
+      onSelect: () => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+          const anchor = selection.anchor.getNode();
+
+          let block: import("lexical").LexicalNode = anchor;
+          while (block.getParent() && !$isRootNode(block.getParent())) {
+            block = block.getParent()!;
+          }
+
+          if (anchor instanceof TextNode) {
+            anchor.remove();
+          }
+
+          const codeBlock = $createCodeBlockNode({ code: "", language: "javascript" });
+          const trailingParagraph = $createParagraphNode();
+          if ($isRootNode(block)) {
+            $getRoot().append(codeBlock);
+          } else if (
+            "getChildrenSize" in block &&
+            typeof block.getChildrenSize === "function" &&
+            (block.getChildrenSize as () => number)() === 0
+          ) {
+            block.replace(codeBlock);
+          } else {
+            block.insertAfter(codeBlock);
+          }
+          codeBlock.insertAfter(trailingParagraph);
+          trailingParagraph.selectEnd();
+        });
+      },
     },
     {
       id: "image",
