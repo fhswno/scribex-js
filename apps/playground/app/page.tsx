@@ -14,6 +14,11 @@ import {
   MobileToolbar,
   EmojiPickerPlugin,
   LinkPlugin,
+  ColorPlugin,
+  TablePlugin,
+  TableActionMenu,
+  TableColumnResizePlugin,
+  TableRowColumnDragPlugin,
   $createMentionNode,
   useEditorState,
   sanitizePastedHTML,
@@ -311,6 +316,11 @@ function EditorCard({
           <ImagePlugin uploadHandler={mockUploadHandler} />
           <AIPlugin provider={aiProvider} config={aiConfig} />
           <MentionPlugin providers={mentionProviders} />
+          <ColorPlugin />
+          <TablePlugin />
+          <TableActionMenu />
+          <TableColumnResizePlugin />
+          <TableRowColumnDragPlugin />
           <PastePlugin />
           <EmojiPickerPlugin />
           <LinkPlugin />
