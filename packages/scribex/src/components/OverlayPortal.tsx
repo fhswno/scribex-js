@@ -95,10 +95,15 @@ export function OverlayPortal({ namespace }: OverlayPortalProps) {
   const dropTargetKeyRef = useRef<string | null>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
 
-  // Detect touch device
+  // Detect touch device — use multiple signals for reliability
+  // Chrome DevTools device emulation doesn't always set pointer: coarse
   useEffect(() => {
     if (typeof window === "undefined") return;
-    setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
+    const isTouch =
+      window.matchMedia("(pointer: coarse)").matches ||
+      navigator.maxTouchPoints > 0 ||
+      "ontouchstart" in window;
+    setIsTouchDevice(isTouch);
   }, []);
 
   // Portal into document.body
