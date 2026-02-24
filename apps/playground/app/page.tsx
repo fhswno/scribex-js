@@ -9,6 +9,8 @@ import {
   InputRulePlugin,
   ImagePlugin,
   AIPlugin,
+  MentionPlugin,
+  $createMentionNode,
   useEditorState,
 } from "@scribex/core";
 
@@ -16,7 +18,7 @@ import {
 import { useCallback, useState } from "react";
 
 // TYPES
-import type { UploadHandler, AIProvider, AIPluginConfig } from "@scribex/core";
+import type { UploadHandler, AIProvider, AIPluginConfig, MentionProvider } from "@scribex/core";
 
 /** Mock upload handler — simulates a 500ms upload and returns a placeholder URL */
 const mockUploadHandler: UploadHandler = async (file: File): Promise<string> => {
@@ -136,6 +138,53 @@ const aiConfig: AIPluginConfig = {
   },
 };
 
+// ─── Mock Mention Providers ──────────────────────────────────────────────────
+
+const MOCK_USERS = [
+  { id: "1", label: "Alice", meta: "alice@example.com" },
+  { id: "2", label: "Bob", meta: "bob@example.com" },
+  { id: "3", label: "Charlie", meta: "charlie@example.com" },
+  { id: "4", label: "Diana", meta: "diana@example.com" },
+];
+
+const MOCK_TAGS = [
+  { id: "t1", label: "feature", meta: "Feature request" },
+  { id: "t2", label: "bug", meta: "Bug report" },
+  { id: "t3", label: "docs", meta: "Documentation" },
+  { id: "t4", label: "design", meta: "Design related" },
+];
+
+const userMentionProvider: MentionProvider = {
+  trigger: "@",
+  onSearch: async (query) => {
+    return MOCK_USERS.filter((u) =>
+      u.label.toLowerCase().includes(query.toLowerCase()),
+    );
+  },
+  renderItem: (item) => <span>{item.label}</span>,
+  onSelect: (item) =>
+    $createMentionNode({ id: item.id, label: item.label, trigger: "@" }),
+};
+
+const tagMentionProvider: MentionProvider = {
+  trigger: "#",
+  onSearch: async (query) => {
+    return MOCK_TAGS.filter((t) =>
+      t.label.toLowerCase().includes(query.toLowerCase()),
+    );
+  },
+  renderItem: (item) => <span>{item.label}</span>,
+  onSelect: (item) =>
+    $createMentionNode({ id: item.id, label: item.label, trigger: "#" }),
+};
+
+const mentionProviders: MentionProvider[] = [
+  userMentionProvider,
+  tagMentionProvider,
+];
+
+// ─── Editor State Display ────────────────────────────────────────────────────
+
 function EditorStateDisplay() {
   // States
   const [saved, setSaved] = useState<string>("");
@@ -173,6 +222,7 @@ export default function Page() {
         <OverlayPortal namespace="playground-editor" />
         <ImagePlugin uploadHandler={mockUploadHandler} />
         <AIPlugin provider={aiProvider} config={aiConfig} />
+        <MentionPlugin providers={mentionProviders} />
         <EditorStateDisplay />
       </EditorRoot>
 
@@ -190,6 +240,7 @@ export default function Page() {
           <OverlayPortal namespace="playground-editor-b" />
           <ImagePlugin uploadHandler={mockUploadHandler} />
           <AIPlugin provider={aiProvider} config={aiConfig} />
+          <MentionPlugin providers={mentionProviders} />
           <EditorStateDisplay />
         </EditorRoot>
       </div>
