@@ -3,6 +3,7 @@ import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListNode, ListItemNode } from '@lexical/list';
 import { ImageNode } from './ImageNode';
 import { LoadingImageNode } from './LoadingImageNode';
+import { AIPreviewNode } from './AIPreviewNode';
 
 export const ALL_NODES: Array<Klass<LexicalNode>> = [
   HeadingNode,
@@ -11,4 +12,5 @@ export const ALL_NODES: Array<Klass<LexicalNode>> = [
   ListItemNode,
   ImageNode,
   LoadingImageNode,
+  AIPreviewNode,
 ];
