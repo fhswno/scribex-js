@@ -212,6 +212,29 @@ interface AIPromptInputProps {
 const AIPromptInput = forwardRef<HTMLInputElement, AIPromptInputProps>(
   function AIPromptInput({ position, onSubmit, onClose }, ref) {
     const [value, setValue] = useState("");
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Close on click outside — deferred to avoid catching the click that opened the prompt
+    useEffect(() => {
+      const handleClickOutside = (e: MouseEvent) => {
+        if (
+          containerRef.current &&
+          !containerRef.current.contains(e.target as Node)
+        ) {
+          onClose();
+        }
+      };
+
+      // Defer registration to the next frame so the opening click doesn't
+      // immediately trigger the outside-click handler
+      const raf = requestAnimationFrame(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+      });
+      return () => {
+        cancelAnimationFrame(raf);
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [onClose]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       // Stop propagation on ALL keys to prevent Lexical from intercepting
@@ -230,6 +253,7 @@ const AIPromptInput = forwardRef<HTMLInputElement, AIPromptInputProps>(
 
     return (
       <div
+        ref={containerRef}
         data-testid="ai-prompt-input"
         style={{
           position: "fixed",
