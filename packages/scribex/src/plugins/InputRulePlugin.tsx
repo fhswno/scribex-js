@@ -5,9 +5,10 @@ import { useEffect } from "react";
 
 // LEXICAL
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { TextNode } from "lexical";
+import { TextNode, $createParagraphNode } from "lexical";
 import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
 import { $createListNode, $createListItemNode } from "@lexical/list";
+import { $createCodeBlockNode } from "../nodes/CodeBlockNode";
 
 // COMMANDS
 import { OPEN_SLASH_MENU_COMMAND } from "../commands";
@@ -115,6 +116,21 @@ const BUILTIN_RULES: InputRule[] = [
       list.append(item);
       parent.replace(list);
       item.selectEnd();
+    },
+  },
+  {
+    pattern: /^```$/,
+    type: "code",
+    onMatch: (_match, node) => {
+      const parent = node.getParent();
+      if (!parent) return;
+      const codeBlock = $createCodeBlockNode({ code: "", language: "javascript" });
+      // DecoratorNodes can't hold a cursor, so insert a trailing paragraph
+      // and move selection there to prevent the "selection lost" error
+      const trailingParagraph = $createParagraphNode();
+      parent.replace(codeBlock);
+      codeBlock.insertAfter(trailingParagraph);
+      trailingParagraph.selectEnd();
     },
   },
 ];
