@@ -112,6 +112,15 @@ export interface InputRule {
   onMatch: (match: RegExpMatchArray, node: TextNode, editor: LexicalEditor) => void;
 }
 
+// --- Emoji Picker ---
+
+export type { EmojiItem } from './data/emoji-list';
+export type { EmojiPickerPluginProps } from './plugins/EmojiPickerPlugin';
+
+// --- Link Plugin ---
+
+export type { LinkPluginConfig, LinkInputRenderProps, LinkPreviewRenderProps } from './plugins/LinkPlugin';
+
 // --- Mention System (Section 12) ---
 
 export interface MentionItem {
