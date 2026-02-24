@@ -24,8 +24,15 @@ import {
   TextUnderlineIcon,
   TextStrikethroughIcon,
   CodeIcon,
+  LinkIcon,
 } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
+
+// LEXICAL LINK
+import { $isLinkNode } from "@lexical/link";
+
+// INTERNAL
+import { OPEN_LINK_INPUT_COMMAND } from "../commands";
 
 type TextFormat = "bold" | "italic" | "underline" | "strikethrough" | "code";
 
@@ -101,6 +108,14 @@ export function FloatingToolbar() {
       if (selection.hasFormat("underline")) formats.add("underline");
       if (selection.hasFormat("strikethrough")) formats.add("strikethrough");
       if (selection.hasFormat("code")) formats.add("code");
+
+      // Check if cursor is inside a link
+      const node = selection.anchor.getNode();
+      const parent = node.getParent();
+      if ($isLinkNode(parent) || $isLinkNode(node)) {
+        formats.add("link");
+      }
+
       setActiveFormats(formats);
     });
 
@@ -220,6 +235,51 @@ export function FloatingToolbar() {
           />
         </button>
       ))}
+
+      {/* Separator */}
+      <div
+        style={{
+          width: "1px",
+          height: "18px",
+          backgroundColor: "rgba(0, 0, 0, 0.1)",
+          margin: "0 2px",
+        }}
+      />
+
+      {/* Link button */}
+      <button
+        type="button"
+        title="Link (Cmd+K)"
+        aria-label="Link"
+        aria-pressed={activeFormats.has("link")}
+        data-testid="toolbar-link"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          editor.dispatchCommand(OPEN_LINK_INPUT_COMMAND, undefined);
+        }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "30px",
+          height: "30px",
+          borderRadius: "7px",
+          border: "none",
+          cursor: "default",
+          backgroundColor: activeFormats.has("link")
+            ? "var(--scribex-accent, #007AFF)"
+            : "transparent",
+          color: activeFormats.has("link")
+            ? "#fff"
+            : "rgba(0, 0, 0, 0.55)",
+          transition: "background-color 80ms ease, color 80ms ease",
+        }}
+      >
+        <LinkIcon
+          size={15}
+          weight={activeFormats.has("link") ? "bold" : "regular"}
+        />
+      </button>
     </div>,
     portalContainer,
   );
