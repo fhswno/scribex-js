@@ -1,5 +1,12 @@
 {
   "name": "scribex-monorepo",
   "private": true,
-  "workspaces": ["packages/*", "apps/*"]
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "dev": "bun run --filter scribex-playground dev",
+    "build": "bun run --filter scribex-playground build",
+    "typecheck": "bunx tsc --noEmit",
+    "test": "cd apps/playground && bunx playwright test",
+    "lint": "bun run --filter scribex-playground lint"
+  }
 }
