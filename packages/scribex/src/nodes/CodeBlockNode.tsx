@@ -56,6 +56,7 @@ export interface CodeBlockPayload {
   code: string;
   language: string;
   key?: NodeKey;
+  autoFocus?: boolean;
 }
 
 export type SerializedCodeBlockNode = Spread<
@@ -71,19 +72,23 @@ export type SerializedCodeBlockNode = Spread<
 export class CodeBlockNode extends DecoratorNode<ReactElement> {
   __code: string;
   __language: string;
+  __autoFocus: boolean;
 
   static getType(): string {
     return "code-block";
   }
 
   static clone(node: CodeBlockNode): CodeBlockNode {
-    return new CodeBlockNode(node.__code, node.__language, node.__key);
+    const clone = new CodeBlockNode(node.__code, node.__language, node.__key);
+    clone.__autoFocus = node.__autoFocus;
+    return clone;
   }
 
   constructor(code: string, language: string, key?: NodeKey) {
     super(key);
     this.__code = code;
     this.__language = language;
+    this.__autoFocus = false;
   }
 
   createDOM(_config: EditorConfig): HTMLElement {
@@ -148,6 +153,7 @@ export class CodeBlockNode extends DecoratorNode<ReactElement> {
         code={this.__code}
         language={this.__language}
         nodeKey={this.getKey()}
+        autoFocus={this.__autoFocus}
       />
     );
   }
@@ -177,10 +183,12 @@ function CodeBlockComponent({
   code,
   language,
   nodeKey,
+  autoFocus,
 }: {
   code: string;
   language: string;
   nodeKey: NodeKey;
+  autoFocus: boolean;
 }) {
   const [editor] = useLexicalComposerContext();
   const [isSelected, setSelected, clearSelection] =
@@ -191,9 +199,26 @@ function CodeBlockComponent({
   const [localLanguage, setLocalLanguage] = useState(language);
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(autoFocus);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didAutoFocusRef = useRef(false);
+
+  // Auto-focus the textarea when the node is freshly created
+  useEffect(() => {
+    if (autoFocus && !didAutoFocusRef.current && textareaRef.current) {
+      didAutoFocusRef.current = true;
+      textareaRef.current.focus();
+      // Clear the autoFocus flag on the node so it doesn't re-focus on re-render
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if (node && node instanceof CodeBlockNode) {
+          const writable = node.getWritable();
+          writable.__autoFocus = false;
+        }
+      });
+    }
+  }, [autoFocus, editor, nodeKey]);
 
   // Sync from node props when they change externally
   useEffect(() => {
@@ -580,7 +605,11 @@ function CodeBlockComponent({
 // ─── Factory Functions ──────────────────────────────────────────────────────
 
 export function $createCodeBlockNode(payload: CodeBlockPayload): CodeBlockNode {
-  return new CodeBlockNode(payload.code, payload.language, payload.key);
+  const node = new CodeBlockNode(payload.code, payload.language, payload.key);
+  if (payload.autoFocus) {
+    node.__autoFocus = true;
+  }
+  return node;
 }
 
 export function $isCodeBlockNode(
