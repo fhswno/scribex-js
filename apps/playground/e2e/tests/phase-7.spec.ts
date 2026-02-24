@@ -110,12 +110,33 @@ test.describe('Phase 7: Code Blocks', () => {
 
     await page.waitForTimeout(300);
 
+    // Set up a spy on clipboard.write to capture the written value
+    // The code block uses navigator.clipboard.write() with ClipboardItem
+    await page.evaluate(() => {
+      (window as unknown as Record<string, string>).__clipboardWritten = '';
+      const original = navigator.clipboard.write.bind(navigator.clipboard);
+      navigator.clipboard.write = async (items: ClipboardItems) => {
+        // Extract text/plain from the ClipboardItem
+        for (const item of items) {
+          if (item.types.includes('text/plain')) {
+            const blob = await item.getType('text/plain');
+            (window as unknown as Record<string, string>).__clipboardWritten = await blob.text();
+          }
+        }
+        return original(items);
+      };
+    });
+
     // Click copy button
     const copyButton = page.locator('[data-testid="code-block-copy"]').first();
     await copyButton.click();
 
-    // Verify clipboard content
-    const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
+    await page.waitForTimeout(500);
+
+    // Verify clipboard content via the spy
+    const clipboardText = await page.evaluate(
+      () => (window as unknown as Record<string, string>).__clipboardWritten,
+    );
     expect(clipboardText).toBe('const x = 42;');
   });
 
