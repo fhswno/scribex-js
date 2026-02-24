@@ -5,6 +5,7 @@ import { ImageNode } from './ImageNode';
 import { LoadingImageNode } from './LoadingImageNode';
 import { AIPreviewNode } from './AIPreviewNode';
 import { MentionNode } from './MentionNode';
+import { CodeBlockNode } from './CodeBlockNode';
 
 export const ALL_NODES: Array<Klass<LexicalNode>> = [
   HeadingNode,
@@ -15,4 +16,5 @@ export const ALL_NODES: Array<Klass<LexicalNode>> = [
   LoadingImageNode,
   AIPreviewNode,
   MentionNode,
+  CodeBlockNode,
 ];
