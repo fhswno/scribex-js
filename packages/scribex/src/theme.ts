@@ -30,4 +30,5 @@ export const scribexTheme: EditorThemeClasses = {
     strikethrough: 'scribex-strikethrough',
     code: 'scribex-code',
   },
+  code: 'scribex-code-block',
 };
