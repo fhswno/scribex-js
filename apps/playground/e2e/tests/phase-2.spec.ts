@@ -91,9 +91,9 @@ test.describe('Phase 2: Floating Toolbar', () => {
     await page.waitForTimeout(200);
     await expect(page.locator('[data-testid="floating-toolbar"]')).toBeVisible();
 
-    // Collapse selection by pressing End
-    await page.keyboard.press('End');
-    await page.waitForTimeout(200);
+    // Collapse selection by pressing Right arrow (moves cursor to end of selection, collapsing it)
+    await page.keyboard.press('ArrowRight');
+    await page.waitForTimeout(300);
     await expect(page.locator('[data-testid="floating-toolbar"]')).not.toBeVisible();
   });
 });
