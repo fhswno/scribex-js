@@ -34,10 +34,15 @@ import {
   ListNumbersIcon,
   MinusSquareIcon,
   ImageSquareIcon,
+  SparkleIcon,
 } from "@phosphor-icons/react";
 
 // COMMANDS
-import { OPEN_SLASH_MENU_COMMAND, INSERT_IMAGE_COMMAND } from "../commands";
+import {
+  OPEN_SLASH_MENU_COMMAND,
+  INSERT_IMAGE_COMMAND,
+  OPEN_AI_PROMPT_COMMAND,
+} from "../commands";
 
 // ── Duotone icon wrappers (stable references, no re-creation) ───────────────
 
@@ -64,6 +69,9 @@ const IconDivider = ({ size }: { size?: number }) => (
 );
 const IconImage = ({ size }: { size?: number }) => (
   <ImageSquareIcon size={size} weight="duotone" />
+);
+const IconAI = ({ size }: { size?: number }) => (
+  <SparkleIcon size={size} weight="duotone" />
 );
 
 // ── Public interface ────────────────────────────────────────────────────────
@@ -96,6 +104,7 @@ interface CategoryStyle {
 }
 
 const CATEGORY_COLORS: Record<string, CategoryStyle> = {
+  ai: { bg: "linear-gradient(135deg, #FAF5FF, #F3E8FF)", icon: "#7C3AED" },
   headings: { bg: "linear-gradient(135deg, #EEF2FF, #E0E7FF)", icon: "#6366F1" },
   blocks: { bg: "linear-gradient(135deg, #F5F3FF, #EDE9FE)", icon: "#8B5CF6" },
   lists: { bg: "linear-gradient(135deg, #ECFDF5, #D1FAE5)", icon: "#10B981" },
@@ -104,6 +113,7 @@ const CATEGORY_COLORS: Record<string, CategoryStyle> = {
 };
 
 function getCategoryForId(id: string): string {
+  if (id === "ai") return "ai";
   if (id.startsWith("heading")) return "headings";
   if (id === "quote" || id === "divider" || id === "code") return "blocks";
   if (id === "bullet-list" || id === "numbered-list" || id === "check-list")
@@ -176,6 +186,25 @@ function getDefaultItems(
   };
 
   return [
+    {
+      id: "ai",
+      label: "Ask AI",
+      description: "Generate content with AI",
+      icon: IconAI,
+      onSelect: () => {
+        // Remove the "/" trigger text first
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+          const anchor = selection.anchor.getNode();
+          if (anchor instanceof TextNode) {
+            anchor.remove();
+          }
+        });
+        // Then open the AI prompt input
+        editor.dispatchCommand(OPEN_AI_PROMPT_COMMAND, undefined);
+      },
+    },
     {
       id: "heading-1",
       label: "Heading 1",
@@ -277,13 +306,14 @@ interface ItemGroup {
 function groupItems(items: SlashMenuItem[]): ItemGroup[] {
   const buckets: Record<string, SlashMenuItem[]> = {};
   const categoryLabels: Record<string, string> = {
+    ai: "AI",
     headings: "Headings",
     blocks: "Blocks",
     lists: "Lists",
     media: "Media",
     other: "Other",
   };
-  const order = ["headings", "blocks", "lists", "media", "other"];
+  const order = ["ai", "headings", "blocks", "lists", "media", "other"];
 
   for (const item of items) {
     const cat = getCategoryForId(item.id);
