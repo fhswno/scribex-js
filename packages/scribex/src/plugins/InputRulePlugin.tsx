@@ -124,9 +124,10 @@ const BUILTIN_RULES: InputRule[] = [
     onMatch: (_match, node) => {
       const parent = node.getParent();
       if (!parent) return;
-      const codeBlock = $createCodeBlockNode({ code: "", language: "javascript" });
+      const codeBlock = $createCodeBlockNode({ code: "", language: "javascript", autoFocus: true });
       // DecoratorNodes can't hold a cursor, so insert a trailing paragraph
-      // and move selection there to prevent the "selection lost" error
+      // to prevent the "selection lost" error. The autoFocus flag on the
+      // CodeBlockNode will focus the textarea once it mounts.
       const trailingParagraph = $createParagraphNode();
       parent.replace(codeBlock);
       codeBlock.insertAfter(trailingParagraph);
