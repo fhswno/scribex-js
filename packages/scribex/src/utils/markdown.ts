@@ -15,6 +15,7 @@ import {
   $isListItemNode,
 } from "@lexical/list";
 import { $isImageNode } from "../nodes/ImageNode";
+import { $isLinkNode } from "@lexical/link";
 
 // ─── Lexical → Markdown (context building) ───────────────────────────────────
 
@@ -95,6 +96,10 @@ function serializeChildren(node: ElementNode): string {
       if (format & 16) text = `\`${text}\``;
 
       result += text;
+    } else if ($isLinkNode(child)) {
+      const linkText = serializeChildren(child);
+      const url = child.getURL();
+      result += `[${linkText}](${url})`;
     } else if ($isElementNode(child)) {
       result += serializeChildren(child);
     } else {
