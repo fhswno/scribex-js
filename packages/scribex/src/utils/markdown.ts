@@ -16,6 +16,11 @@ import {
 } from "@lexical/list";
 import { $isImageNode } from "../nodes/ImageNode";
 import { $isLinkNode } from "@lexical/link";
+import {
+  $isTableNode,
+  $isTableRowNode,
+  $isTableCellNode,
+} from "@lexical/table";
 
 // ─── Lexical → Markdown (context building) ───────────────────────────────────
 
@@ -65,6 +70,35 @@ function serializeNode(node: LexicalNode): string {
   // Image
   if ($isImageNode(node)) {
     return `![${node.getAltText()}](${node.getSrc()})`;
+  }
+
+  // Table → pipe-delimited markdown
+  if ($isTableNode(node)) {
+    const rows = node.getChildren();
+    const lines: string[] = [];
+
+    for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+      const row = rows[rowIdx];
+      if (!row || !$isTableRowNode(row)) continue;
+
+      const cells = row.getChildren();
+      const cellTexts: string[] = [];
+
+      for (const cell of cells) {
+        if ($isTableCellNode(cell)) {
+          cellTexts.push(serializeChildren(cell).replace(/\|/g, "\\|"));
+        }
+      }
+
+      lines.push(`| ${cellTexts.join(" | ")} |`);
+
+      // Add separator after first row
+      if (rowIdx === 0) {
+        lines.push(`| ${cellTexts.map(() => "---").join(" | ")} |`);
+      }
+    }
+
+    return lines.join("\n");
   }
 
   // Element with children (paragraph, etc.)
