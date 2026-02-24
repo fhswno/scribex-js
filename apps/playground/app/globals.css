@@ -115,6 +115,28 @@
   font-size: 0.9em;
 }
 
+/* Code Block */
+.scribex-code-block {
+  font-family: var(--scribex-font-mono);
+  background-color: var(--scribex-muted);
+  border-radius: 0.5rem;
+  margin: 0.5em 0;
+  overflow: hidden;
+}
+
+/* Shiki output styling — reset pre/code defaults */
+.scribex-code-block pre {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+}
+
+.scribex-code-block code {
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 /* Paragraph */
 .scribex-paragraph {
   margin: 0.25em 0;
