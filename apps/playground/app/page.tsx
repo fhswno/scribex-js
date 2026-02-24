@@ -10,12 +10,17 @@ import {
   ImagePlugin,
   AIPlugin,
   MentionPlugin,
+  PastePlugin,
+  MobileToolbar,
+  EmojiPickerPlugin,
+  LinkPlugin,
   $createMentionNode,
   useEditorState,
+  sanitizePastedHTML,
 } from "@scribex/core";
 
 // REACT
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 // TYPES
 import type { UploadHandler, AIProvider, AIPluginConfig, MentionProvider } from "@scribex/core";
@@ -306,6 +311,10 @@ function EditorCard({
           <ImagePlugin uploadHandler={mockUploadHandler} />
           <AIPlugin provider={aiProvider} config={aiConfig} />
           <MentionPlugin providers={mentionProviders} />
+          <PastePlugin />
+          <EmojiPickerPlugin />
+          <LinkPlugin />
+          <MobileToolbar />
           <HiddenStateDisplay onStateChange={setEditorState} />
         </EditorRoot>
       </div>
@@ -317,6 +326,11 @@ function EditorCard({
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function Page() {
+  // Expose sanitizePastedHTML on window for Playwright unit tests
+  useEffect(() => {
+    (window as unknown as Record<string, unknown>).__scribex_sanitize = sanitizePastedHTML;
+  }, []);
+
   return (
     <main className="max-w-4xl mx-auto py-6 px-6">
       {/* Header */}
@@ -365,6 +379,20 @@ export default function Page() {
           namespace="playground-editor-b"
           label="Multi-Editor Isolation Test"
         />
+      </div>
+
+      {/* Stress Test Editors (c, d, e) — below the fold for multi-editor isolation tests */}
+      <div className="mt-8" data-testid="stress-test-editors">
+        <div className="mb-3">
+          <span className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+            Stress Test Editors
+          </span>
+        </div>
+        <div className="space-y-6">
+          <EditorCard namespace="playground-editor-c" label="Editor C" />
+          <EditorCard namespace="playground-editor-d" label="Editor D" />
+          <EditorCard namespace="playground-editor-e" label="Editor E" />
+        </div>
       </div>
 
       {/* Footer */}
