@@ -32,4 +32,9 @@ export const scribexTheme: EditorThemeClasses = {
   },
   link: 'scribex-link',
   code: 'scribex-code-block',
+  table: 'scribex-table',
+  tableRow: 'scribex-table-row',
+  tableCell: 'scribex-table-cell',
+  tableCellHeader: 'scribex-table-cell-header',
+  tableSelection: 'scribex-table-selection',
 };
