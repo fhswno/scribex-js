@@ -7,3 +7,6 @@ export const OPEN_AI_PROMPT_COMMAND = createCommand<void>('OPEN_AI_PROMPT_COMMAN
 export const INSERT_AI_PREVIEW_COMMAND = createCommand<{ prompt: string }>('INSERT_AI_PREVIEW_COMMAND');
 export const OPEN_EMOJI_PICKER_COMMAND = createCommand<void>('OPEN_EMOJI_PICKER_COMMAND');
 export const OPEN_LINK_INPUT_COMMAND = createCommand<void>('OPEN_LINK_INPUT_COMMAND');
+export const SET_TEXT_COLOR_COMMAND = createCommand<string>('SET_TEXT_COLOR_COMMAND');
+export const SET_HIGHLIGHT_COLOR_COMMAND = createCommand<string>('SET_HIGHLIGHT_COLOR_COMMAND');
+export const INSERT_TABLE_COMMAND_SCRIBEX = createCommand<{ rows: number; columns: number }>('INSERT_TABLE_COMMAND_SCRIBEX');
