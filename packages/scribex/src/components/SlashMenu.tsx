@@ -293,7 +293,7 @@ function getDefaultItems(
             anchor.remove();
           }
 
-          const codeBlock = $createCodeBlockNode({ code: "", language: "javascript" });
+          const codeBlock = $createCodeBlockNode({ code: "", language: "javascript", autoFocus: true });
           const trailingParagraph = $createParagraphNode();
           if ($isRootNode(block)) {
             $getRoot().append(codeBlock);
