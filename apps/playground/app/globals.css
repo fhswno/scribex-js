@@ -90,6 +90,20 @@
   padding-left: 0.5em;
 }
 
+/* Links */
+.scribex-link {
+  color: var(--scribex-accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--scribex-accent) 40%, transparent);
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.scribex-link:hover {
+  text-decoration-color: var(--scribex-accent);
+}
+
 /* Inline text formats */
 .scribex-bold {
   font-weight: 700;
