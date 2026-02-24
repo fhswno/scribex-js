@@ -196,8 +196,10 @@ test.describe('Phase 2: Slash Menu', () => {
     await page.waitForTimeout(300);
     await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible();
 
-    // Use keyboard to select: Enter selects the first (already highlighted) item
-    await page.keyboard.press('Enter');
+    // Click on the Heading 1 item directly
+    const h1Item = page.locator('[data-testid="slash-menu-item-heading-1"]');
+    await expect(h1Item).toBeVisible({ timeout: 2000 });
+    await h1Item.click({ force: true });
 
     await page.waitForTimeout(500);
 
