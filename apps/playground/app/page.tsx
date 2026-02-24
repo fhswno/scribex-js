@@ -8,6 +8,7 @@ import {
   OverlayPortal,
   InputRulePlugin,
   ImagePlugin,
+  AIPlugin,
   useEditorState,
 } from "@scribex/core";
 
@@ -15,7 +16,7 @@ import {
 import { useCallback, useState } from "react";
 
 // TYPES
-import type { UploadHandler } from "@scribex/core";
+import type { UploadHandler, AIProvider, AIPluginConfig } from "@scribex/core";
 
 /** Mock upload handler — simulates a 500ms upload and returns a placeholder URL */
 const mockUploadHandler: UploadHandler = async (file: File): Promise<string> => {
@@ -27,6 +28,112 @@ const mockUploadHandler: UploadHandler = async (file: File): Promise<string> => 
     reader.onerror = () => reject(new Error("Failed to read file"));
     reader.readAsDataURL(file);
   });
+};
+
+/**
+ * Mistral AI provider — calls the playground's /api/editor/mistral route.
+ * The route proxies to the Mistral API and returns a plain text stream.
+ */
+const mistralProvider: AIProvider = {
+  name: "Mistral",
+  generate: async ({ prompt, context, config }) => {
+    const response = await fetch("/api/editor/mistral", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prompt,
+        context,
+        ...(config?.temperature != null && { temperature: config.temperature }),
+        ...(config?.maxTokens != null && { maxTokens: config.maxTokens }),
+        ...(config?.systemPrompt != null && { systemPrompt: config.systemPrompt }),
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error((error as { error?: string }).error ?? `HTTP ${response.status}`);
+    }
+
+    // Convert the Uint8Array stream to a string stream
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+
+    return new ReadableStream<string>({
+      async pull(controller) {
+        const { done, value } = await reader.read();
+        if (done) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(decoder.decode(value, { stream: true }));
+      },
+    });
+  },
+};
+
+/**
+ * Ollama AI provider — calls the playground's /api/editor/ollama route.
+ * The route proxies to a local Ollama instance and returns a plain text stream.
+ */
+const ollamaProvider: AIProvider = {
+  name: "Ollama",
+  generate: async ({ prompt, context, config }) => {
+    const response = await fetch("/api/editor/ollama", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prompt,
+        context,
+        ...(config?.temperature != null && { temperature: config.temperature }),
+        ...(config?.maxTokens != null && { maxTokens: config.maxTokens }),
+        ...(config?.systemPrompt != null && { systemPrompt: config.systemPrompt }),
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: "Unknown error" }));
+      throw new Error((error as { error?: string }).error ?? `HTTP ${response.status}`);
+    }
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+
+    return new ReadableStream<string>({
+      async pull(controller) {
+        const { done, value } = await reader.read();
+        if (done) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(decoder.decode(value, { stream: true }));
+      },
+    });
+  },
+};
+
+// Default to Ollama for local development (no API key needed)
+const aiProvider = ollamaProvider;
+
+/** AI plugin configuration — demonstrates the customization surface */
+const aiConfig: AIPluginConfig = {
+  // Model-level configuration forwarded to the provider
+  generate: {
+    temperature: 0.7,
+    maxTokens: 2048,
+    systemPrompt: "You are a helpful writing assistant. Respond with well-formatted Markdown. Be concise and direct.",
+  },
+  // Number of preceding blocks to include as context
+  contextWindowSize: 5,
+  // Lifecycle callbacks
+  onError: (error) => {
+    console.warn("[Scribex AI] Generation failed:", error.message);
+  },
+  onAccept: (content) => {
+    console.log("[Scribex AI] Content accepted:", content.slice(0, 80) + "...");
+  },
+  onDiscard: () => {
+    console.log("[Scribex AI] Content discarded");
+  },
 };
 
 function EditorStateDisplay() {
@@ -65,6 +172,7 @@ export default function Page() {
         <SlashMenu />
         <OverlayPortal namespace="playground-editor" />
         <ImagePlugin uploadHandler={mockUploadHandler} />
+        <AIPlugin provider={aiProvider} config={aiConfig} />
         <EditorStateDisplay />
       </EditorRoot>
 
@@ -81,6 +189,7 @@ export default function Page() {
           <SlashMenu />
           <OverlayPortal namespace="playground-editor-b" />
           <ImagePlugin uploadHandler={mockUploadHandler} />
+          <AIPlugin provider={aiProvider} config={aiConfig} />
           <EditorStateDisplay />
         </EditorRoot>
       </div>
