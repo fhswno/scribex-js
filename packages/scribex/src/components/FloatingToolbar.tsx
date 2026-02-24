@@ -8,11 +8,13 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import {
   $getSelection,
   $isRangeSelection,
+  $isTextNode,
   COMMAND_PRIORITY_LOW,
   FORMAT_TEXT_COMMAND,
   KEY_ESCAPE_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from "lexical";
+import { $isTableSelection } from "@lexical/table";
 
 // REACT DOM
 import { createPortal } from "react-dom";
@@ -33,6 +35,9 @@ import { $isLinkNode } from "@lexical/link";
 
 // INTERNAL
 import { OPEN_LINK_INPUT_COMMAND } from "../commands";
+import { getInlineStyleProperty } from "../utils/style";
+import { ColorPicker } from "./ColorPicker";
+import type { ColorPalette } from "../data/color-palette";
 
 type TextFormat = "bold" | "italic" | "underline" | "strikethrough" | "code";
 
@@ -50,7 +55,11 @@ const TOOLBAR_BUTTONS: ToolbarButton[] = [
   { icon: CodeIcon, format: "code", label: "Inline Code" },
 ];
 
-export function FloatingToolbar() {
+interface FloatingToolbarProps {
+  colorPalette?: ColorPalette;
+}
+
+export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
   // Hook - Lexical Editor Context
   const [editor] = useLexicalComposerContext();
 
@@ -61,6 +70,9 @@ export function FloatingToolbar() {
     left: 0,
   });
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
+  const [activeTextColor, setActiveTextColor] = useState<string | null>(null);
+  const [activeHighlightColor, setActiveHighlightColor] = useState<string | null>(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
     null,
@@ -97,6 +109,13 @@ export function FloatingToolbar() {
     // Read Lexical state for active formats
     editor.read(() => {
       const selection = $getSelection();
+
+      // Hide toolbar when table selection is active (table has its own action menu)
+      if ($isTableSelection(selection)) {
+        setIsVisible(false);
+        return;
+      }
+
       if (!$isRangeSelection(selection) || selection.isCollapsed()) {
         setIsVisible(false);
         return;
@@ -114,6 +133,17 @@ export function FloatingToolbar() {
       const parent = node.getParent();
       if ($isLinkNode(parent) || $isLinkNode(node)) {
         formats.add("link");
+      }
+
+      // Read active text color and highlight from the anchor node's style
+      const anchorNode = selection.anchor.getNode();
+      if ($isTextNode(anchorNode)) {
+        const style = anchorNode.getStyle();
+        setActiveTextColor(getInlineStyleProperty(style, "color"));
+        setActiveHighlightColor(getInlineStyleProperty(style, "background-color"));
+      } else {
+        setActiveTextColor(null);
+        setActiveHighlightColor(null);
       }
 
       setActiveFormats(formats);
@@ -164,6 +194,11 @@ export function FloatingToolbar() {
     },
     [editor],
   );
+
+  // Close color picker when toolbar hides
+  useEffect(() => {
+    if (!isVisible) setShowColorPicker(false);
+  }, [isVisible]);
 
   if (!isVisible || !portalContainer) return null;
 
@@ -280,6 +315,95 @@ export function FloatingToolbar() {
           weight={activeFormats.has("link") ? "bold" : "regular"}
         />
       </button>
+
+      {/* Separator */}
+      <div
+        style={{
+          width: "1px",
+          height: "18px",
+          backgroundColor: "rgba(0, 0, 0, 0.1)",
+          margin: "0 2px",
+        }}
+      />
+
+      {/* Color button */}
+      <div style={{ position: "relative" }}>
+        <button
+          type="button"
+          title="Text color"
+          aria-label="Text color"
+          aria-expanded={showColorPicker}
+          data-testid="toolbar-color"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setShowColorPicker((prev) => !prev);
+          }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            width: "30px",
+            height: "30px",
+            borderRadius: "7px",
+            border: "none",
+            cursor: "default",
+            backgroundColor: showColorPicker
+              ? "rgba(0, 0, 0, 0.06)"
+              : "transparent",
+            color: "rgba(0, 0, 0, 0.55)",
+            transition: "background-color 80ms ease",
+            gap: "1px",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "13px",
+              fontWeight: 700,
+              lineHeight: 1,
+              color: activeTextColor || "rgba(0, 0, 0, 0.55)",
+            }}
+          >
+            A
+          </span>
+          <div
+            style={{
+              width: "12px",
+              height: "2.5px",
+              borderRadius: "1px",
+              backgroundColor: activeHighlightColor || "var(--scribex-accent, #007AFF)",
+            }}
+          />
+        </button>
+
+        {/* Color picker dropdown */}
+        {showColorPicker && (
+          <div
+            data-testid="color-picker-dropdown"
+            style={{
+              position: "absolute",
+              top: "calc(100% + 6px)",
+              left: "50%",
+              transform: "translateX(-50%)",
+              borderRadius: "12px",
+              border: "1px solid rgba(0, 0, 0, 0.06)",
+              backgroundColor: "rgba(255, 255, 255, 0.96)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              WebkitBackdropFilter: "blur(20px) saturate(180%)",
+              boxShadow:
+                "0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)",
+              zIndex: 60,
+            }}
+          >
+            <ColorPicker
+              palette={colorPalette}
+              activeTextColor={activeTextColor}
+              activeHighlightColor={activeHighlightColor}
+              onClose={() => setShowColorPicker(false)}
+            />
+          </div>
+        )}
+      </div>
     </div>,
     portalContainer,
   );
