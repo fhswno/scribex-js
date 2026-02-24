@@ -12,6 +12,7 @@ export { ImageNode, $createImageNode, $isImageNode } from './nodes/ImageNode';
 export { LoadingImageNode, $createLoadingImageNode, $isLoadingImageNode } from './nodes/LoadingImageNode';
 export { AIPreviewNode, $createAIPreviewNode, $isAIPreviewNode } from './nodes/AIPreviewNode';
 export { MentionNode, $createMentionNode, $isMentionNode } from './nodes/MentionNode';
+export { CodeBlockNode, $createCodeBlockNode, $isCodeBlockNode } from './nodes/CodeBlockNode';
 export { serializeNodesToMarkdown, $parseMarkdownToLexicalNodes } from './utils/markdown';
 export type {
   UploadHandler,
@@ -30,3 +31,4 @@ export type { SlashMenuItem } from './components/SlashMenu';
 export type { ImagePayload } from './nodes/ImageNode';
 export type { AIPreviewPayload } from './nodes/AIPreviewNode';
 export type { MentionPayload } from './nodes/MentionNode';
+export type { CodeBlockPayload } from './nodes/CodeBlockNode';
