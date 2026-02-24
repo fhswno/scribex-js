@@ -51,7 +51,7 @@ export function EditorRoot({
             />
           }
           placeholder={
-            <div className="scribex-placeholder text-scribex-muted-foreground pointer-events-none absolute">
+            <div className="scribex-placeholder">
               Start writing...
             </div>
           }
