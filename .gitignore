@@ -1,6 +1,7 @@
 node_modules/
 .next/
 dist/
+out/
 .env
 .env.local
 .env.*.local
@@ -8,4 +9,10 @@ bun.lockb
 *.tsbuildinfo
 test-results/
 playwright-report/
+blob-report/
 .DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+!.vscode/extensions.json
