@@ -21,6 +21,7 @@ import {
   $isTableRowNode,
   $isTableCellNode,
 } from "@lexical/table";
+import { $isCalloutNode } from "../nodes/CalloutNode";
 
 // ─── Lexical → Markdown (context building) ───────────────────────────────────
 
@@ -99,6 +100,21 @@ function serializeNode(node: LexicalNode): string {
     }
 
     return lines.join("\n");
+  }
+
+  // Callout → GitHub-flavored callout syntax
+  if ($isCalloutNode(node)) {
+    const emoji = node.getEmoji();
+    const childContent = node
+      .getChildren()
+      .map((child) => {
+        if ($isElementNode(child)) {
+          return serializeChildren(child);
+        }
+        return child.getTextContent();
+      })
+      .join("\n> ");
+    return `> [!${emoji}] ${childContent}`;
   }
 
   // Element with children (paragraph, etc.)
