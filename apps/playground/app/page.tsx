@@ -17,8 +17,7 @@ import {
   ColorPlugin,
   TablePlugin,
   TableActionMenu,
-  TableColumnResizePlugin,
-  TableRowColumnDragPlugin,
+  TableHoverActions,
   $createMentionNode,
   useEditorState,
   sanitizePastedHTML,
@@ -333,8 +332,7 @@ function EditorCard({
           <ColorPlugin />
           <TablePlugin />
           <TableActionMenu />
-          <TableColumnResizePlugin />
-          <TableRowColumnDragPlugin />
+          <TableHoverActions />
           <PastePlugin />
           <EmojiPickerPlugin />
           <LinkPlugin />
