@@ -28,10 +28,17 @@ import {
 import { useCallback, useEffect, useState } from "react";
 
 // TYPES
-import type { UploadHandler, AIProvider, AIPluginConfig, MentionProvider } from "@scribex/core";
+import type {
+  UploadHandler,
+  AIProvider,
+  AIPluginConfig,
+  MentionProvider,
+} from "@scribex/core";
 
 /** Mock upload handler — simulates a 500ms upload and returns a placeholder URL */
-const mockUploadHandler: UploadHandler = async (file: File): Promise<string> => {
+const mockUploadHandler: UploadHandler = async (
+  file: File,
+): Promise<string> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   // Return a data URL from the file for demo purposes
   return new Promise((resolve, reject) => {
@@ -57,13 +64,19 @@ const mistralProvider: AIProvider = {
         context,
         ...(config?.temperature != null && { temperature: config.temperature }),
         ...(config?.maxTokens != null && { maxTokens: config.maxTokens }),
-        ...(config?.systemPrompt != null && { systemPrompt: config.systemPrompt }),
+        ...(config?.systemPrompt != null && {
+          systemPrompt: config.systemPrompt,
+        }),
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: "Unknown error" }));
-      throw new Error((error as { error?: string }).error ?? `HTTP ${response.status}`);
+      const error = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        (error as { error?: string }).error ?? `HTTP ${response.status}`,
+      );
     }
 
     // Convert the Uint8Array stream to a string stream
@@ -98,13 +111,19 @@ const ollamaProvider: AIProvider = {
         context,
         ...(config?.temperature != null && { temperature: config.temperature }),
         ...(config?.maxTokens != null && { maxTokens: config.maxTokens }),
-        ...(config?.systemPrompt != null && { systemPrompt: config.systemPrompt }),
+        ...(config?.systemPrompt != null && {
+          systemPrompt: config.systemPrompt,
+        }),
       }),
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: "Unknown error" }));
-      throw new Error((error as { error?: string }).error ?? `HTTP ${response.status}`);
+      const error = await response
+        .json()
+        .catch(() => ({ error: "Unknown error" }));
+      throw new Error(
+        (error as { error?: string }).error ?? `HTTP ${response.status}`,
+      );
     }
 
     const reader = response.body!.getReader();
@@ -132,7 +151,8 @@ const aiConfig: AIPluginConfig = {
   generate: {
     temperature: 0.7,
     maxTokens: 2048,
-    systemPrompt: "You are a helpful writing assistant. Respond with well-formatted Markdown. Be concise and direct.",
+    systemPrompt:
+      "You are a helpful writing assistant. Respond with well-formatted Markdown. Be concise and direct.",
   },
   // Number of preceding blocks to include as context
   contextWindowSize: 5,
@@ -210,10 +230,7 @@ function HiddenStateDisplay({
   const { serializedState } = useEditorState({ onChange: handleChange });
 
   return (
-    <pre
-      className="sr-only"
-      data-testid="editor-state"
-    >
+    <pre className="sr-only" data-testid="editor-state">
       {serializedState}
     </pre>
   );
@@ -249,7 +266,7 @@ function JsonStatePanel({ state }: { state: string }) {
     <div className="mt-3">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-neutral-500 hover:text-neutral-700 transition-colors rounded-lg hover:bg-neutral-100"
+        className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-neutral-500 hover:text-neutral-700 transition-colors rounded-lg hover:bg-neutral-100 cursor-pointer"
       >
         <svg
           className={`w-3.5 h-3.5 transition-transform ${open ? "rotate-90" : ""}`}
@@ -305,10 +322,7 @@ function EditorCard({
         </div>
       )}
       <div className="rounded-2xl border border-neutral-200 shadow-sm hover:shadow-md transition-shadow bg-white">
-        <EditorRoot
-          namespace={namespace}
-          className="relative p-6 min-h-50"
-        >
+        <EditorRoot namespace={namespace} className="relative p-6 min-h-50">
           <FloatingToolbar />
           <InputRulePlugin />
           <SlashMenu />
@@ -338,7 +352,8 @@ function EditorCard({
 export default function Page() {
   // Expose sanitizePastedHTML on window for Playwright unit tests
   useEffect(() => {
-    (window as unknown as Record<string, unknown>).__scribex_sanitize = sanitizePastedHTML;
+    (window as unknown as Record<string, unknown>).__scribex_sanitize =
+      sanitizePastedHTML;
   }, []);
 
   return (
@@ -346,10 +361,10 @@ export default function Page() {
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-neutral-900 flex items-center justify-center">
+          <div className="w-7 min-w-7 h-7 rounded-lg bg-blue-900 flex items-center justify-center">
             <span className="text-white text-xs font-bold">S</span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-900">
+          <h1 className="text-xl font-bold tracking-tight text-blue-900">
             Scribex Playground
           </h1>
           <span className="text-xs font-mono text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-md">
