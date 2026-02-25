@@ -37,6 +37,7 @@ import {
   SparkleIcon,
   CodeSimpleIcon,
   TableIcon,
+  InfoIcon,
 } from "@phosphor-icons/react";
 
 // COMMANDS
@@ -45,6 +46,7 @@ import {
   INSERT_IMAGE_COMMAND,
   OPEN_AI_PROMPT_COMMAND,
   INSERT_TABLE_COMMAND_SCRIBEX,
+  INSERT_CALLOUT_COMMAND,
 } from "../commands";
 
 import { $createCodeBlockNode } from "../nodes/CodeBlockNode";
@@ -83,6 +85,9 @@ const IconAI = ({ size }: { size?: number }) => (
 );
 const IconTable = ({ size }: { size?: number }) => (
   <TableIcon size={size} weight="duotone" />
+);
+const IconCallout = ({ size }: { size?: number }) => (
+  <InfoIcon size={size} weight="duotone" />
 );
 
 // ── Public interface ────────────────────────────────────────────────────────
@@ -127,7 +132,7 @@ const CATEGORY_COLORS: Record<string, CategoryStyle> = {
 function getCategoryForId(id: string): string {
   if (id === "ai") return "ai";
   if (id.startsWith("heading")) return "headings";
-  if (id === "quote" || id === "divider" || id === "code" || id === "table") return "blocks";
+  if (id === "quote" || id === "divider" || id === "code" || id === "table" || id === "callout") return "blocks";
   if (id === "bullet-list" || id === "numbered-list" || id === "check-list")
     return "lists";
   if (id === "image") return "media";
@@ -334,6 +339,23 @@ function getDefaultItems(
           rows: 3,
           columns: 3,
         });
+      },
+    },
+    {
+      id: "callout",
+      label: "Callout",
+      description: "Highlighted block with icon",
+      icon: IconCallout,
+      onSelect: () => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+          const anchor = selection.anchor.getNode();
+          if (anchor instanceof TextNode) {
+            anchor.remove();
+          }
+        });
+        editor.dispatchCommand(INSERT_CALLOUT_COMMAND, {});
       },
     },
     {
