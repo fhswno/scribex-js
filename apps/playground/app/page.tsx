@@ -18,6 +18,7 @@ import {
   TablePlugin,
   TableActionMenu,
   TableHoverActions,
+  CalloutPlugin,
   $createMentionNode,
   useEditorState,
   sanitizePastedHTML,
@@ -333,6 +334,7 @@ function EditorCard({
           <TablePlugin />
           <TableActionMenu />
           <TableHoverActions />
+          <CalloutPlugin />
           <PastePlugin />
           <EmojiPickerPlugin />
           <LinkPlugin />
