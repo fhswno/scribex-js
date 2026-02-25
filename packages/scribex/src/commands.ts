@@ -10,3 +10,4 @@ export const OPEN_LINK_INPUT_COMMAND = createCommand<void>('OPEN_LINK_INPUT_COMM
 export const SET_TEXT_COLOR_COMMAND = createCommand<string>('SET_TEXT_COLOR_COMMAND');
 export const SET_HIGHLIGHT_COLOR_COMMAND = createCommand<string>('SET_HIGHLIGHT_COLOR_COMMAND');
 export const INSERT_TABLE_COMMAND_SCRIBEX = createCommand<{ rows: number; columns: number }>('INSERT_TABLE_COMMAND_SCRIBEX');
+export const INSERT_CALLOUT_COMMAND = createCommand<{ emoji?: string; colorPreset?: string }>('INSERT_CALLOUT_COMMAND');
