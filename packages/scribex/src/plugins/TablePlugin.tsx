@@ -5,6 +5,8 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { COMMAND_PRIORITY_LOW } from "lexical";
 import {
   $createTableNodeWithDimensions,
+  $isTableRowNode,
+  $isTableCellNode,
   registerTablePlugin,
   registerTableSelectionObserver,
   registerTableCellUnmergeTransform,
@@ -67,6 +69,15 @@ export function TablePlugin({
               topLevelNode.getType() === "paragraph"
             ) {
               topLevelNode.remove();
+            }
+
+            // Select the first cell so the cursor lands in the right place
+            const firstRow = tableNode.getChildren().find($isTableRowNode);
+            if (firstRow) {
+              const firstCell = firstRow.getChildren().find($isTableCellNode);
+              if (firstCell) {
+                firstCell.selectStart();
+              }
             }
           }
         });
