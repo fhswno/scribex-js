@@ -8,6 +8,7 @@ import { LoadingImageNode } from './LoadingImageNode';
 import { AIPreviewNode } from './AIPreviewNode';
 import { MentionNode } from './MentionNode';
 import { CodeBlockNode } from './CodeBlockNode';
+import { CalloutNode } from './CalloutNode';
 
 export const ALL_NODES: Array<Klass<LexicalNode>> = [
   HeadingNode,
@@ -24,4 +25,5 @@ export const ALL_NODES: Array<Klass<LexicalNode>> = [
   AIPreviewNode,
   MentionNode,
   CodeBlockNode,
+  CalloutNode,
 ];
