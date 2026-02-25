@@ -19,12 +19,15 @@ export type { ColorEntry, ColorPalette } from './data/color-palette';
 export { TablePlugin } from './plugins/TablePlugin';
 export { TableActionMenu } from './components/TableActionMenu';
 export { TableHoverActions } from './components/TableHoverActions';
-export { OPEN_SLASH_MENU_COMMAND, INSERT_IMAGE_COMMAND, OPEN_AI_PROMPT_COMMAND, INSERT_AI_PREVIEW_COMMAND, OPEN_EMOJI_PICKER_COMMAND, OPEN_LINK_INPUT_COMMAND, SET_TEXT_COLOR_COMMAND, SET_HIGHLIGHT_COLOR_COMMAND, INSERT_TABLE_COMMAND_SCRIBEX } from './commands';
+export { OPEN_SLASH_MENU_COMMAND, INSERT_IMAGE_COMMAND, OPEN_AI_PROMPT_COMMAND, INSERT_AI_PREVIEW_COMMAND, OPEN_EMOJI_PICKER_COMMAND, OPEN_LINK_INPUT_COMMAND, SET_TEXT_COLOR_COMMAND, SET_HIGHLIGHT_COLOR_COMMAND, INSERT_TABLE_COMMAND_SCRIBEX, INSERT_CALLOUT_COMMAND } from './commands';
 export { ImageNode, $createImageNode, $isImageNode } from './nodes/ImageNode';
 export { LoadingImageNode, $createLoadingImageNode, $isLoadingImageNode } from './nodes/LoadingImageNode';
 export { AIPreviewNode, $createAIPreviewNode, $isAIPreviewNode } from './nodes/AIPreviewNode';
 export { MentionNode, $createMentionNode, $isMentionNode } from './nodes/MentionNode';
 export { CodeBlockNode, $createCodeBlockNode, $isCodeBlockNode } from './nodes/CodeBlockNode';
+export { CalloutNode, $createCalloutNode, $isCalloutNode } from './nodes/CalloutNode';
+export { CalloutPlugin } from './plugins/CalloutPlugin';
+export { DEFAULT_CALLOUT_PRESETS } from './data/callout-presets';
 export { serializeNodesToMarkdown, $parseMarkdownToLexicalNodes } from './utils/markdown';
 export type {
   UploadHandler,
@@ -48,3 +51,5 @@ export type { EmojiItem } from './data/emoji-list';
 export { DEFAULT_EMOJIS } from './data/emoji-list';
 export type { EmojiPickerPluginProps } from './plugins/EmojiPickerPlugin';
 export type { LinkPluginConfig, LinkInputRenderProps, LinkPreviewRenderProps } from './plugins/LinkPlugin';
+export type { CalloutPayload } from './nodes/CalloutNode';
+export type { CalloutPreset } from './data/callout-presets';
