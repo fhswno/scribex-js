@@ -199,6 +199,14 @@
   margin: 0;
 }
 
+/* Table node-selected state (for delete via keyboard) */
+.scribex-table:has(:focus-visible),
+table.scribex-table[style*="outline"] {
+  outline: 2px solid var(--scribex-accent, #007AFF);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 /* Column resize handle */
 .scribex-table-cell-resizer {
   position: absolute;
@@ -213,6 +221,67 @@
 .scribex-table-cell-resizer:hover,
 .scribex-table-cell-resizer.active {
   background-color: var(--scribex-table-resize-handle);
+}
+
+/* ============================================
+   Callout block — Notion-style flat fill
+   ============================================ */
+.scribex-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  padding: 1em 1em 1em 0.875em;
+  margin: 0.5em 0;
+  border-radius: 3px;
+  background-color: var(--scribex-callout-default-bg);
+  position: relative;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Emoji icon — sits on the same baseline as the first line of text */
+.scribex-callout > [data-callout-emoji-display] {
+  flex-shrink: 0;
+  user-select: none;
+  cursor: default;
+  font-size: 1em;
+  width: 1.5em;
+  text-align: center;
+}
+
+.scribex-callout .scribex-paragraph {
+  margin: 0;
+  min-height: 1.5em;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Content area fills remaining width */
+.scribex-callout > :not([data-callout-emoji-display]) {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.scribex-callout--info {
+  background-color: var(--scribex-callout-info-bg);
+}
+
+.scribex-callout--warning {
+  background-color: var(--scribex-callout-warning-bg);
+}
+
+.scribex-callout--error {
+  background-color: var(--scribex-callout-error-bg);
+}
+
+.scribex-callout--success {
+  background-color: var(--scribex-callout-success-bg);
+}
+
+.scribex-callout--purple {
+  background-color: var(--scribex-callout-purple-bg);
 }
 
 /* ============================================
