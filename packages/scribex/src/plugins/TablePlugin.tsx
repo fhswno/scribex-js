@@ -2,16 +2,24 @@
 
 import { useEffect } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { COMMAND_PRIORITY_LOW } from "lexical";
+import {
+  $createParagraphNode,
+  $getSelection,
+  $isNodeSelection,
+  $isRangeSelection,
+  COMMAND_PRIORITY_LOW,
+  KEY_BACKSPACE_COMMAND,
+  KEY_DELETE_COMMAND,
+} from "lexical";
 import {
   $createTableNodeWithDimensions,
+  $isTableNode,
   $isTableRowNode,
   $isTableCellNode,
   registerTablePlugin,
   registerTableSelectionObserver,
   registerTableCellUnmergeTransform,
 } from "@lexical/table";
-import { $getSelection, $isRangeSelection } from "lexical";
 
 import { INSERT_TABLE_COMMAND_SCRIBEX } from "../commands";
 
@@ -85,6 +93,41 @@ export function TablePlugin({
       },
       COMMAND_PRIORITY_LOW,
     );
+  }, [editor]);
+
+  // Delete table when it is node-selected and user presses Delete/Backspace
+  useEffect(() => {
+    const handleDelete = (event: KeyboardEvent) => {
+      const selection = $getSelection();
+      if (!$isNodeSelection(selection)) return false;
+
+      const nodes = selection.getNodes();
+      const tableNode = nodes.find($isTableNode);
+      if (!tableNode) return false;
+
+      event.preventDefault();
+      const paragraph = $createParagraphNode();
+      tableNode.insertBefore(paragraph);
+      tableNode.remove();
+      paragraph.selectStart();
+      return true;
+    };
+
+    const unregisterBackspace = editor.registerCommand(
+      KEY_BACKSPACE_COMMAND,
+      handleDelete,
+      COMMAND_PRIORITY_LOW,
+    );
+    const unregisterDelete = editor.registerCommand(
+      KEY_DELETE_COMMAND,
+      handleDelete,
+      COMMAND_PRIORITY_LOW,
+    );
+
+    return () => {
+      unregisterBackspace();
+      unregisterDelete();
+    };
   }, [editor]);
 
   return null;
