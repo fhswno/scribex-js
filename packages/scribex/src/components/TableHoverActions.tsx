@@ -4,10 +4,12 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { createPortal } from "react-dom";
 import {
+  $createNodeSelection,
   $getNearestNodeFromDOMNode,
   $getNodeByKey,
   $getSelection,
   $isRangeSelection,
+  $setSelection,
 } from "lexical";
 import {
   $isTableNode,
@@ -17,12 +19,11 @@ import {
   $insertTableColumnAtSelection,
   $deleteTableRowAtSelection,
   $deleteTableColumnAtSelection,
-  TableNode,
 } from "@lexical/table";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type MenuType = "row" | "column" | "table";
+type MenuType = "row" | "column";
 
 interface MenuState {
   type: MenuType;
@@ -231,22 +232,19 @@ export function TableHoverActions() {
     [editor],
   );
 
-  // ─── Delete table ───────────────────────────────────────────────────────
+  // ─── Select table (NodeSelection) ──────────────────────────────────────
 
-  const deleteTable = useCallback(() => {
+  const selectTable = useCallback(() => {
     const key = activeTableKeyRef.current;
     if (!key) return;
 
-    setMenu(null);
     editor.update(() => {
-      const tableNode = $getNodeByKey(key);
-      if (tableNode) tableNode.remove();
+      const nodeSelection = $createNodeSelection();
+      nodeSelection.add(key);
+      $setSelection(nodeSelection);
     });
     editor.focus();
-    activeTableRef.current = null;
-    activeTableKeyRef.current = null;
-    hideAll();
-  }, [editor, hideAll]);
+  }, [editor]);
 
   // ─── Build row/column handle elements ─────────────────────────────────
 
@@ -678,9 +676,6 @@ export function TableHoverActions() {
       case "delete-col":
         deleteColAt(index);
         break;
-      case "delete-table":
-        deleteTable();
-        break;
     }
   };
 
@@ -881,21 +876,13 @@ export function TableHoverActions() {
         +
       </div>
 
-      {/* ── Table grip handle (top-left corner) ───────────────────── */}
+      {/* ── Table grip handle (top-left corner) — click to select ── */}
       <div
         ref={tableGripRef}
+        title="Click to select table, then press Delete to remove"
         onMouseDown={(e) => {
           e.preventDefault();
-          const grip = tableGripRef.current;
-          if (grip) {
-            const rect = grip.getBoundingClientRect();
-            setMenu({
-              type: "table",
-              top: rect.bottom + 4,
-              left: rect.left,
-              index: 0,
-            });
-          }
+          selectTable();
         }}
         style={{
           position: "fixed",
@@ -966,9 +953,6 @@ export function TableHoverActions() {
               <Separator />
               <MenuButton label="Delete column" action="delete-col" destructive />
             </>
-          )}
-          {menu.type === "table" && (
-            <MenuButton label="Delete table" action="delete-table" destructive />
           )}
         </div>
       )}
