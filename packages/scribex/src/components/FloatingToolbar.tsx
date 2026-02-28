@@ -195,6 +195,31 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
     [editor],
   );
 
+  // Keyboard shortcuts: Cmd+E (code), Cmd+Shift+S (strikethrough)
+  useEffect(() => {
+    const rootElement = editor.getRootElement();
+    if (!rootElement) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMod = e.metaKey || e.ctrlKey;
+
+      // Cmd+E → inline code
+      if (isMod && e.key === "e" && !e.shiftKey) {
+        e.preventDefault();
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
+      }
+
+      // Cmd+Shift+S → strikethrough
+      if (isMod && e.shiftKey && e.key === "s") {
+        e.preventDefault();
+        editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
+      }
+    };
+
+    rootElement.addEventListener("keydown", handleKeyDown);
+    return () => rootElement.removeEventListener("keydown", handleKeyDown);
+  }, [editor]);
+
   // Close color picker when toolbar hides
   useEffect(() => {
     if (!isVisible) setShowColorPicker(false);
