@@ -259,11 +259,11 @@ function AIPreviewComponent({
       data-testid="ai-preview-node"
       style={{
         position: "relative",
-        borderLeft: "3px solid var(--scribex-ai-stream, #7c3aed)",
+        borderLeft: "3px solid var(--scribex-ai-stream, #3366cc)",
         borderRadius: "0 8px 8px 0",
         padding: "16px 20px",
         margin: "8px 0",
-        backgroundColor: "rgba(124, 58, 237, 0.04)",
+        backgroundColor: "rgba(51, 102, 204, 0.05)",
         fontFamily: "var(--scribex-font-sans, system-ui, sans-serif)",
       }}
     >
@@ -276,7 +276,7 @@ function AIPreviewComponent({
           marginBottom: "12px",
           fontSize: "12px",
           fontWeight: 500,
-          color: "var(--scribex-ai-stream, #7c3aed)",
+          color: "var(--scribex-ai-stream, #3366cc)",
           letterSpacing: "0.02em",
           textTransform: "uppercase",
         }}
@@ -327,7 +327,7 @@ function AIPreviewComponent({
                 width: "2px",
                 height: "1em",
                 marginLeft: "1px",
-                backgroundColor: "var(--scribex-ai-stream, #7c3aed)",
+                backgroundColor: "var(--scribex-ai-stream, #3366cc)",
                 animation: "scribex-cursor-blink 1s step-end infinite",
                 verticalAlign: "text-bottom",
               }}
@@ -360,7 +360,7 @@ function AIPreviewComponent({
                 fontSize: "13px",
                 fontWeight: 500,
                 cursor: "pointer",
-                backgroundColor: "var(--scribex-ai-stream, #7c3aed)",
+                backgroundColor: "var(--scribex-ai-stream, #3366cc)",
                 color: "#fff",
                 transition: "opacity 0.15s",
               }}
@@ -384,7 +384,7 @@ function AIPreviewComponent({
                 fontSize: "13px",
                 fontWeight: 500,
                 cursor: "pointer",
-                backgroundColor: "var(--scribex-ai-stream, #7c3aed)",
+                backgroundColor: "var(--scribex-ai-stream, #3366cc)",
                 color: "#fff",
                 transition: "opacity 0.15s",
               }}
