@@ -267,12 +267,11 @@ export function TableActionMenu() {
         left: `${position.left}px`,
         minWidth: "180px",
         borderRadius: "10px",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
-        backgroundColor: "rgba(255, 255, 255, 0.96)",
+        border: "1px solid var(--scribex-popover-border)",
+        backgroundColor: "var(--scribex-popover-bg)",
         backdropFilter: "blur(20px) saturate(180%)",
         WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        boxShadow:
-          "0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)",
+        boxShadow: "var(--scribex-popover-shadow)",
         padding: "4px",
         fontFamily:
           '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
@@ -308,7 +307,7 @@ export function TableActionMenu() {
                 }}
               >
                 <span>{item.label}</span>
-                <span style={{ fontSize: "10px", color: "rgba(0,0,0,0.3)" }}>
+                <span style={{ fontSize: "10px", color: "var(--scribex-text-tertiary)" }}>
                   {"\u25B6"}
                 </span>
               </button>
@@ -321,12 +320,11 @@ export function TableActionMenu() {
                     left: "100%",
                     marginLeft: "4px",
                     borderRadius: "10px",
-                    border: "1px solid rgba(0, 0, 0, 0.06)",
-                    backgroundColor: "rgba(255, 255, 255, 0.96)",
+                    border: "1px solid var(--scribex-popover-border)",
+                    backgroundColor: "var(--scribex-popover-bg)",
                     backdropFilter: "blur(20px) saturate(180%)",
                     WebkitBackdropFilter: "blur(20px) saturate(180%)",
-                    boxShadow:
-                      "0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.12)",
+                    boxShadow: "var(--scribex-popover-shadow)",
                     padding: "6px",
                     display: "flex",
                     flexWrap: "wrap",
@@ -352,7 +350,7 @@ export function TableActionMenu() {
                           currentCellBg === color.value ||
                           (!currentCellBg && color.value === "")
                             ? "2px solid var(--scribex-accent, #007AFF)"
-                            : "1px solid rgba(0, 0, 0, 0.08)",
+                            : "1px solid var(--scribex-popover-border)",
                         cursor: "pointer",
                         backgroundColor:
                           color.swatch === "transparent"
@@ -367,7 +365,7 @@ export function TableActionMenu() {
                         <span
                           style={{
                             fontSize: "11px",
-                            color: "rgba(0, 0, 0, 0.3)",
+                            color: "var(--scribex-text-tertiary)",
                           }}
                         >
                           {"\u2205"}
@@ -390,7 +388,7 @@ export function TableActionMenu() {
               <div
                 style={{
                   height: "0.5px",
-                  backgroundColor: "rgba(0, 0, 0, 0.08)",
+                  backgroundColor: "var(--scribex-separator)",
                   margin: "3px 6px",
                 }}
               />
