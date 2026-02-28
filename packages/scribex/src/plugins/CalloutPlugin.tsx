@@ -493,12 +493,11 @@ export function CalloutPlugin({
           gap: "3px",
           padding: "3px",
           borderRadius: "8px",
-          border: "1px solid rgba(0, 0, 0, 0.06)",
-          backgroundColor: "rgba(255, 255, 255, 0.92)",
+          border: "1px solid var(--scribex-popover-border)",
+          backgroundColor: "var(--scribex-popover-bg)",
           backdropFilter: "blur(20px) saturate(180%)",
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          boxShadow:
-            "0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.08)",
+          boxShadow: "var(--scribex-popover-shadow)",
           zIndex: 50,
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
@@ -522,7 +521,7 @@ export function CalloutPlugin({
             borderRadius: "5px",
             border: "none",
             cursor: "pointer",
-            backgroundColor: showEmojiPicker ? "rgba(0,0,0,0.06)" : "transparent",
+            backgroundColor: showEmojiPicker ? "var(--scribex-hover-bg)" : "transparent",
             fontSize: "14px",
             transition: "background-color 80ms",
           }}
@@ -535,7 +534,7 @@ export function CalloutPlugin({
           style={{
             width: "1px",
             height: "16px",
-            backgroundColor: "rgba(0,0,0,0.08)",
+            backgroundColor: "var(--scribex-separator)",
             margin: "0 1px",
           }}
         />
@@ -585,7 +584,7 @@ export function CalloutPlugin({
           style={{
             width: "1px",
             height: "16px",
-            backgroundColor: "rgba(0,0,0,0.08)",
+            backgroundColor: "var(--scribex-separator)",
             margin: "0 1px",
           }}
         />
@@ -608,17 +607,17 @@ export function CalloutPlugin({
             border: "none",
             cursor: "pointer",
             backgroundColor: "transparent",
-            color: "rgba(0,0,0,0.4)",
+            color: "var(--scribex-text-tertiary)",
             fontSize: "14px",
             transition: "background-color 80ms, color 80ms",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.06)";
+            e.currentTarget.style.backgroundColor = "var(--scribex-hover-bg)";
             e.currentTarget.style.color = "var(--scribex-destructive, #e03e3e)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "rgba(0,0,0,0.4)";
+            e.currentTarget.style.color = "var(--scribex-text-tertiary)";
           }}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -638,12 +637,11 @@ export function CalloutPlugin({
             left: `${emojiPickerLeft}px`,
             width: `${emojiPickerWidth}px`,
             borderRadius: "10px",
-            border: "1px solid rgba(0, 0, 0, 0.06)",
-            backgroundColor: "rgba(255, 255, 255, 0.96)",
+            border: "1px solid var(--scribex-popover-border)",
+            backgroundColor: "var(--scribex-popover-bg)",
             backdropFilter: "blur(20px) saturate(180%)",
             WebkitBackdropFilter: "blur(20px) saturate(180%)",
-            boxShadow:
-              "0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.12)",
+            boxShadow: "var(--scribex-popover-shadow)",
             zIndex: 60,
             fontFamily:
               '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
@@ -671,7 +669,7 @@ export function CalloutPlugin({
                 width: "100%",
                 padding: "6px 8px",
                 borderRadius: "6px",
-                border: "1px solid rgba(0, 0, 0, 0.1)",
+                border: "1px solid var(--scribex-popover-border)",
                 fontSize: "13px",
                 outline: "none",
                 backgroundColor: "transparent",
@@ -713,7 +711,7 @@ export function CalloutPlugin({
                   transition: "background-color 60ms",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.06)";
+                  e.currentTarget.style.backgroundColor = "var(--scribex-hover-bg)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = "transparent";
