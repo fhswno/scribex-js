@@ -38,6 +38,7 @@ import {
   CodeSimpleIcon,
   TableIcon,
   InfoIcon,
+  SmileyIcon,
 } from "@phosphor-icons/react";
 
 // COMMANDS
@@ -45,6 +46,7 @@ import {
   OPEN_SLASH_MENU_COMMAND,
   INSERT_IMAGE_COMMAND,
   OPEN_AI_PROMPT_COMMAND,
+  OPEN_EMOJI_PICKER_COMMAND,
   INSERT_TABLE_COMMAND_SCRIBEX,
   INSERT_CALLOUT_COMMAND,
 } from "../commands";
@@ -89,6 +91,9 @@ const IconTable = ({ size }: { size?: number }) => (
 const IconCallout = ({ size }: { size?: number }) => (
   <InfoIcon size={size} weight="duotone" />
 );
+const IconEmoji = ({ size }: { size?: number }) => (
+  <SmileyIcon size={size} weight="duotone" />
+);
 
 // ── Public interface ────────────────────────────────────────────────────────
 
@@ -98,6 +103,8 @@ export interface SlashMenuItem {
   description: string;
   icon: React.ComponentType<{ size?: number }>;
   onSelect: () => void;
+  /** Extra search terms (e.g. "h1" for "Heading 1") */
+  keywords?: string[];
 }
 
 // ── Markdown shortcut hints (shown on the right of each item) ───────────────
@@ -135,7 +142,7 @@ function getCategoryForId(id: string): string {
   if (id === "quote" || id === "divider" || id === "code" || id === "table" || id === "callout") return "blocks";
   if (id === "bullet-list" || id === "numbered-list" || id === "check-list")
     return "lists";
-  if (id === "image") return "media";
+  if (id === "image" || id === "emoji") return "media";
   return "other";
 }
 
@@ -226,6 +233,7 @@ function getDefaultItems(
       id: "heading-1",
       label: "Heading 1",
       description: "Large heading",
+      keywords: ["h1"],
       icon: IconH1,
       onSelect: () => replaceCurrentBlock(() => $createHeadingNode("h1")),
     },
@@ -233,6 +241,7 @@ function getDefaultItems(
       id: "heading-2",
       label: "Heading 2",
       description: "Medium heading",
+      keywords: ["h2"],
       icon: IconH2,
       onSelect: () => replaceCurrentBlock(() => $createHeadingNode("h2")),
     },
@@ -240,6 +249,7 @@ function getDefaultItems(
       id: "heading-3",
       label: "Heading 3",
       description: "Small heading",
+      keywords: ["h3"],
       icon: IconH3,
       onSelect: () => replaceCurrentBlock(() => $createHeadingNode("h3")),
     },
@@ -384,6 +394,25 @@ function getDefaultItems(
         input.click();
       },
     },
+    {
+      id: "emoji",
+      label: "Emoji",
+      description: "Insert an emoji",
+      keywords: ["smiley", "face", "emoticon"],
+      icon: IconEmoji,
+      onSelect: () => {
+        // Remove the "/" trigger text, then open the emoji picker via command
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+          const anchor = selection.anchor.getNode();
+          if (anchor instanceof TextNode) {
+            anchor.remove();
+          }
+        });
+        editor.dispatchCommand(OPEN_EMOJI_PICKER_COMMAND, undefined);
+      },
+    },
   ];
 }
 
@@ -455,11 +484,15 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
     : defaultItems;
 
   const filteredItems = query
-    ? allItems.filter(
-        (item) =>
-          item.label.toLowerCase().includes(query.toLowerCase()) ||
-          item.description.toLowerCase().includes(query.toLowerCase()),
-      )
+    ? allItems.filter((item) => {
+        const q = query.toLowerCase();
+        return (
+          item.label.toLowerCase().includes(q) ||
+          item.description.toLowerCase().includes(q) ||
+          item.keywords?.some((kw) => kw.toLowerCase().includes(q)) ||
+          false
+        );
+      })
     : allItems;
 
   // Group and flatten for sectioned display
