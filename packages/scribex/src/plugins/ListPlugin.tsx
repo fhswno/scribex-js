@@ -1,6 +1,9 @@
 "use client";
 
+// REACT
 import { useEffect } from "react";
+
+// LEXICAL
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { registerList } from "@lexical/list";
 
