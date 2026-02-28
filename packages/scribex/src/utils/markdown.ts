@@ -15,6 +15,7 @@ import {
   $isListItemNode,
 } from "@lexical/list";
 import { $isImageNode } from "../nodes/ImageNode";
+import { $isVideoNode } from "../nodes/VideoNode";
 import { $isLinkNode } from "@lexical/link";
 import {
   $isTableNode,
@@ -22,6 +23,7 @@ import {
   $isTableCellNode,
 } from "@lexical/table";
 import { $isCalloutNode } from "../nodes/CalloutNode";
+import { $isHorizontalRuleNode } from "../nodes/HorizontalRuleNode";
 
 // ─── Lexical → Markdown (context building) ───────────────────────────────────
 
@@ -71,6 +73,17 @@ function serializeNode(node: LexicalNode): string {
   // Image
   if ($isImageNode(node)) {
     return `![${node.getAltText()}](${node.getSrc()})`;
+  }
+
+  // Video
+  if ($isVideoNode(node)) {
+    const title = node.getTitle() || "Video";
+    return `[${title}](${node.getSrc()})`;
+  }
+
+  // Horizontal rule
+  if ($isHorizontalRuleNode(node)) {
+    return "---";
   }
 
   // Table → pipe-delimited markdown
