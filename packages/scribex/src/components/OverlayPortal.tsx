@@ -10,8 +10,11 @@ import { $getNodeByKey, $getRoot } from "lexical";
 // REACT DOM
 import { createPortal } from "react-dom";
 
-// LUCIDE
+// PHOSPHOR
 import { DotsSixVerticalIcon } from "@phosphor-icons/react";
+
+// INTERNAL
+import { TurnIntoMenu } from "./TurnIntoMenu";
 
 interface BlockInfo {
   key: string;
@@ -104,6 +107,17 @@ export function OverlayPortal({ namespace }: OverlayPortalProps) {
   const dropPositionRef = useRef<"before" | "after">("after");
   const dropTargetKeyRef = useRef<string | null>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
+
+  // Click vs drag detection
+  const mousedownTimeRef = useRef(0);
+  const mousedownPosRef = useRef({ x: 0, y: 0 });
+
+  // Turn Into menu state
+  const [menuState, setMenuState] = useState<{
+    open: boolean;
+    blockKey: string;
+    position: { top: number; left: number };
+  } | null>(null);
 
   // Detect touch device — use multiple signals for reliability
   // Chrome DevTools device emulation doesn't always set pointer: coarse
@@ -225,14 +239,27 @@ export function OverlayPortal({ namespace }: OverlayPortalProps) {
       const key = hoveredKeyRef.current;
       if (!key) return;
 
-      isDraggingRef.current = true;
-      dragSourceKeyRef.current = key;
+      // Track for click vs drag detection
+      mousedownTimeRef.current = Date.now();
+      mousedownPosRef.current = { x: e.clientX, y: e.clientY };
 
-      handle.style.opacity = "0.3";
-      handle.style.cursor = "grabbing";
+      dragSourceKeyRef.current = key;
+      let hasMoved = false;
 
       const onDragMove = (moveEvent: MouseEvent) => {
-        if (!isDraggingRef.current) return;
+        const dx = moveEvent.clientX - mousedownPosRef.current.x;
+        const dy = moveEvent.clientY - mousedownPosRef.current.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Only start dragging after 5px of movement
+        if (!hasMoved && dist < 5) return;
+        hasMoved = true;
+
+        if (!isDraggingRef.current) {
+          isDraggingRef.current = true;
+          handle.style.opacity = "0.3";
+          handle.style.cursor = "grabbing";
+        }
 
         const target = findBlockAtY(moveEvent.clientY, editor);
         if (!target || target.key === dragSourceKeyRef.current) {
@@ -257,7 +284,29 @@ export function OverlayPortal({ namespace }: OverlayPortalProps) {
         );
       };
 
-      const onDragEnd = () => {
+      const onDragEnd = (upEvent: MouseEvent) => {
+        document.removeEventListener("mousemove", onDragMove);
+        document.removeEventListener("mouseup", onDragEnd);
+
+        if (!hasMoved) {
+          // This was a click, not a drag — open Turn Into menu
+          isDraggingRef.current = false;
+          const blockKey = dragSourceKeyRef.current;
+          if (blockKey && handleRef.current) {
+            const handleRect = handleRef.current.getBoundingClientRect();
+            setMenuState({
+              open: true,
+              blockKey,
+              position: {
+                top: handleRect.bottom + 4,
+                left: handleRect.left,
+              },
+            });
+          }
+          dragSourceKeyRef.current = null;
+          return;
+        }
+
         isDraggingRef.current = false;
         hideIndicator();
 
@@ -288,9 +337,6 @@ export function OverlayPortal({ namespace }: OverlayPortalProps) {
         dragSourceKeyRef.current = null;
         dropTargetKeyRef.current = null;
         hideHandle();
-
-        document.removeEventListener("mousemove", onDragMove);
-        document.removeEventListener("mouseup", onDragEnd);
       };
 
       document.addEventListener("mousemove", onDragMove);
@@ -308,54 +354,72 @@ export function OverlayPortal({ namespace }: OverlayPortalProps) {
     };
   }, [editor, isTouchDevice, hideHandle, hideIndicator, showIndicator]);
 
+  const closeMenu = useCallback(() => {
+    setMenuState(null);
+  }, []);
+
   if (isTouchDevice === null || isTouchDevice || !portalContainer) return null;
 
-  return createPortal(
+  return (
     <>
-      {/* Drag handle — always in DOM, positioned imperatively */}
-      <div
-        ref={handleRef}
-        data-testid="overlay-drag-handle"
-        data-namespace={namespace}
-        style={{
-          position: "fixed",
-          top: "0px",
-          left: "0px",
-          width: "24px",
-          height: "24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "grab",
-          borderRadius: "4px",
-          color: "var(--scribex-muted-foreground, #94a3b8)",
-          opacity: 0.6,
-          transition: "opacity 0.15s",
-          userSelect: "none",
-          zIndex: 40,
-          visibility: "hidden",
-        }}
-      >
-        <DotsSixVerticalIcon size={16} weight="bold" />
-      </div>
+      {createPortal(
+        <>
+          {/* Drag handle — always in DOM, positioned imperatively */}
+          <div
+            ref={handleRef}
+            data-testid="overlay-drag-handle"
+            data-namespace={namespace}
+            style={{
+              position: "fixed",
+              top: "0px",
+              left: "0px",
+              width: "24px",
+              height: "24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "grab",
+              borderRadius: "4px",
+              color: "var(--scribex-muted-foreground, #94a3b8)",
+              opacity: 0.6,
+              transition: "opacity 0.15s",
+              userSelect: "none",
+              zIndex: 40,
+              visibility: "hidden",
+            }}
+          >
+            <DotsSixVerticalIcon size={16} weight="bold" />
+          </div>
 
-      {/* Drop indicator line — always in DOM, positioned imperatively */}
-      <div
-        ref={indicatorRef}
-        data-testid="overlay-drop-indicator"
-        style={{
-          position: "fixed",
-          top: "0px",
-          left: "0px",
-          width: "0px",
-          height: "2px",
-          backgroundColor: "var(--scribex-accent, #3b82f6)",
-          pointerEvents: "none",
-          zIndex: 50,
-          visibility: "hidden",
-        }}
-      />
-    </>,
-    portalContainer,
+          {/* Drop indicator line — always in DOM, positioned imperatively */}
+          <div
+            ref={indicatorRef}
+            data-testid="overlay-drop-indicator"
+            style={{
+              position: "fixed",
+              top: "0px",
+              left: "0px",
+              width: "0px",
+              height: "2px",
+              backgroundColor: "var(--scribex-accent, #3b82f6)",
+              pointerEvents: "none",
+              zIndex: 50,
+              visibility: "hidden",
+            }}
+          />
+        </>,
+        portalContainer,
+      )}
+
+      {/* Turn Into menu — rendered when drag handle is clicked */}
+      {menuState?.open && (
+        <TurnIntoMenu
+          editor={editor}
+          blockKey={menuState.blockKey}
+          position={menuState.position}
+          onClose={closeMenu}
+        />
+      )}
+    </>
   );
 }
