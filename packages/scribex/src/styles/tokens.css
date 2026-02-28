@@ -15,7 +15,7 @@
 
   /* Status */
   --scribex-destructive: hsl(0 84.2% 60.2%);
-  --scribex-ai-stream: hsl(262 83% 58%);
+  --scribex-ai-stream: hsl(220 60% 50%);
 
   /* Radius */
   --scribex-radius: 0.5rem;
@@ -76,6 +76,15 @@
   --scribex-callout-success-border: #0f7b6c;
   --scribex-callout-purple-bg: #eae4f2;
   --scribex-callout-purple-border: #6940a5;
+
+  /* Popover / floating UI chrome */
+  --scribex-popover-bg: rgba(255, 255, 255, 0.82);
+  --scribex-popover-border: rgba(0, 0, 0, 0.06);
+  --scribex-popover-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --scribex-icon-secondary: rgba(0, 0, 0, 0.55);
+  --scribex-separator: rgba(0, 0, 0, 0.1);
+  --scribex-text-tertiary: rgba(0, 0, 0, 0.3);
+  --scribex-hover-bg: rgba(0, 0, 0, 0.04);
 }
 
 .dark {
@@ -88,7 +97,7 @@
   --scribex-accent: hsl(224.3 76.3% 48%);
   --scribex-accent-foreground: hsl(210 40% 98%);
   --scribex-destructive: hsl(0 62.8% 30.6%);
-  --scribex-ai-stream: hsl(262 83% 58%);
+  --scribex-ai-stream: hsl(220 60% 50%);
 
   /* Text colors — brighter for dark backgrounds */
   --scribex-text-gray: #979a9b;
@@ -142,4 +151,13 @@
   --scribex-callout-success-border: hsl(160 60% 42%);
   --scribex-callout-purple-bg: hsl(270 20% 20%);
   --scribex-callout-purple-border: hsl(270 55% 55%);
+
+  /* Popover / floating UI chrome */
+  --scribex-popover-bg: rgba(30, 30, 34, 0.88);
+  --scribex-popover-border: rgba(255, 255, 255, 0.08);
+  --scribex-popover-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+  --scribex-icon-secondary: rgba(255, 255, 255, 0.55);
+  --scribex-separator: rgba(255, 255, 255, 0.1);
+  --scribex-text-tertiary: rgba(255, 255, 255, 0.3);
+  --scribex-hover-bg: rgba(255, 255, 255, 0.06);
 }
