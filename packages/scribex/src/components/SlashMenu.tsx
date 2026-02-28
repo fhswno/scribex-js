@@ -39,6 +39,7 @@ import {
   TableIcon,
   InfoIcon,
   SmileyIcon,
+  VideoCameraIcon,
 } from "@phosphor-icons/react";
 
 // COMMANDS
@@ -49,9 +50,11 @@ import {
   OPEN_EMOJI_PICKER_COMMAND,
   INSERT_TABLE_COMMAND_SCRIBEX,
   INSERT_CALLOUT_COMMAND,
+  OPEN_VIDEO_INPUT_COMMAND,
 } from "../commands";
 
 import { $createCodeBlockNode } from "../nodes/CodeBlockNode";
+import { $createHorizontalRuleNode } from "../nodes/HorizontalRuleNode";
 
 // ── Duotone icon wrappers (stable references, no re-creation) ───────────────
 
@@ -93,6 +96,9 @@ const IconCallout = ({ size }: { size?: number }) => (
 );
 const IconEmoji = ({ size }: { size?: number }) => (
   <SmileyIcon size={size} weight="duotone" />
+);
+const IconVideo = ({ size }: { size?: number }) => (
+  <VideoCameraIcon size={size} weight="duotone" />
 );
 
 // ── Public interface ────────────────────────────────────────────────────────
@@ -142,7 +148,7 @@ function getCategoryForId(id: string): string {
   if (id === "quote" || id === "divider" || id === "code" || id === "table" || id === "callout") return "blocks";
   if (id === "bullet-list" || id === "numbered-list" || id === "check-list")
     return "lists";
-  if (id === "image" || id === "emoji") return "media";
+  if (id === "image" || id === "emoji" || id === "video") return "media";
   return "other";
 }
 
@@ -291,7 +297,42 @@ function getDefaultItems(
       label: "Divider",
       description: "Horizontal rule",
       icon: IconDivider,
-      onSelect: () => replaceCurrentBlock(() => $createParagraphNode()),
+      onSelect: () => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+          const anchor = selection.anchor.getNode();
+
+          let block: import("lexical").LexicalNode = anchor;
+          while (block.getParent() && !$isRootNode(block.getParent())) {
+            block = block.getParent()!;
+          }
+
+          if (anchor instanceof TextNode) {
+            anchor.remove();
+          }
+
+          const rule = $createHorizontalRuleNode();
+          const trailingParagraph = $createParagraphNode();
+
+          if ($isRootNode(block)) {
+            const root = $getRoot();
+            root.append(rule);
+            root.append(trailingParagraph);
+          } else if (
+            "getChildrenSize" in block &&
+            typeof block.getChildrenSize === "function" &&
+            (block.getChildrenSize as () => number)() === 0
+          ) {
+            block.replace(rule);
+            rule.insertAfter(trailingParagraph);
+          } else {
+            block.insertAfter(rule);
+            rule.insertAfter(trailingParagraph);
+          }
+          trailingParagraph.selectEnd();
+        });
+      },
     },
     {
       id: "code",
@@ -411,6 +452,24 @@ function getDefaultItems(
           }
         });
         editor.dispatchCommand(OPEN_EMOJI_PICKER_COMMAND, undefined);
+      },
+    },
+    {
+      id: "video",
+      label: "Video",
+      description: "Embed or upload a video",
+      keywords: ["youtube", "vimeo", "loom", "embed", "movie", "clip"],
+      icon: IconVideo,
+      onSelect: () => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+          const anchor = selection.anchor.getNode();
+          if (anchor instanceof TextNode) {
+            anchor.remove();
+          }
+        });
+        editor.dispatchCommand(OPEN_VIDEO_INPUT_COMMAND, undefined);
       },
     },
   ];
