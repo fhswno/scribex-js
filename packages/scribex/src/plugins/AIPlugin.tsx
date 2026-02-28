@@ -74,25 +74,18 @@ export function AIPlugin({ provider, config = {} }: AIPluginProps) {
     return editor.registerCommand(
       OPEN_AI_PROMPT_COMMAND,
       () => {
-        // Get cursor position for popover anchoring
+        // Get cursor position for popover anchoring — same line as trigger
         const domSelection = window.getSelection();
         if (domSelection && domSelection.rangeCount > 0) {
           const range = domSelection.getRangeAt(0);
           const rect = range.getBoundingClientRect();
           setPromptPosition({
-            top: rect.bottom + 8,
+            top: rect.top,
             left: rect.left,
           });
         }
 
         setIsPromptOpen(true);
-
-        // Focus the input after render (only for built-in prompt)
-        if (!config.renderPrompt) {
-          requestAnimationFrame(() => {
-            inputRef.current?.focus();
-          });
-        }
 
         return true;
       },
@@ -114,7 +107,7 @@ export function AIPlugin({ provider, config = {} }: AIPluginProps) {
           contextMarkdown = serializeNodesToMarkdown(contextNodes);
         });
 
-        // Insert AIPreviewNode into the AST
+        // Insert AIPreviewNode into the AST — replace the current block if empty
         editor.update(() => {
           const selection = $getSelection();
           let targetBlock: import("lexical").LexicalNode | null = null;
@@ -138,7 +131,13 @@ export function AIPlugin({ provider, config = {} }: AIPluginProps) {
           });
 
           if (targetBlock && !$isRootNode(targetBlock)) {
-            targetBlock.insertAfter(aiNode);
+            // If the current block is empty, replace it with the AI node
+            const textContent = targetBlock.getTextContent();
+            if (textContent.trim() === "") {
+              targetBlock.replace(aiNode);
+            } else {
+              targetBlock.insertAfter(aiNode);
+            }
           } else {
             const root = $getRoot();
             root.append(aiNode);
@@ -213,7 +212,6 @@ const AIPromptInput = forwardRef<HTMLInputElement, AIPromptInputProps>(
   function AIPromptInput({ position, onSubmit, onClose }, ref) {
     const [value, setValue] = useState("");
     const containerRef = useRef<HTMLDivElement>(null);
-
     // Close on click outside — deferred to avoid catching the click that opened the prompt
     useEffect(() => {
       const handleClickOutside = (e: MouseEvent) => {
@@ -265,12 +263,11 @@ const AIPromptInput = forwardRef<HTMLInputElement, AIPromptInputProps>(
           gap: "8px",
           padding: "6px 8px 6px 14px",
           borderRadius: "12px",
-          border: "1px solid rgba(124, 58, 237, 0.2)",
-          backgroundColor: "rgba(255, 255, 255, 0.92)",
+          border: "1px solid rgba(51, 102, 204, 0.2)",
+          backgroundColor: "var(--scribex-popover-bg)",
           backdropFilter: "blur(20px) saturate(180%)",
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          boxShadow:
-            "0 0 0 0.5px rgba(124, 58, 237, 0.08), 0 8px 32px rgba(124, 58, 237, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)",
+          boxShadow: "var(--scribex-popover-shadow)",
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
           animation: "scribex-prompt-enter 0.2s ease-out",
@@ -278,7 +275,11 @@ const AIPromptInput = forwardRef<HTMLInputElement, AIPromptInputProps>(
         }}
       >
         <input
-          ref={ref}
+          ref={(el) => {
+            if (el) el.focus();
+            if (typeof ref === "function") ref(el);
+            else if (ref) ref.current = el;
+          }}
           type="text"
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -309,9 +310,9 @@ const AIPromptInput = forwardRef<HTMLInputElement, AIPromptInputProps>(
             border: "none",
             cursor: value.trim() ? "pointer" : "default",
             backgroundColor: value.trim()
-              ? "var(--scribex-ai-stream, #7c3aed)"
-              : "rgba(124, 58, 237, 0.1)",
-            color: value.trim() ? "#fff" : "rgba(124, 58, 237, 0.3)",
+              ? "var(--scribex-ai-stream, #3366cc)"
+              : "rgba(51, 102, 204, 0.15)",
+            color: value.trim() ? "var(--scribex-accent-foreground, #fff)" : "rgba(51, 102, 204, 0.35)",
             transition: "background-color 0.15s, color 0.15s",
           }}
         >
