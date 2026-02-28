@@ -16,6 +16,7 @@ export { ColorPlugin } from './plugins/ColorPlugin';
 export { ColorPicker } from './components/ColorPicker';
 export { DEFAULT_COLOR_PALETTE } from './data/color-palette';
 export type { ColorEntry, ColorPalette } from './data/color-palette';
+export { ListPlugin } from './plugins/ListPlugin';
 export { TablePlugin } from './plugins/TablePlugin';
 export { TableActionMenu } from './components/TableActionMenu';
 export { TableHoverActions } from './components/TableHoverActions';
