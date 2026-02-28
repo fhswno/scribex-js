@@ -32,6 +32,7 @@ import {
   QuotesIcon,
   ListBulletsIcon,
   ListNumbersIcon,
+  CheckSquareIcon,
   MinusSquareIcon,
   ImageSquareIcon,
   SparkleIcon,
@@ -100,6 +101,9 @@ const IconEmoji = ({ size }: { size?: number }) => (
 const IconVideo = ({ size }: { size?: number }) => (
   <VideoCameraIcon size={size} weight="duotone" />
 );
+const IconChecklist = ({ size }: { size?: number }) => (
+  <CheckSquareIcon size={size} weight="duotone" />
+);
 
 // ── Public interface ────────────────────────────────────────────────────────
 
@@ -122,6 +126,7 @@ const SHORTCUT_HINTS: Record<string, string> = {
   quote: ">",
   "bullet-list": "-",
   "numbered-list": "1.",
+  "check-list": "[]",
   divider: "---",
   code: "```",
 };
@@ -287,6 +292,20 @@ function getDefaultItems(
       onSelect: () =>
         replaceCurrentBlock(() => {
           const list = $createListNode("number");
+          const item = $createListItemNode();
+          list.append(item);
+          return list;
+        }),
+    },
+    {
+      id: "check-list",
+      label: "Checklist",
+      description: "Task list with checkboxes",
+      keywords: ["todo", "task", "checkbox", "check"],
+      icon: IconChecklist,
+      onSelect: () =>
+        replaceCurrentBlock(() => {
+          const list = $createListNode("check");
           const item = $createListItemNode();
           list.append(item);
           return list;
