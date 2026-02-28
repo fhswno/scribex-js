@@ -121,12 +121,12 @@ interface CategoryStyle {
 }
 
 const CATEGORY_COLORS: Record<string, CategoryStyle> = {
-  ai: { bg: "linear-gradient(135deg, #FAF5FF, #F3E8FF)", icon: "#7C3AED" },
-  headings: { bg: "linear-gradient(135deg, #EEF2FF, #E0E7FF)", icon: "#6366F1" },
-  blocks: { bg: "linear-gradient(135deg, #F5F3FF, #EDE9FE)", icon: "#8B5CF6" },
-  lists: { bg: "linear-gradient(135deg, #ECFDF5, #D1FAE5)", icon: "#10B981" },
-  media: { bg: "linear-gradient(135deg, #FFF7ED, #FFEDD5)", icon: "#F59E0B" },
-  other: { bg: "linear-gradient(135deg, #F9FAFB, #F3F4F6)", icon: "#6B7280" },
+  ai: { bg: "var(--scribex-muted)", icon: "#3366CC" },
+  headings: { bg: "var(--scribex-muted)", icon: "#6366F1" },
+  blocks: { bg: "var(--scribex-muted)", icon: "#8B5CF6" },
+  lists: { bg: "var(--scribex-muted)", icon: "#10B981" },
+  media: { bg: "var(--scribex-muted)", icon: "#F59E0B" },
+  other: { bg: "var(--scribex-muted)", icon: "#6B7280" },
 };
 
 function getCategoryForId(id: string): string {
@@ -618,16 +618,12 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
         maxHeight: "min(380px, 60vh)",
         overflow: "auto",
         borderRadius: "12px",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
-        backgroundColor: "rgba(255, 255, 255, 0.78)",
+        border: "1px solid var(--scribex-popover-border)",
+        backgroundColor: "var(--scribex-popover-bg)",
         backdropFilter: "blur(24px) saturate(190%)",
         WebkitBackdropFilter: "blur(24px) saturate(190%)",
         padding: "6px",
-        boxShadow: [
-          "0 0 0 0.5px rgba(0, 0, 0, 0.04)",
-          "0 12px 48px -4px rgba(0, 0, 0, 0.13)",
-          "0 4px 12px rgba(0, 0, 0, 0.05)",
-        ].join(", "),
+        boxShadow: "var(--scribex-popover-shadow)",
         top: `${position.top}px`,
         left: `${position.left}px`,
         fontFamily:
@@ -645,7 +641,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
           style={{
             padding: "20px 12px",
             fontSize: "12.5px",
-            color: "rgba(0, 0, 0, 0.3)",
+            color: "var(--scribex-text-tertiary)",
             textAlign: "center",
             fontWeight: 400,
           }}
@@ -660,7 +656,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
               <div
                 style={{
                   height: "0.5px",
-                  backgroundColor: "rgba(0, 0, 0, 0.07)",
+                  backgroundColor: "var(--scribex-separator)",
                   margin: "4px 10px",
                 }}
               />
@@ -673,7 +669,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
                   padding: "7px 10px 4px",
                   fontSize: "10.5px",
                   fontWeight: 600,
-                  color: "rgba(0, 0, 0, 0.28)",
+                  color: "var(--scribex-text-tertiary)",
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
                   userSelect: "none",
@@ -717,7 +713,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
                       ? "var(--scribex-accent, #007AFF)"
                       : "transparent",
                     color: isActive
-                      ? "#fff"
+                      ? "var(--scribex-accent-foreground, #fff)"
                       : "var(--scribex-foreground, #1d1d1f)",
                     transition: "background-color 80ms ease",
                   }}
@@ -735,7 +731,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
                         ? "rgba(255, 255, 255, 0.2)"
                         : colors.bg,
                       flexShrink: 0,
-                      color: isActive ? "#fff" : colors.icon,
+                      color: isActive ? "var(--scribex-accent-foreground, #fff)" : colors.icon,
                       animation: isActive
                         ? "scribex-icon-lift 400ms cubic-bezier(0.34, 1.56, 0.64, 1)"
                         : "none",
@@ -767,8 +763,8 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
                           '"SF Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace',
                         fontWeight: 400,
                         color: isActive
-                          ? "rgba(255, 255, 255, 0.55)"
-                          : "rgba(0, 0, 0, 0.18)",
+                          ? "var(--scribex-accent-foreground, rgba(255, 255, 255, 0.55))"
+                          : "var(--scribex-text-tertiary)",
                         flexShrink: 0,
                         paddingRight: "2px",
                       }}
