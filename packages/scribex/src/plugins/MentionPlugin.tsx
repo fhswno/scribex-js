@@ -328,7 +328,7 @@ function MentionDropdown({
   const accentColor =
     trigger === "#"
       ? "var(--scribex-accent, #3b82f6)"
-      : "var(--scribex-ai-stream, #7c3aed)";
+      : "var(--scribex-ai-stream, #3366cc)";
 
   return (
     <div
@@ -344,11 +344,10 @@ function MentionDropdown({
         overflowY: "auto",
         borderRadius: "10px",
         border: "1px solid var(--scribex-border, #e2e8f0)",
-        backgroundColor: "rgba(255, 255, 255, 0.96)",
+        backgroundColor: "var(--scribex-popover-bg)",
         backdropFilter: "blur(20px) saturate(180%)",
         WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        boxShadow:
-          "0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04)",
+        boxShadow: "var(--scribex-popover-shadow)",
         fontFamily: "var(--scribex-font-sans, system-ui, sans-serif)",
         animation: "scribex-mention-enter 0.15s ease-out",
         padding: "4px",
