@@ -457,19 +457,18 @@ const LinkInputPopover = forwardRef<HTMLInputElement, LinkInputRenderProps>(
           gap: "6px",
           padding: "6px 8px 6px 12px",
           borderRadius: "12px",
-          border: "1px solid rgba(0, 0, 0, 0.08)",
-          backgroundColor: "rgba(255, 255, 255, 0.96)",
+          border: "1px solid var(--scribex-popover-border)",
+          backgroundColor: "var(--scribex-popover-bg)",
           backdropFilter: "blur(20px) saturate(180%)",
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          boxShadow:
-            "0 4px 24px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.04)",
+          boxShadow: "var(--scribex-popover-shadow)",
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
           animation: "scribex-link-enter 0.15s ease-out",
           minWidth: "300px",
         }}
       >
-        <LinkIcon size={14} style={{ color: "rgba(0, 0, 0, 0.4)", flexShrink: 0 }} />
+        <LinkIcon size={14} style={{ color: "var(--scribex-text-tertiary)", flexShrink: 0 }} />
         <input
           ref={ref}
           type="text"
@@ -505,8 +504,8 @@ const LinkInputPopover = forwardRef<HTMLInputElement, LinkInputRenderProps>(
             cursor: value.trim() ? "pointer" : "default",
             backgroundColor: value.trim()
               ? "var(--scribex-accent, #007AFF)"
-              : "rgba(0, 0, 0, 0.06)",
-            color: value.trim() ? "#fff" : "rgba(0, 0, 0, 0.3)",
+              : "var(--scribex-hover-bg)",
+            color: value.trim() ? "var(--scribex-accent-foreground, #fff)" : "var(--scribex-text-tertiary)",
             fontSize: "12px",
             fontWeight: 500,
             fontFamily: "inherit",
@@ -613,12 +612,11 @@ function LinkPreviewPopover({
         gap: "6px",
         padding: "5px 6px 5px 12px",
         borderRadius: "10px",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
-        backgroundColor: "rgba(255, 255, 255, 0.96)",
+        border: "1px solid var(--scribex-popover-border)",
+        backgroundColor: "var(--scribex-popover-bg)",
         backdropFilter: "blur(20px) saturate(180%)",
         WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        boxShadow:
-          "0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04)",
+        boxShadow: "var(--scribex-popover-shadow)",
         fontFamily:
           '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
         animation: "scribex-link-preview-enter 0.12s ease-out",
@@ -646,7 +644,7 @@ function LinkPreviewPopover({
         style={{
           width: "1px",
           height: "16px",
-          backgroundColor: "rgba(0, 0, 0, 0.1)",
+          backgroundColor: "var(--scribex-separator)",
           flexShrink: 0,
         }}
       />
@@ -669,7 +667,7 @@ function LinkPreviewPopover({
           border: "none",
           cursor: "pointer",
           backgroundColor: "transparent",
-          color: "rgba(0, 0, 0, 0.45)",
+          color: "var(--scribex-icon-secondary)",
         }}
       >
         <ArrowSquareOutIcon size={14} />
@@ -693,7 +691,7 @@ function LinkPreviewPopover({
           border: "none",
           cursor: "pointer",
           backgroundColor: "transparent",
-          color: "rgba(0, 0, 0, 0.45)",
+          color: "var(--scribex-icon-secondary)",
         }}
       >
         <PencilSimpleIcon size={14} />
