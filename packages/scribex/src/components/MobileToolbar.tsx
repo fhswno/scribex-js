@@ -127,10 +127,10 @@ export function MobileToolbar() {
         gap: "2px",
         padding: "8px 12px",
         paddingBottom: "calc(8px + env(safe-area-inset-bottom, 0px))",
-        backgroundColor: "rgba(255, 255, 255, 0.92)",
+        backgroundColor: "var(--scribex-popover-bg)",
         backdropFilter: "blur(20px) saturate(180%)",
         WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        borderTop: "1px solid rgba(0, 0, 0, 0.08)",
+        borderTop: "1px solid var(--scribex-popover-border)",
         zIndex: 50,
         fontFamily:
           '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
@@ -161,7 +161,7 @@ export function MobileToolbar() {
             border: "none",
             cursor: "default",
             backgroundColor: "transparent",
-            color: "rgba(0, 0, 0, 0.55)",
+            color: "var(--scribex-icon-secondary)",
           }}
         >
           <Icon size={20} weight="regular" />
