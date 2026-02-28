@@ -272,7 +272,7 @@ export function TableHoverActions() {
             justify-content:center;
             cursor:pointer;
             border-radius:4px;
-            color:rgba(0,0,0,0.2);
+            color:var(--scribex-text-tertiary);
             transition:background-color 100ms, color 100ms;
           ">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
@@ -289,12 +289,12 @@ export function TableHoverActions() {
       handleEls.forEach((el) => {
         const htmlEl = el as HTMLElement;
         htmlEl.addEventListener("mouseenter", () => {
-          htmlEl.style.backgroundColor = "rgba(0, 0, 0, 0.06)";
-          htmlEl.style.color = "rgba(0, 0, 0, 0.5)";
+          htmlEl.style.backgroundColor = "var(--scribex-hover-bg)";
+          htmlEl.style.color = "var(--scribex-icon-secondary)";
         });
         htmlEl.addEventListener("mouseleave", () => {
           htmlEl.style.backgroundColor = "transparent";
-          htmlEl.style.color = "rgba(0, 0, 0, 0.2)";
+          htmlEl.style.color = "var(--scribex-text-tertiary)";
         });
         htmlEl.addEventListener("mousedown", (e) => {
           e.preventDefault();
@@ -339,7 +339,7 @@ export function TableHoverActions() {
             justify-content:center;
             cursor:pointer;
             border-radius:4px;
-            color:rgba(0,0,0,0.2);
+            color:var(--scribex-text-tertiary);
             transition:background-color 100ms, color 100ms;
           ">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
@@ -356,12 +356,12 @@ export function TableHoverActions() {
       handleEls.forEach((el) => {
         const htmlEl = el as HTMLElement;
         htmlEl.addEventListener("mouseenter", () => {
-          htmlEl.style.backgroundColor = "rgba(0, 0, 0, 0.06)";
-          htmlEl.style.color = "rgba(0, 0, 0, 0.5)";
+          htmlEl.style.backgroundColor = "var(--scribex-hover-bg)";
+          htmlEl.style.color = "var(--scribex-icon-secondary)";
         });
         htmlEl.addEventListener("mouseleave", () => {
           htmlEl.style.backgroundColor = "transparent";
-          htmlEl.style.color = "rgba(0, 0, 0, 0.2)";
+          htmlEl.style.color = "var(--scribex-text-tertiary)";
         });
         htmlEl.addEventListener("mousedown", (e) => {
           e.preventDefault();
@@ -690,9 +690,9 @@ export function TableHoverActions() {
     zIndex: 45,
     visibility: "hidden" as const,
     borderRadius: "4px",
-    border: "1px dashed rgba(0, 0, 0, 0.1)",
+    border: "1px dashed var(--scribex-separator)",
     backgroundColor: "transparent",
-    color: "rgba(0, 0, 0, 0.2)",
+    color: "var(--scribex-text-tertiary)",
     fontSize: "15px",
     fontWeight: 600,
     transition: "background-color 120ms, color 120ms, border-color 120ms",
@@ -709,19 +709,18 @@ export function TableHoverActions() {
     cursor: "default",
     backgroundColor: "transparent",
     fontSize: "13px",
-    color: "rgba(0, 0, 0, 0.7)",
+    color: "var(--scribex-foreground, #1d1d1f)",
   };
 
   const menuPopoverStyle: React.CSSProperties = {
     position: "fixed",
     minWidth: "160px",
     borderRadius: "8px",
-    border: "1px solid rgba(0, 0, 0, 0.06)",
-    backgroundColor: "rgba(255, 255, 255, 0.96)",
+    border: "1px solid var(--scribex-popover-border)",
+    backgroundColor: "var(--scribex-popover-bg)",
     backdropFilter: "blur(20px) saturate(180%)",
     WebkitBackdropFilter: "blur(20px) saturate(180%)",
-    boxShadow:
-      "0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)",
+    boxShadow: "var(--scribex-popover-shadow)",
     padding: "4px",
     zIndex: 100,
     fontFamily:
@@ -748,7 +747,7 @@ export function TableHoverActions() {
         ...(destructive ? { color: "var(--scribex-destructive, #e03e3e)" } : {}),
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "rgba(0, 0, 0, 0.04)";
+        e.currentTarget.style.backgroundColor = "var(--scribex-hover-bg)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = "transparent";
@@ -762,7 +761,7 @@ export function TableHoverActions() {
     <div
       style={{
         height: "1px",
-        backgroundColor: "rgba(0, 0, 0, 0.06)",
+        backgroundColor: "var(--scribex-separator)",
         margin: "3px 4px",
       }}
     />
@@ -833,8 +832,8 @@ export function TableHoverActions() {
         onMouseLeave={(e) => {
           const el = e.currentTarget;
           el.style.backgroundColor = "transparent";
-          el.style.color = "rgba(0, 0, 0, 0.2)";
-          el.style.borderColor = "rgba(0, 0, 0, 0.1)";
+          el.style.color = "var(--scribex-text-tertiary)";
+          el.style.borderColor = "var(--scribex-separator)";
         }}
         style={{
           ...edgeButtonBase,
@@ -865,8 +864,8 @@ export function TableHoverActions() {
         onMouseLeave={(e) => {
           const el = e.currentTarget;
           el.style.backgroundColor = "transparent";
-          el.style.color = "rgba(0, 0, 0, 0.2)";
-          el.style.borderColor = "rgba(0, 0, 0, 0.1)";
+          el.style.color = "var(--scribex-text-tertiary)";
+          el.style.borderColor = "var(--scribex-separator)";
         }}
         style={{
           ...edgeButtonBase,
@@ -893,7 +892,7 @@ export function TableHoverActions() {
           justifyContent: "center",
           borderRadius: "4px",
           cursor: "pointer",
-          color: "rgba(0, 0, 0, 0.25)",
+          color: "var(--scribex-text-tertiary)",
           backgroundColor: "transparent",
           zIndex: 46,
           visibility: "hidden",
@@ -902,13 +901,13 @@ export function TableHoverActions() {
         }}
         onMouseEnter={(e) => {
           const el = e.currentTarget;
-          el.style.backgroundColor = "rgba(0, 0, 0, 0.06)";
-          el.style.color = "rgba(0, 0, 0, 0.5)";
+          el.style.backgroundColor = "var(--scribex-hover-bg)";
+          el.style.color = "var(--scribex-icon-secondary)";
         }}
         onMouseLeave={(e) => {
           const el = e.currentTarget;
           el.style.backgroundColor = "transparent";
-          el.style.color = "rgba(0, 0, 0, 0.25)";
+          el.style.color = "var(--scribex-text-tertiary)";
         }}
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
