@@ -18,6 +18,8 @@ interface BlockInfo {
   top: number;
   left: number;
   width: number;
+  /** Vertical center of the first line of text in the block */
+  firstLineCenter: number;
 }
 
 /**
@@ -42,12 +44,19 @@ function findBlockAtY(
       const blockTop = rect.top;
       const blockBottom = rect.bottom;
 
+      // Compute the vertical center of the first line of text
+      const computed = window.getComputedStyle(el);
+      const paddingTop = parseFloat(computed.paddingTop) || 0;
+      const lineHeight = parseFloat(computed.lineHeight) || parseFloat(computed.fontSize) * 1.2 || 20;
+      const firstLineCenter = rect.top + paddingTop + lineHeight / 2;
+
       if (clientY >= blockTop - 4 && clientY <= blockBottom + 4) {
         result = {
           key: child.getKey(),
           top: rect.top,
           left: rect.left,
           width: rect.width,
+          firstLineCenter,
         };
         return;
       }
@@ -63,6 +72,7 @@ function findBlockAtY(
           top: rect.top,
           left: rect.left,
           width: rect.width,
+          firstLineCenter,
         };
       }
     }
@@ -113,9 +123,10 @@ export function OverlayPortal({ namespace }: OverlayPortalProps) {
   }, []);
 
   // Position the handle imperatively (no state updates = no re-renders = no flicker)
-  const showHandle = useCallback((top: number, left: number) => {
+  // `firstLineCenter` is the vertical center of the first line of text in the block
+  const showHandle = useCallback((firstLineCenter: number, left: number) => {
     if (!handleRef.current) return;
-    handleRef.current.style.top = `${top}px`;
+    handleRef.current.style.top = `${firstLineCenter - 12}px`;
     handleRef.current.style.left = `${left - 28}px`;
     handleRef.current.style.visibility = "visible";
     handleVisibleRef.current = true;
@@ -182,7 +193,7 @@ export function OverlayPortal({ namespace }: OverlayPortalProps) {
       }
 
       hoveredKeyRef.current = block.key;
-      showHandle(block.top, block.left);
+      showHandle(block.firstLineCenter, block.left);
     };
 
     document.addEventListener("mousemove", onMouseMove);
