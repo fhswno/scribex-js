@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Class-based dark mode (toggle via .dark on <html>) */
+@custom-variant dark (&:is(.dark *));
+
 /* Scan the scribex package source for Tailwind classes */
 @source "../../../packages/scribex/src";
 
@@ -22,12 +25,13 @@
   top: 0;
   right: 0;
   left: 0;
-  padding: inherit; /* inherit parent's padding so text aligns with ContentEditable */
-  margin-top: 0.25em; /* match .scribex-paragraph margin */
+  padding: inherit;
+  margin-top: 0.25em;
   pointer-events: none;
   user-select: none;
   color: var(--scribex-muted-foreground);
-  opacity: 0.5;
+  opacity: 0.4;
+  font-weight: 400;
 }
 
 /* ============================================
