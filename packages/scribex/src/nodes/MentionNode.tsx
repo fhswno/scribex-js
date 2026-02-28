@@ -236,7 +236,7 @@ function MentionComponent({
   const chipColor =
     trigger === "#"
       ? "var(--scribex-accent, #3b82f6)"
-      : "var(--scribex-ai-stream, #7c3aed)";
+      : "var(--scribex-ai-stream, #3366cc)";
 
   return (
     <span
