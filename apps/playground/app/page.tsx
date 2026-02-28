@@ -20,6 +20,7 @@ import {
   TableActionMenu,
   TableHoverActions,
   CalloutPlugin,
+  VideoPlugin,
   $createMentionNode,
   useEditorState,
   sanitizePastedHTML,
@@ -36,12 +37,21 @@ import type {
   MentionProvider,
 } from "@scribex/core";
 
-/** Mock upload handler — simulates a 500ms upload and returns a placeholder URL */
+/** Mock upload handler — simulates a 500ms upload and returns a usable URL.
+ *  Videos use blob URLs (data URLs are too large for browsers to play).
+ *  Images use data URLs for demo purposes. */
 const mockUploadHandler: UploadHandler = async (
   file: File,
 ): Promise<string> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
-  // Return a data URL from the file for demo purposes
+
+  // Video files: use a blob URL — browsers can stream and play these natively.
+  // In production, this would be a CDN URL returned by your upload service.
+  if (file.type.startsWith("video/")) {
+    return URL.createObjectURL(file);
+  }
+
+  // Images / other files: data URL works fine for small files
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
@@ -229,6 +239,7 @@ function EditorPlugins({ namespace }: { namespace: string }) {
       <TableActionMenu />
       <TableHoverActions />
       <CalloutPlugin />
+      <VideoPlugin uploadHandler={mockUploadHandler} />
       <PastePlugin />
       <EmojiPickerPlugin />
       <LinkPlugin />
