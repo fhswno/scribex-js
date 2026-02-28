@@ -221,12 +221,11 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
         gap: "1px",
         padding: "3px",
         borderRadius: "10px",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
-        backgroundColor: "rgba(255, 255, 255, 0.82)",
+        border: "1px solid var(--scribex-popover-border)",
+        backgroundColor: "var(--scribex-popover-bg)",
         backdropFilter: "blur(20px) saturate(180%)",
         WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        boxShadow:
-          "0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)",
+        boxShadow: "var(--scribex-popover-shadow)",
         top: `${position.top}px`,
         left: `${position.left}px`,
         transform: transformValue,
@@ -259,8 +258,8 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
               ? "var(--scribex-accent, #007AFF)"
               : "transparent",
             color: activeFormats.has(format)
-              ? "#fff"
-              : "rgba(0, 0, 0, 0.55)",
+              ? "var(--scribex-accent-foreground, #fff)"
+              : "var(--scribex-icon-secondary)",
             transition: "background-color 80ms ease, color 80ms ease",
           }}
         >
@@ -276,7 +275,7 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
         style={{
           width: "1px",
           height: "18px",
-          backgroundColor: "rgba(0, 0, 0, 0.1)",
+          backgroundColor: "var(--scribex-separator)",
           margin: "0 2px",
         }}
       />
@@ -305,8 +304,8 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
             ? "var(--scribex-accent, #007AFF)"
             : "transparent",
           color: activeFormats.has("link")
-            ? "#fff"
-            : "rgba(0, 0, 0, 0.55)",
+            ? "var(--scribex-accent-foreground, #fff)"
+            : "var(--scribex-icon-secondary)",
           transition: "background-color 80ms ease, color 80ms ease",
         }}
       >
@@ -321,7 +320,7 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
         style={{
           width: "1px",
           height: "18px",
-          backgroundColor: "rgba(0, 0, 0, 0.1)",
+          backgroundColor: "var(--scribex-separator)",
           margin: "0 2px",
         }}
       />
@@ -349,9 +348,9 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
             border: "none",
             cursor: "default",
             backgroundColor: showColorPicker
-              ? "rgba(0, 0, 0, 0.06)"
+              ? "var(--scribex-hover-bg)"
               : "transparent",
-            color: "rgba(0, 0, 0, 0.55)",
+            color: "var(--scribex-icon-secondary)",
             transition: "background-color 80ms ease",
             gap: "1px",
           }}
@@ -361,7 +360,7 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
               fontSize: "13px",
               fontWeight: 700,
               lineHeight: 1,
-              color: activeTextColor || "rgba(0, 0, 0, 0.55)",
+              color: activeTextColor || "var(--scribex-icon-secondary)",
             }}
           >
             A
@@ -386,12 +385,11 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
               left: "50%",
               transform: "translateX(-50%)",
               borderRadius: "12px",
-              border: "1px solid rgba(0, 0, 0, 0.06)",
-              backgroundColor: "rgba(255, 255, 255, 0.96)",
+              border: "1px solid var(--scribex-popover-border)",
+              backgroundColor: "var(--scribex-popover-bg)",
               backdropFilter: "blur(20px) saturate(180%)",
               WebkitBackdropFilter: "blur(20px) saturate(180%)",
-              boxShadow:
-                "0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04)",
+              boxShadow: "var(--scribex-popover-shadow)",
               zIndex: 60,
             }}
           >
