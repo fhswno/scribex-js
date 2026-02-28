@@ -64,7 +64,14 @@ function serializeNode(node: LexicalNode): string {
         const content = $isElementNode(item)
           ? serializeChildren(item)
           : item.getTextContent();
-        const prefix = listType === "number" ? `${i + 1}. ` : "- ";
+        let prefix: string;
+        if (listType === "number") {
+          prefix = `${i + 1}. `;
+        } else if (listType === "check" && $isListItemNode(item)) {
+          prefix = item.getChecked() ? "- [x] " : "- [ ] ";
+        } else {
+          prefix = "- ";
+        }
         return `${prefix}${content}`;
       })
       .join("\n");
@@ -221,8 +228,24 @@ export function $parseMarkdownToLexicalNodes(
 
     // List items
     const lines = trimmed.split("\n");
+    const isChecklist = lines.every((l) => /^- \[([ x])\] /.test(l));
     const isBullet = lines.every((l) => /^[-*]\s/.test(l));
     const isNumbered = lines.every((l) => /^\d+\.\s/.test(l));
+
+    if (isChecklist) {
+      const list = $createListNode("check");
+      for (const line of lines) {
+        const match = line.match(/^- \[([ x])\] (.*)$/);
+        if (!match) continue;
+        const checked = match[1] === "x";
+        const content = match[2] ?? "";
+        const item = $createListItemNode(checked);
+        item.append(...$parseInlineMarkdown(content));
+        list.append(item);
+      }
+      nodes.push(list);
+      continue;
+    }
 
     if (isBullet || isNumbered) {
       const list = $createListNode(isBullet ? "bullet" : "number");
