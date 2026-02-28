@@ -9,6 +9,9 @@ import { AIPreviewNode } from './AIPreviewNode';
 import { MentionNode } from './MentionNode';
 import { CodeBlockNode } from './CodeBlockNode';
 import { CalloutNode } from './CalloutNode';
+import { VideoNode } from './VideoNode';
+import { LoadingVideoNode } from './LoadingVideoNode';
+import { HorizontalRuleNode } from './HorizontalRuleNode';
 
 export const ALL_NODES: Array<Klass<LexicalNode>> = [
   HeadingNode,
@@ -26,4 +29,7 @@ export const ALL_NODES: Array<Klass<LexicalNode>> = [
   MentionNode,
   CodeBlockNode,
   CalloutNode,
+  VideoNode,
+  LoadingVideoNode,
+  HorizontalRuleNode,
 ];
