@@ -9,6 +9,7 @@ import { TextNode, $createParagraphNode } from "lexical";
 import { $createHeadingNode, $createQuoteNode } from "@lexical/rich-text";
 import { $createListNode, $createListItemNode } from "@lexical/list";
 import { $createCodeBlockNode } from "../nodes/CodeBlockNode";
+import { $createHorizontalRuleNode } from "../nodes/HorizontalRuleNode";
 
 // COMMANDS
 import { OPEN_SLASH_MENU_COMMAND } from "../commands";
@@ -116,6 +117,19 @@ const BUILTIN_RULES: InputRule[] = [
       list.append(item);
       parent.replace(list);
       item.selectEnd();
+    },
+  },
+  {
+    pattern: /^---$/,
+    type: "divider",
+    onMatch: (_match, node) => {
+      const parent = node.getParent();
+      if (!parent) return;
+      const rule = $createHorizontalRuleNode();
+      const trailingParagraph = $createParagraphNode();
+      parent.replace(rule);
+      rule.insertAfter(trailingParagraph);
+      trailingParagraph.selectEnd();
     },
   },
   {
