@@ -57,7 +57,7 @@ export function ColorPicker({
         style={{
           fontSize: "10.5px",
           fontWeight: 600,
-          color: "rgba(0, 0, 0, 0.4)",
+          color: "var(--scribex-text-tertiary)",
           textTransform: "uppercase",
           letterSpacing: "0.05em",
           padding: "2px 4px 6px",
@@ -85,7 +85,7 @@ export function ColorPicker({
                 width: "24px",
                 height: "24px",
                 borderRadius: "4px",
-                border: "1px solid rgba(0, 0, 0, 0.08)",
+                border: "1px solid var(--scribex-popover-border)",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -128,7 +128,7 @@ export function ColorPicker({
       <div
         style={{
           height: "0.5px",
-          backgroundColor: "rgba(0, 0, 0, 0.08)",
+          backgroundColor: "var(--scribex-separator)",
           margin: "4px 0",
         }}
       />
@@ -138,7 +138,7 @@ export function ColorPicker({
         style={{
           fontSize: "10.5px",
           fontWeight: 600,
-          color: "rgba(0, 0, 0, 0.4)",
+          color: "var(--scribex-text-tertiary)",
           textTransform: "uppercase",
           letterSpacing: "0.05em",
           padding: "6px 4px 6px",
@@ -168,7 +168,7 @@ export function ColorPicker({
                 width: "24px",
                 height: "24px",
                 borderRadius: "4px",
-                border: "1px solid rgba(0, 0, 0, 0.08)",
+                border: "1px solid var(--scribex-popover-border)",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -182,7 +182,7 @@ export function ColorPicker({
                 <span
                   style={{
                     fontSize: "11px",
-                    color: "rgba(0, 0, 0, 0.3)",
+                    color: "var(--scribex-text-tertiary)",
                     lineHeight: 1,
                   }}
                 >
@@ -197,7 +197,7 @@ export function ColorPicker({
                     color:
                       entry.swatch === "transparent"
                         ? "var(--scribex-accent, #007AFF)"
-                        : "rgba(0, 0, 0, 0.5)",
+                        : "var(--scribex-icon-secondary)",
                   }}
                 />
               )}
