@@ -1,7 +1,7 @@
 'use client';
 
 // REACT
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // LEXICAL
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
@@ -22,20 +22,36 @@ export function useEditorState({
 }: UseEditorStateOptions = {}) {
   const [editor] = useLexicalComposerContext();
   const [serializedState, setSerializedState] = useState<string>('');
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout> | null = null;
+    // Keep a ref to the latest editorState so we only serialize once when
+    // the debounce fires, using the most recent state (not every intermediate one).
+    let latestEditorState: import('lexical').EditorState | null = null;
 
-    return editor.registerUpdateListener(({ editorState }) => {
+    const unregister = editor.registerUpdateListener(({ editorState }) => {
+      latestEditorState = editorState;
       if (timeout) clearTimeout(timeout);
 
       timeout = setTimeout(() => {
-        const json = JSON.stringify(editorState.toJSON());
-        setSerializedState(json);
-        onChange?.(json);
+        if (!latestEditorState) return;
+        const json = JSON.stringify(latestEditorState.toJSON());
+        latestEditorState = null;
+        // Only trigger React re-render if no onChange callback is handling it
+        if (!onChangeRef.current) {
+          setSerializedState(json);
+        }
+        onChangeRef.current?.(json);
       }, debounceMs);
     });
-  }, [editor, debounceMs, onChange]);
+
+    return () => {
+      unregister();
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [editor, debounceMs]);
 
   return { serializedState };
 }
