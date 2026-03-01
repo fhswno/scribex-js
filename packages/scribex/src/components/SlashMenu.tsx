@@ -42,6 +42,7 @@ import {
   SmileyIcon,
   VideoCameraIcon,
   CaretCircleDownIcon,
+  TextAaIcon,
 } from "@phosphor-icons/react";
 
 // COMMANDS
@@ -56,8 +57,10 @@ import {
   INSERT_TOGGLE_COMMAND,
 } from "../commands";
 
+import { $patchStyleText } from "@lexical/selection";
 import { $createCodeBlockNode } from "../nodes/CodeBlockNode";
 import { $createHorizontalRuleNode } from "../nodes/HorizontalRuleNode";
+import { DEFAULT_FONT_FAMILIES } from "../data/font-families";
 
 // ── Duotone icon wrappers (stable references, no re-creation) ───────────────
 
@@ -109,6 +112,9 @@ const IconChecklist = ({ size }: { size?: number }) => (
 const IconToggle = ({ size }: { size?: number }) => (
   <CaretCircleDownIcon size={size} weight="duotone" />
 );
+const IconFont = ({ size }: { size?: number }) => (
+  <TextAaIcon size={size} weight="duotone" />
+);
 
 // ── Public interface ────────────────────────────────────────────────────────
 
@@ -149,6 +155,7 @@ const CATEGORY_COLORS: Record<string, CategoryStyle> = {
   blocks: { bg: "var(--scribex-muted)", icon: "#8B5CF6" },
   lists: { bg: "var(--scribex-muted)", icon: "#10B981" },
   media: { bg: "var(--scribex-muted)", icon: "#F59E0B" },
+  format: { bg: "var(--scribex-muted)", icon: "#EC4899" },
   other: { bg: "var(--scribex-muted)", icon: "#6B7280" },
 };
 
@@ -159,6 +166,7 @@ function getCategoryForId(id: string): string {
   if (id === "bullet-list" || id === "numbered-list" || id === "check-list")
     return "lists";
   if (id === "image" || id === "emoji" || id === "video") return "media";
+  if (id.startsWith("font-")) return "format";
   return "other";
 }
 
@@ -514,6 +522,30 @@ function getDefaultItems(
         editor.dispatchCommand(OPEN_VIDEO_INPUT_COMMAND, undefined);
       },
     },
+    // Font family items — skip "Default" (index 0) since it just removes the font
+    ...DEFAULT_FONT_FAMILIES.filter((f) => f.value !== "").map((font) => ({
+      id: `font-${font.label.toLowerCase()}`,
+      label: `${font.label} font`,
+      description: `Switch to ${font.label.toLowerCase()} typeface`,
+      keywords: ["font", "typeface", "typography", font.label.toLowerCase()],
+      icon: IconFont,
+      onSelect: () => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+          const anchor = selection.anchor.getNode();
+          if (anchor instanceof TextNode) {
+            anchor.remove();
+          }
+          // $patchStyleText handles collapsed selections by setting a
+          // pending style, so newly typed text inherits the font.
+          const current = $getSelection();
+          if ($isRangeSelection(current)) {
+            $patchStyleText(current, { "font-family": font.value });
+          }
+        });
+      },
+    })),
   ];
 }
 
@@ -533,9 +565,10 @@ function groupItems(items: SlashMenuItem[]): ItemGroup[] {
     blocks: "Blocks",
     lists: "Lists",
     media: "Media",
+    format: "Format",
     other: "Other",
   };
-  const order = ["ai", "headings", "blocks", "lists", "media", "other"];
+  const order = ["ai", "headings", "blocks", "lists", "media", "format", "other"];
 
   for (const item of items) {
     const cat = getCategoryForId(item.id);
