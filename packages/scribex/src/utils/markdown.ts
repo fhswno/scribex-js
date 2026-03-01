@@ -24,6 +24,9 @@ import {
 } from "@lexical/table";
 import { $isCalloutNode } from "../nodes/CalloutNode";
 import { $isHorizontalRuleNode } from "../nodes/HorizontalRuleNode";
+import { $isToggleContainerNode } from "../nodes/ToggleContainerNode";
+import { $isToggleTitleNode } from "../nodes/ToggleTitleNode";
+import { $isToggleContentNode } from "../nodes/ToggleContentNode";
 
 // ─── Lexical → Markdown (context building) ───────────────────────────────────
 
@@ -120,6 +123,31 @@ function serializeNode(node: LexicalNode): string {
     }
 
     return lines.join("\n");
+  }
+
+  // Toggle → collapsible details block
+  if ($isToggleContainerNode(node)) {
+    const children = node.getChildren();
+    let titleText = "";
+    let contentText = "";
+
+    for (const child of children) {
+      if ($isToggleTitleNode(child)) {
+        titleText = serializeChildren(child);
+      } else if ($isToggleContentNode(child)) {
+        contentText = child
+          .getChildren()
+          .map((contentChild) => {
+            if ($isElementNode(contentChild)) {
+              return serializeChildren(contentChild);
+            }
+            return contentChild.getTextContent();
+          })
+          .join("\n");
+      }
+    }
+
+    return `<details>\n<summary>${titleText}</summary>\n\n${contentText}\n\n</details>`;
   }
 
   // Callout → GitHub-flavored callout syntax
