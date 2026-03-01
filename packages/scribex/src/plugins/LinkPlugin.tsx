@@ -307,24 +307,30 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
     );
   }, [editor, triggerLinkInput]);
 
-  // Detect cursor inside link for preview popover
+  // Detect cursor inside link for preview popover (RAF-throttled)
+  const linkSelRafRef = useRef(0);
   useEffect(() => {
     return editor.registerCommand(
       SELECTION_CHANGE_COMMAND,
       () => {
-        // Don't show preview if input is open
-        if (showInput) return false;
+        if (linkSelRafRef.current === 0) {
+          linkSelRafRef.current = requestAnimationFrame(() => {
+            linkSelRafRef.current = 0;
+            // Don't show preview if input is open
+            if (showInput) return;
 
-        const linkNode = findLinkNode();
-        if (linkNode) {
-          setCurrentUrl(linkNode.getURL());
-          setPreviewPosition(getSelectionPosition());
-          setShowPreview(true);
-        } else {
-          if (showPreview) {
-            setShowPreview(false);
-            setCurrentUrl("");
-          }
+            const linkNode = findLinkNode();
+            if (linkNode) {
+              setCurrentUrl(linkNode.getURL());
+              setPreviewPosition(getSelectionPosition());
+              setShowPreview(true);
+            } else {
+              if (showPreview) {
+                setShowPreview(false);
+                setCurrentUrl("");
+              }
+            }
+          });
         }
         return false;
       },
