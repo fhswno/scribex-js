@@ -8,7 +8,7 @@ import {
   $isTextNode,
   COMMAND_PRIORITY_LOW,
 } from "lexical";
-import { SET_TEXT_COLOR_COMMAND, SET_HIGHLIGHT_COLOR_COMMAND } from "../commands";
+import { SET_TEXT_COLOR_COMMAND, SET_HIGHLIGHT_COLOR_COMMAND, SET_FONT_FAMILY_COMMAND } from "../commands";
 import { mergeInlineStyle } from "../utils/style";
 
 export function ColorPlugin() {
@@ -54,6 +54,33 @@ export function ColorPlugin() {
                 existing,
                 "background-color",
                 color || null,
+              );
+              node.setStyle(merged);
+            }
+          }
+        });
+        return true;
+      },
+      COMMAND_PRIORITY_LOW,
+    );
+  }, [editor]);
+
+  useEffect(() => {
+    return editor.registerCommand(
+      SET_FONT_FAMILY_COMMAND,
+      (fontFamily: string) => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+
+          const nodes = selection.getNodes();
+          for (const node of nodes) {
+            if ($isTextNode(node)) {
+              const existing = node.getStyle();
+              const merged = mergeInlineStyle(
+                existing,
+                "font-family",
+                fontFamily || null,
               );
               node.setStyle(merged);
             }
