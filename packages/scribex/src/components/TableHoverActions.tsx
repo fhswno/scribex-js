@@ -517,8 +517,26 @@ export function TableHoverActions() {
       handle.style.visibility = "hidden";
     };
 
-    document.addEventListener("mousemove", handleMouseMove);
-    return () => document.removeEventListener("mousemove", handleMouseMove);
+    let tableRafId = 0;
+    let pendingEvent: MouseEvent | null = null;
+
+    const throttledMouseMove = (e: MouseEvent) => {
+      pendingEvent = e;
+      if (tableRafId === 0) {
+        tableRafId = requestAnimationFrame(() => {
+          tableRafId = 0;
+          if (pendingEvent) {
+            handleMouseMove(pendingEvent);
+          }
+        });
+      }
+    };
+
+    document.addEventListener("mousemove", throttledMouseMove);
+    return () => {
+      document.removeEventListener("mousemove", throttledMouseMove);
+      if (tableRafId) cancelAnimationFrame(tableRafId);
+    };
   }, [editor, hideAll, buildRowHandles, buildColHandles]);
 
   // ─── Column resize drag lifecycle ───────────────────────────────────────
