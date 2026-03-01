@@ -27,6 +27,7 @@ import {
   TextStrikethroughIcon,
   CodeIcon,
   LinkIcon,
+  TextAaIcon,
 } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
 
@@ -37,7 +38,9 @@ import { $isLinkNode } from "@lexical/link";
 import { OPEN_LINK_INPUT_COMMAND } from "../commands";
 import { getInlineStyleProperty } from "../utils/style";
 import { ColorPicker } from "./ColorPicker";
+import { FontPicker } from "./FontPicker";
 import type { ColorPalette } from "../data/color-palette";
+import type { FontFamilyEntry } from "../data/font-families";
 
 type TextFormat = "bold" | "italic" | "underline" | "strikethrough" | "code";
 
@@ -57,9 +60,10 @@ const TOOLBAR_BUTTONS: ToolbarButton[] = [
 
 interface FloatingToolbarProps {
   colorPalette?: ColorPalette;
+  fontFamilies?: FontFamilyEntry[];
 }
 
-export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
+export function FloatingToolbar({ colorPalette, fontFamilies }: FloatingToolbarProps = {}) {
   // Hook - Lexical Editor Context
   const [editor] = useLexicalComposerContext();
 
@@ -72,7 +76,9 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
   const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set());
   const [activeTextColor, setActiveTextColor] = useState<string | null>(null);
   const [activeHighlightColor, setActiveHighlightColor] = useState<string | null>(null);
+  const [activeFont, setActiveFont] = useState<string | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showFontPicker, setShowFontPicker] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
     null,
@@ -150,9 +156,11 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
         const style = anchorNode.getStyle();
         setActiveTextColor(getInlineStyleProperty(style, "color"));
         setActiveHighlightColor(getInlineStyleProperty(style, "background-color"));
+        setActiveFont(getInlineStyleProperty(style, "font-family"));
       } else {
         setActiveTextColor(null);
         setActiveHighlightColor(null);
+        setActiveFont(null);
       }
 
       setActiveFormats(formats);
@@ -240,9 +248,12 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
     return () => rootElement.removeEventListener("keydown", handleKeyDown);
   }, [editor]);
 
-  // Close color picker when toolbar hides
+  // Close pickers when toolbar hides
   useEffect(() => {
-    if (!isVisible) setShowColorPicker(false);
+    if (!isVisible) {
+      setShowColorPicker(false);
+      setShowFontPicker(false);
+    }
   }, [isVisible]);
 
   if (!isVisible || !portalContainer) return null;
@@ -380,7 +391,10 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
           data-testid="toolbar-color"
           onMouseDown={(e) => {
             e.preventDefault();
-            setShowColorPicker((prev) => !prev);
+            setShowColorPicker((prev) => {
+              if (!prev) setShowFontPicker(false);
+              return !prev;
+            });
           }}
           style={{
             display: "flex",
@@ -443,6 +457,67 @@ export function FloatingToolbar({ colorPalette }: FloatingToolbarProps = {}) {
               activeTextColor={activeTextColor}
               activeHighlightColor={activeHighlightColor}
               onClose={() => setShowColorPicker(false)}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Font picker button */}
+      <div style={{ position: "relative" }}>
+        <button
+          type="button"
+          title="Font family"
+          aria-label="Font family"
+          aria-expanded={showFontPicker}
+          data-testid="toolbar-font"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            setShowFontPicker((prev) => {
+              if (!prev) setShowColorPicker(false);
+              return !prev;
+            });
+          }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "30px",
+            height: "30px",
+            borderRadius: "7px",
+            border: "none",
+            cursor: "default",
+            backgroundColor: showFontPicker
+              ? "var(--scribex-hover-bg)"
+              : "transparent",
+            color: "var(--scribex-icon-secondary)",
+            transition: "background-color 80ms ease",
+          }}
+        >
+          <TextAaIcon size={15} weight="regular" />
+        </button>
+
+        {/* Font picker dropdown */}
+        {showFontPicker && (
+          <div
+            data-testid="font-picker-dropdown"
+            style={{
+              position: "absolute",
+              top: "calc(100% + 6px)",
+              left: "50%",
+              transform: "translateX(-50%)",
+              borderRadius: "12px",
+              border: "1px solid var(--scribex-popover-border)",
+              backgroundColor: "var(--scribex-popover-bg)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              WebkitBackdropFilter: "blur(20px) saturate(180%)",
+              boxShadow: "var(--scribex-popover-shadow)",
+              zIndex: 60,
+            }}
+          >
+            <FontPicker
+              fonts={fontFamilies}
+              activeFont={activeFont}
+              onClose={() => setShowFontPicker(false)}
             />
           </div>
         )}
