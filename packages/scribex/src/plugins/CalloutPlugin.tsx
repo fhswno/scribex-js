@@ -152,11 +152,17 @@ export function CalloutPlugin({
     });
   }, [editor]);
 
+  const calloutSelRafRef = useRef(0);
   useEffect(() => {
     return editor.registerCommand(
       SELECTION_CHANGE_COMMAND,
       () => {
-        checkActiveCallout();
+        if (calloutSelRafRef.current === 0) {
+          calloutSelRafRef.current = requestAnimationFrame(() => {
+            calloutSelRafRef.current = 0;
+            checkActiveCallout();
+          });
+        }
         return false;
       },
       COMMAND_PRIORITY_LOW,
