@@ -1,0 +1,17 @@
+{
+  "title": "Docs",
+  "root": true,
+  "pages": [
+    "---Getting Started---",
+    "index",
+    "installation",
+    "quick-start",
+    "project-structure",
+    "---Guides---",
+    "...guides",
+    "---API Reference---",
+    "...api",
+    "---Examples---",
+    "...examples"
+  ]
+}
