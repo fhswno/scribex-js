@@ -1,33 +1,21 @@
 @import "tailwindcss";
 
-/* Class-based dark mode (toggle via .dark on <html>) */
 @custom-variant dark (&:is(.dark *));
 
-/* Scan the scribex package source for Tailwind classes */
 @source "../../../packages/scribex/src";
 
-/* Import Scribex design tokens */
 @import "../../../packages/scribex/src/styles/tokens.css";
 
-/* ============================================
-   Map Scribex font tokens to loaded Google Fonts
-   ============================================ */
 :root {
   --scribex-font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
   --scribex-font-hand: var(--font-caveat), "Caveat", cursive;
 }
 
-/* ============================================
-   Tailwind v4 theme — font families
-   ============================================ */
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
 }
 
-/* ============================================
-   Scribex placeholder — positioned on first line
-   ============================================ */
 .scribex-placeholder {
   position: absolute;
   top: 0;
@@ -41,12 +29,6 @@
   text-align: start;
 }
 
-/* ============================================
-   Lexical editor visual styles
-   These classes are applied via the Lexical theme
-   ============================================ */
-
-/* Headings */
 .scribex-h1 {
   font-size: 2em;
   font-weight: 700;
@@ -71,7 +53,6 @@
   margin-bottom: 0.25em;
 }
 
-/* Blockquote */
 .scribex-quote {
   border-inline-start: 3px solid var(--scribex-border);
   padding-inline-start: 1em;
@@ -79,7 +60,6 @@
   margin: 0.5em 0;
 }
 
-/* Lists */
 .scribex-ul {
   list-style-type: disc;
   padding-inline-start: 1.5em;
@@ -146,7 +126,6 @@
   color: var(--scribex-muted-foreground);
 }
 
-/* Links */
 .scribex-link {
   color: var(--scribex-accent);
   text-decoration: underline;
@@ -160,7 +139,6 @@
   text-decoration-color: var(--scribex-accent);
 }
 
-/* Inline text formats */
 .scribex-bold {
   font-weight: 700;
 }
@@ -185,7 +163,6 @@
   font-size: 0.9em;
 }
 
-/* Code Block */
 .scribex-code-block {
   font-family: var(--scribex-font-mono);
   background-color: var(--scribex-muted);
@@ -207,14 +184,10 @@
   line-height: 1.6;
 }
 
-/* Paragraph */
 .scribex-paragraph {
   margin: 0.25em 0;
 }
 
-/* ============================================
-   Direction-aware text alignment
-   ============================================ */
 [data-scribex-root] [dir="rtl"] {
   text-align: right;
 }
@@ -222,9 +195,6 @@
   text-align: left;
 }
 
-/* ============================================
-   Table
-   ============================================ */
 .scribex-table {
   border-collapse: collapse;
   width: 100%;
@@ -234,7 +204,6 @@
 }
 
 .scribex-table-row {
-  /* Row styling if needed */
 }
 
 .scribex-table-cell {
@@ -289,9 +258,6 @@ table.scribex-table[style*="outline"] {
   background-color: var(--scribex-table-resize-handle);
 }
 
-/* ============================================
-   Callout block — Notion-style flat fill
-   ============================================ */
 .scribex-callout {
   display: flex;
   align-items: flex-start;
@@ -350,18 +316,12 @@ table.scribex-table[style*="outline"] {
   background-color: var(--scribex-callout-purple-bg);
 }
 
-/* ============================================
-   Toggle / Collapsible Block (Three-Node)
-   ============================================ */
-
-/* Container — transparent, no box appearance */
 .scribex-toggle-container {
   margin: 0.25em 0;
   border: none;
   background: transparent;
 }
 
-/* Title (summary element) — editable inline text */
 .scribex-toggle-title {
   display: block;
   padding: 2px 8px;
@@ -427,7 +387,6 @@ div.scribex-toggle-container[data-open="true"] > .scribex-toggle-title::before {
   top: 2px;
 }
 
-/* Content area */
 .scribex-toggle-content {
   padding: 2px 8px 4px 8px;
   padding-inline-start: 24px;
@@ -453,15 +412,11 @@ div.scribex-toggle-container[data-open="false"] > .scribex-toggle-content {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%2394a3b8' d='M6 3l5 5-5 5z'/%3E%3C/svg%3E");
 }
 
-/* ============================================
-   Notion-style block selection highlight
-   ============================================ */
 [data-block-selected="true"] {
   background-color: var(--scribex-block-selection);
   border-radius: 4px;
 }
 
-/* Hide native text selection on block-highlighted nodes */
 [data-block-selected="true"] ::selection {
   background: transparent;
 }
@@ -469,9 +424,6 @@ div.scribex-toggle-container[data-open="false"] > .scribex-toggle-content {
   background: transparent;
 }
 
-/* ============================================
-   JSON state panel — dark theme scrollbar
-   ============================================ */
 .json-panel-scroll::-webkit-scrollbar {
   width: 6px;
   height: 6px;
