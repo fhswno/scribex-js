@@ -31,8 +31,7 @@
 .scribex-placeholder {
   position: absolute;
   top: 0;
-  right: 0;
-  left: 0;
+  inset-inline: 0;
   padding: inherit;
   margin-top: 0.25em;
   pointer-events: none;
@@ -40,6 +39,7 @@
   color: var(--scribex-muted-foreground);
   opacity: 0.4;
   font-weight: 400;
+  text-align: start;
 }
 
 /* ============================================
@@ -74,8 +74,8 @@
 
 /* Blockquote */
 .scribex-quote {
-  border-left: 3px solid var(--scribex-border);
-  padding-left: 1em;
+  border-inline-start: 3px solid var(--scribex-border);
+  padding-inline-start: 1em;
   color: var(--scribex-muted-foreground);
   margin: 0.5em 0;
 }
@@ -83,13 +83,13 @@
 /* Lists */
 .scribex-ul {
   list-style-type: disc;
-  padding-left: 1.5em;
+  padding-inline-start: 1.5em;
   margin: 0.25em 0;
 }
 
 .scribex-ol {
   list-style-type: decimal;
-  padding-left: 1.5em;
+  padding-inline-start: 1.5em;
   margin: 0.25em 0;
 }
 
@@ -99,7 +99,7 @@
 
 .scribex-checklist {
   list-style-type: none;
-  padding-left: 0.5em;
+  padding-inline-start: 0.5em;
 }
 
 /* Checklist items — checkbox via ::before */
@@ -119,7 +119,7 @@
   width: 16px;
   height: 16px;
   border-radius: 4px;
-  margin-right: 8px;
+  margin-inline-end: 8px;
   margin-top: 4px;
   cursor: pointer;
 }
@@ -210,6 +210,16 @@
 }
 
 /* ============================================
+   Direction-aware text alignment
+   ============================================ */
+[data-scribex-root] [dir="rtl"] {
+  text-align: right;
+}
+[data-scribex-root] [dir="ltr"] {
+  text-align: left;
+}
+
+/* ============================================
    Table
    ============================================ */
 .scribex-table {
@@ -264,7 +274,7 @@ table.scribex-table[style*="outline"] {
 .scribex-table-cell-resizer {
   position: absolute;
   top: 0;
-  right: -2px;
+  inset-inline-end: -2px;
   bottom: 0;
   width: 4px;
   cursor: col-resize;
@@ -351,7 +361,8 @@ table.scribex-table[style*="outline"] {
 /* Title (summary element) — editable inline text */
 .scribex-toggle-title {
   display: block;
-  padding: 2px 8px 2px 24px;
+  padding: 2px 8px;
+  padding-inline-start: 24px;
   border-radius: 3px;
   cursor: text;
   font-weight: 400;
@@ -374,7 +385,7 @@ table.scribex-table[style*="outline"] {
 .scribex-toggle-title::before {
   content: '';
   position: absolute;
-  left: 2px;
+  inset-inline-start: 2px;
   top: 6px;
   width: 16px;
   height: 16px;
@@ -409,13 +420,14 @@ div.scribex-toggle-container[data-open="true"] > .scribex-toggle-title::before {
   pointer-events: none;
   font-weight: 400;
   position: absolute;
-  left: 24px;
+  inset-inline-start: 24px;
   top: 2px;
 }
 
 /* Content area */
 .scribex-toggle-content {
-  padding: 2px 8px 4px 24px;
+  padding: 2px 8px 4px 8px;
+  padding-inline-start: 24px;
 }
 
 .scribex-toggle-content .scribex-paragraph {
