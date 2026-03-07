@@ -1,0 +1,172 @@
+---
+title: Video Nodes
+description: VideoNode and LoadingVideoNode for video content.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Scribex provides two nodes for video handling: `VideoNode` for permanent video embeds and uploaded files, and `LoadingVideoNode` for optimistic previews during file upload. Together they implement the video upload and embed flow described in the [Video Embeds guide](/docs/guides/video-embeds).
+
+---
+
+## VideoNode
+
+A `DecoratorNode` that renders either an `<iframe>` (for embedded videos from YouTube, Vimeo, Loom, etc.) or a `<video>` element (for uploaded video files). Supports click-to-select with a selection ring, and full JSON serialization.
+
+### Import
+
+```tsx
+import { VideoNode, $createVideoNode, $isVideoNode } from '@scribex/core';
+import type { VideoPayload } from '@scribex/core';
+```
+
+### VideoPayload
+
+```ts
+interface VideoPayload {
+  src: string;
+  videoType: 'embed' | 'file';
+  provider: string;
+  title?: string;
+  key?: NodeKey;
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `src` | `string` | Yes | The video URL. For embeds, this is the embed URL (e.g., `https://www.youtube.com/embed/dQw4w9WgXcQ`). For files, this is the remote file URL. |
+| `videoType` | `'embed' \| 'file'` | Yes | Whether the video is an iframe embed or a native `<video>` file. |
+| `provider` | `string` | Yes | The video provider identifier: `"youtube"`, `"vimeo"`, `"loom"`, or `"generic"`. |
+| `title` | `string` | No | Title/label for the video. Used as the `<iframe>` title attribute. |
+| `key` | `NodeKey` | No | Explicit Lexical node key. |
+
+### Functions
+
+#### `$createVideoNode(payload: VideoPayload): VideoNode`
+
+Creates a new `VideoNode`. Must be called inside `editor.update()`.
+
+```ts
+import { parseVideoEmbed } from '@scribex/core';
+
+editor.update(() => {
+  const embedInfo = parseVideoEmbed('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+  if (embedInfo) {
+    const video = $createVideoNode({
+      src: embedInfo.embedUrl,
+      videoType: 'embed',
+      provider: embedInfo.provider,
+      title: 'My Video',
+    });
+    $getRoot().append(video);
+  }
+});
+```
+
+#### `$isVideoNode(node: LexicalNode | null | undefined): node is VideoNode`
+
+Type guard that returns `true` if the given node is a `VideoNode`.
+
+### Instance methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `getSrc()` | `string` | Returns the video URL. |
+| `getVideoType()` | `'embed' \| 'file'` | Returns whether this is an embed or a file. |
+| `getProvider()` | `string` | Returns the provider identifier. |
+| `getTitle()` | `string` | Returns the video title. |
+
+### Serialized format
+
+```ts
+type SerializedVideoNode = {
+  type: 'video';
+  version: 1;
+  src: string;
+  videoType: 'embed' | 'file';
+  provider: string;
+  title: string;
+};
+```
+
+### DOM behavior
+
+- **exportDOM**: Produces a `<div>` with `data-video-src`, `data-video-type`, `data-video-provider`, and optional `data-video-title` attributes.
+- **importDOM**: Converts both `<div>` elements with `data-video-src` attributes and `<iframe>` elements from YouTube, Vimeo, or Loom back into `VideoNode` instances.
+
+### Rendering
+
+The component renders differently based on `videoType`:
+
+- **`'embed'`**: Renders an `<iframe>` with `allow="autoplay; encrypted-media; picture-in-picture"` and `allowFullScreen`. The iframe has a 16:9 aspect ratio.
+- **`'file'`**: Renders a native `<video>` element with controls.
+
+A transparent click overlay covers the video when it is not selected. This overlay captures clicks that iframes and video players would otherwise swallow, allowing the node to be selected. When the node is selected, the overlay is removed so the user can interact with the video player controls.
+
+### Selection behavior
+
+Clicking on the video selects the node and renders a selection ring. When selected, pressing `Backspace` or `Delete` removes the video from the AST.
+
+---
+
+## LoadingVideoNode
+
+A transient `DecoratorNode` used during video file upload. It renders a placeholder with the file name and a spinner overlay. This node should never be persisted to a database.
+
+### Import
+
+```tsx
+import { LoadingVideoNode, $createLoadingVideoNode, $isLoadingVideoNode } from '@scribex/core';
+```
+
+### Functions
+
+#### `$createLoadingVideoNode(objectURL: string, fileName: string): LoadingVideoNode`
+
+Creates a new `LoadingVideoNode`. Must be called inside `editor.update()`.
+
+```ts
+editor.update(() => {
+  const objectURL = URL.createObjectURL(videoFile);
+  const loadingNode = $createLoadingVideoNode(objectURL, videoFile.name);
+  $getRoot().append(loadingNode);
+});
+```
+
+#### `$isLoadingVideoNode(node: LexicalNode | null | undefined): node is LoadingVideoNode`
+
+Type guard that returns `true` if the given node is a `LoadingVideoNode`.
+
+### Instance methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `getObjectURL()` | `string` | Returns the local blob URL. |
+| `getFileName()` | `string` | Returns the original file name. |
+
+### Serialized format
+
+```ts
+type SerializedLoadingVideoNode = {
+  type: 'loading-video';
+  version: 1;
+  objectURL: string;
+  fileName: string;
+};
+```
+
+<Callout type="warn">
+`LoadingVideoNode` is transient. It exists only while the upload is in progress. After the upload resolves or rejects, the `VideoPlugin` replaces or removes it. Always call `URL.revokeObjectURL()` after the upload completes to prevent memory leaks.
+</Callout>
+
+### Visual rendering
+
+The loading state renders as a placeholder with a 16:9 aspect ratio, a muted background color, the file name at the bottom, and a centered spinner animation. The placeholder is rendered at 60% opacity to visually distinguish it from permanent content.
+
+---
+
+## Related
+
+- [VideoPlugin](/docs/api/plugins/video-plugin) -- Plugin that manages video insertion and upload
+- [Video Embeds guide](/docs/guides/video-embeds) -- Full tutorial with embed and upload examples
+- [parseVideoEmbed](/docs/api/utilities#parsevideoembed) -- URL parser for video providers
