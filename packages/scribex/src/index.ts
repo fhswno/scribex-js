@@ -1,4 +1,7 @@
 export { EditorRoot } from './components/EditorRoot';
+export { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+export { $getSelection, $isRangeSelection, TextNode } from 'lexical';
+export type { LexicalEditor } from 'lexical';
 export { FloatingToolbar } from './components/FloatingToolbar';
 export { SlashMenu } from './components/SlashMenu';
 export { OverlayPortal } from './components/OverlayPortal';
@@ -10,6 +13,7 @@ export { PastePlugin } from './plugins/PastePlugin';
 export { EmojiPickerPlugin } from './plugins/EmojiPickerPlugin';
 export { LinkPlugin } from './plugins/LinkPlugin';
 export { useEditorState } from './hooks/useEditorState';
+export { useWordCount } from './hooks/useWordCount';
 export { MobileToolbar } from './components/MobileToolbar';
 export { sanitizePastedHTML } from './utils/sanitize';
 export { ColorPlugin } from './plugins/ColorPlugin';
@@ -70,4 +74,5 @@ export { ToggleContainerNode, $createToggleContainerNode, $isToggleContainerNode
 export { ToggleTitleNode, $createToggleTitleNode, $isToggleTitleNode } from './nodes/ToggleTitleNode';
 export { ToggleContentNode, $createToggleContentNode, $isToggleContentNode } from './nodes/ToggleContentNode';
 export { TogglePlugin } from './plugins/TogglePlugin';
+export { BlockSelectionPlugin } from './plugins/BlockSelectionPlugin';
 export type { ToggleContainerPayload } from './nodes/ToggleContainerNode';
