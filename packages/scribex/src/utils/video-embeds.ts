@@ -34,18 +34,13 @@ export function parseVideoEmbed(url: string): VideoEmbedInfo | null {
 
   const hostname = parsed.hostname.replace(/^www\./, "");
 
-  // ── YouTube ─────────────────────────────────────────────────────────
-  // youtube.com/watch?v=ID, youtube.com/embed/ID, youtube.com/shorts/ID,
-  // youtube.com/live/ID, youtube.com/v/ID, youtu.be/ID
   if (hostname === "youtube.com" || hostname === "m.youtube.com") {
     let videoId: string | null = null;
 
-    // /watch?v=ID
     if (parsed.pathname === "/watch") {
       videoId = parsed.searchParams.get("v");
     }
 
-    // /embed/ID, /shorts/ID, /live/ID, /v/ID
     if (!videoId) {
       const pathMatch = parsed.pathname.match(
         /^\/(embed|shorts|live|v)\/([a-zA-Z0-9_-]+)/,
@@ -75,8 +70,6 @@ export function parseVideoEmbed(url: string): VideoEmbedInfo | null {
     }
   }
 
-  // ── Vimeo ───────────────────────────────────────────────────────────
-  // vimeo.com/ID, vimeo.com/channels/*/ID, player.vimeo.com/video/ID
   if (hostname === "vimeo.com" || hostname === "player.vimeo.com") {
     const vimeoMatch = parsed.pathname.match(/\/(?:video\/|channels\/[^/]+\/)?(\d+)/);
     if (vimeoMatch) {
@@ -88,8 +81,6 @@ export function parseVideoEmbed(url: string): VideoEmbedInfo | null {
     }
   }
 
-  // ── Loom ────────────────────────────────────────────────────────────
-  // loom.com/share/ID, loom.com/embed/ID
   if (hostname === "loom.com") {
     const loomMatch = parsed.pathname.match(/\/(?:share|embed)\/([a-zA-Z0-9]+)/);
     if (loomMatch) {
@@ -101,7 +92,6 @@ export function parseVideoEmbed(url: string): VideoEmbedInfo | null {
     }
   }
 
-  // ── Generic ─────────────────────────────────────────────────────────
   return {
     provider: "generic",
     embedUrl: trimmed,
