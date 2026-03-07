@@ -1,4 +1,3 @@
-// LEXICAL
 import type { LexicalNode, ElementNode } from "lexical";
 import {
   $createParagraphNode,
@@ -28,8 +27,6 @@ import { $isToggleContainerNode } from "../nodes/ToggleContainerNode";
 import { $isToggleTitleNode } from "../nodes/ToggleTitleNode";
 import { $isToggleContentNode } from "../nodes/ToggleContentNode";
 
-// ─── Lexical → Markdown (context building) ───────────────────────────────────
-
 /**
  * Serializes an array of Lexical nodes to Markdown.
  * Pure function — call inside editor.read().
@@ -45,7 +42,6 @@ export function serializeNodesToMarkdown(nodes: LexicalNode[]): string {
 }
 
 function serializeNode(node: LexicalNode): string {
-  // Heading
   if ($isHeadingNode(node)) {
     const tag = node.getTag();
     const level = parseInt(tag.replace("h", ""), 10);
@@ -53,12 +49,10 @@ function serializeNode(node: LexicalNode): string {
     return `${prefix} ${serializeChildren(node)}`;
   }
 
-  // Blockquote
   if ($isQuoteNode(node)) {
     return `> ${serializeChildren(node)}`;
   }
 
-  // List
   if ($isListNode(node)) {
     const listType = node.getListType();
     const items = node.getChildren();
@@ -80,23 +74,19 @@ function serializeNode(node: LexicalNode): string {
       .join("\n");
   }
 
-  // Image
   if ($isImageNode(node)) {
     return `![${node.getAltText()}](${node.getSrc()})`;
   }
 
-  // Video
   if ($isVideoNode(node)) {
     const title = node.getTitle() || "Video";
     return `[${title}](${node.getSrc()})`;
   }
 
-  // Horizontal rule
   if ($isHorizontalRuleNode(node)) {
     return "---";
   }
 
-  // Table → pipe-delimited markdown
   if ($isTableNode(node)) {
     const rows = node.getChildren();
     const lines: string[] = [];
@@ -116,7 +106,6 @@ function serializeNode(node: LexicalNode): string {
 
       lines.push(`| ${cellTexts.join(" | ")} |`);
 
-      // Add separator after first row
       if (rowIdx === 0) {
         lines.push(`| ${cellTexts.map(() => "---").join(" | ")} |`);
       }
@@ -125,7 +114,6 @@ function serializeNode(node: LexicalNode): string {
     return lines.join("\n");
   }
 
-  // Toggle → collapsible details block
   if ($isToggleContainerNode(node)) {
     const children = node.getChildren();
     let titleText = "";
@@ -150,7 +138,6 @@ function serializeNode(node: LexicalNode): string {
     return `<details>\n<summary>${titleText}</summary>\n\n${contentText}\n\n</details>`;
   }
 
-  // Callout → GitHub-flavored callout syntax
   if ($isCalloutNode(node)) {
     const emoji = node.getEmoji();
     const childContent = node
@@ -165,12 +152,10 @@ function serializeNode(node: LexicalNode): string {
     return `> [!${emoji}] ${childContent}`;
   }
 
-  // Element with children (paragraph, etc.)
   if ($isElementNode(node)) {
     return serializeChildren(node);
   }
 
-  // Fallback: plain text
   return node.getTextContent();
 }
 
@@ -208,8 +193,6 @@ function serializeChildren(node: ElementNode): string {
   return result;
 }
 
-// ─── Markdown → Lexical (accept flow) ────────────────────────────────────────
-
 /**
  * Parses a Markdown string into Lexical nodes.
  * Must be called inside editor.update() — creates Lexical nodes that require
@@ -225,7 +208,6 @@ export function $parseMarkdownToLexicalNodes(
     const trimmed = block.trim();
     if (!trimmed) continue;
 
-    // Heading
     const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
     if (headingMatch) {
       const level = headingMatch[1]!.length;
@@ -242,7 +224,6 @@ export function $parseMarkdownToLexicalNodes(
       continue;
     }
 
-    // Blockquote
     if (trimmed.startsWith("> ")) {
       const quote = $createQuoteNode();
       const content = trimmed
@@ -254,7 +235,6 @@ export function $parseMarkdownToLexicalNodes(
       continue;
     }
 
-    // List items
     const lines = trimmed.split("\n");
     const isChecklist = lines.every((l) => /^- \[([ x])\] /.test(l));
     const isBullet = lines.every((l) => /^[-*]\s/.test(l));
@@ -287,7 +267,6 @@ export function $parseMarkdownToLexicalNodes(
       continue;
     }
 
-    // Default: paragraph
     const paragraph = $createParagraphNode();
     paragraph.append(...$parseInlineMarkdown(trimmed));
     nodes.push(paragraph);
