@@ -1,0 +1,264 @@
+---
+title: Read-Only Viewer
+description: Display saved editor content in a non-editable view.
+---
+
+A common pattern is to save editor content in one place and display it in another -- a blog post editor and its public-facing page, a CMS and a marketing site, a note-taking app and a shared link. Scribex handles this with `editable={false}` on `EditorRoot`.
+
+## Basic read-only viewer
+
+Pass `editable={false}` and `autoFocus={false}` to render saved content without any editing capabilities. No plugins are needed for viewing.
+
+```tsx title="app/posts/[slug]/page.tsx"
+'use client';
+
+import { EditorRoot } from '@scribex/core';
+
+interface ContentViewerProps {
+  content: string; // Serialized Lexical JSON from your database
+}
+
+export function ContentViewer({ content }: ContentViewerProps) {
+  return (
+    <EditorRoot
+      namespace="viewer"
+      initialState={content}
+      editable={false}
+      autoFocus={false}
+      className="prose prose-lg max-w-none"
+    />
+  );
+}
+```
+
+When `editable` is `false`:
+
+- The editor is not focusable and does not accept keyboard input.
+- No cursor or caret is visible.
+- The `OverlayPortal` drag handles do not render.
+- The `FloatingToolbar` does not appear on text selection.
+- The slash menu is disabled.
+- All content is rendered exactly as it was saved.
+
+## Loading content from an API
+
+Here is a complete page that fetches content from an API route and renders it read-only:
+
+```tsx title="app/posts/[slug]/page.tsx"
+import { ContentViewer } from './content-viewer';
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+async function getPost(slug: string) {
+  const response = await fetch(`${process.env.API_URL}/posts/${slug}`, {
+    next: { revalidate: 60 }, // ISR: revalidate every 60 seconds
+  });
+
+  if (!response.ok) return null;
+  return response.json() as Promise<{ title: string; content: string }>;
+}
+
+export default async function PostPage({ params }: PageProps) {
+  const { slug } = await params;
+  const post = await getPost(slug);
+
+  if (!post) {
+    return <div>Post not found</div>;
+  }
+
+  return (
+    <article className="max-w-3xl mx-auto py-12 px-4">
+      <h1 className="text-3xl font-bold mb-8">{post.title}</h1>
+      <ContentViewer content={post.content} />
+    </article>
+  );
+}
+```
+
+```tsx title="app/posts/[slug]/content-viewer.tsx"
+'use client';
+
+import { EditorRoot } from '@scribex/core';
+
+export function ContentViewer({ content }: { content: string }) {
+  return (
+    <EditorRoot
+      namespace="post-viewer"
+      initialState={content}
+      editable={false}
+      autoFocus={false}
+      className="prose prose-lg max-w-none"
+    />
+  );
+}
+```
+
+The server component fetches the data. The client component renders the Lexical viewer. This pattern works seamlessly with Next.js App Router because `EditorRoot` is a `'use client'` component that receives the serialized state as a prop.
+
+## Loading from localStorage
+
+For offline-first applications or prototypes, load saved state from localStorage:
+
+```tsx title="app/viewer/page.tsx"
+'use client';
+
+import { useState, useEffect } from 'react';
+import { EditorRoot } from '@scribex/core';
+
+export default function LocalViewerPage() {
+  const [content, setContent] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('scribex-editor-state');
+    setContent(saved);
+    setIsLoaded(true);
+  }, []);
+
+  if (!isLoaded) {
+    return (
+      <div className="max-w-3xl mx-auto py-12 px-4">
+        <div className="animate-pulse h-64 bg-gray-100 rounded-lg" />
+      </div>
+    );
+  }
+
+  if (!content) {
+    return (
+      <div className="max-w-3xl mx-auto py-12 px-4">
+        <p className="text-gray-500">No saved content found.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto py-12 px-4">
+      <h1 className="text-2xl font-bold mb-6">Saved Content</h1>
+      <EditorRoot
+        namespace="local-viewer"
+        initialState={content}
+        editable={false}
+        autoFocus={false}
+        className="prose max-w-none"
+      />
+    </div>
+  );
+}
+```
+
+## Side-by-side editor and preview
+
+A useful pattern is showing an editable editor alongside a live read-only preview. Because Scribex supports multiple editor instances on the same page (each with a unique `namespace`), this works out of the box:
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { useState } from 'react';
+import {
+  EditorRoot,
+  FloatingToolbar,
+  SlashMenu,
+  InputRulePlugin,
+  PastePlugin,
+  useEditorState,
+} from '@scribex/core';
+
+function EditorStateCapture({ onUpdate }: { onUpdate: (json: string) => void }) {
+  useEditorState({
+    debounceMs: 200,
+    onChange: onUpdate,
+  });
+  return null;
+}
+
+export default function SideBySidePage() {
+  const [previewState, setPreviewState] = useState<string | null>(null);
+
+  return (
+    <main className="max-w-6xl mx-auto py-12 px-4">
+      <h1 className="text-2xl font-bold mb-6">Editor with Live Preview</h1>
+
+      <div className="grid grid-cols-2 gap-6">
+        {/* Editable side */}
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500 mb-2 uppercase tracking-wide">
+            Editor
+          </h2>
+          <EditorRoot
+            namespace="side-by-side-editor"
+            className="relative min-h-[400px] p-4 border rounded-lg"
+            placeholder="Type here and watch the preview update..."
+          >
+            <EditorStateCapture onUpdate={setPreviewState} />
+            <FloatingToolbar />
+            <SlashMenu />
+            <InputRulePlugin />
+            <PastePlugin />
+          </EditorRoot>
+        </div>
+
+        {/* Read-only preview side */}
+        <div>
+          <h2 className="text-sm font-semibold text-gray-500 mb-2 uppercase tracking-wide">
+            Preview
+          </h2>
+          <div className="min-h-[400px] p-4 border rounded-lg bg-gray-50">
+            {previewState ? (
+              <EditorRoot
+                namespace="side-by-side-preview"
+                initialState={previewState}
+                editable={false}
+                autoFocus={false}
+                className="prose max-w-none"
+              />
+            ) : (
+              <p className="text-gray-400 italic">
+                Start typing in the editor to see a preview.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+```
+
+Note that the preview re-mounts when `initialState` changes. For very large documents, consider debouncing the preview update to a higher interval (500ms or more).
+
+## Styling differences for read-only mode
+
+You can apply different styles to the read-only viewer to distinguish it from an editable editor. The `editable` prop does not affect the CSS classes you pass, so you have full control:
+
+```tsx
+<EditorRoot
+  namespace="styled-viewer"
+  initialState={content}
+  editable={false}
+  autoFocus={false}
+  className="
+    prose prose-lg max-w-none
+    prose-headings:font-serif
+    prose-p:leading-relaxed
+    prose-a:text-blue-600 prose-a:underline
+    prose-blockquote:border-l-4 prose-blockquote:border-gray-300
+    prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded
+  "
+/>
+```
+
+## Important notes
+
+- **Unique namespaces are required.** When using multiple `EditorRoot` instances on the same page (like the side-by-side example), each must have a unique `namespace` prop. This ensures state isolation between instances.
+
+- **No plugins needed for viewing.** The read-only viewer does not need `InputRulePlugin`, `PastePlugin`, `FloatingToolbar`, or any other plugin. The `EditorRoot` alone is sufficient to render saved content.
+
+- **Custom nodes must be registered.** If your saved content contains custom nodes (images, videos, mentions, tables, etc.), the `EditorRoot` automatically registers all built-in nodes via `ALL_NODES`. If you have created your own custom nodes, ensure they are registered in the `nodes` configuration.
+
+## Next steps
+
+- [Serialization](/docs/guides/serialization) -- How JSON and Markdown serialization work
+- [Minimal Editor](/docs/examples/minimal-editor) -- The simplest editable setup
+- [Full-Featured Editor](/docs/examples/full-featured) -- All plugins enabled
