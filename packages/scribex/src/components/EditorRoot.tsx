@@ -28,6 +28,14 @@ interface EditorRootProps {
   className?: string;
   /** Document-level text direction. Omit for per-paragraph auto-detection (default). */
   dir?: "ltr" | "rtl" | "auto";
+  /** Customizable placeholder text. Default: "Start writing..." */
+  placeholder?: string;
+  /** Read-only mode. Default: true (editable). */
+  editable?: boolean;
+  /** Whether the editor auto-focuses on mount. Default: true. */
+  autoFocus?: boolean;
+  /** Custom error handler for Lexical errors. Default: console.error + throw. */
+  onError?: (error: Error) => void;
 }
 
 /** Sets the root node direction on mount when an explicit dir is provided. */
@@ -43,22 +51,29 @@ function SetInitialDirection({ dir }: { dir: "ltr" | "rtl" }) {
   return null;
 }
 
+const defaultOnError = (error: Error) => {
+  console.error("[Scribex] Lexical error:", error);
+  throw error;
+};
+
 export function EditorRoot({
   namespace,
   initialState,
   children,
   className,
   dir,
+  placeholder = "Start writing...",
+  editable = true,
+  autoFocus = true,
+  onError = defaultOnError,
 }: EditorRootProps) {
   const initialConfig = {
     namespace,
     nodes: ALL_NODES,
     theme: scribexTheme,
     editorState: initialState ?? undefined,
-    onError: (error: Error) => {
-      console.error("[Scribex] Lexical error:", error);
-      throw error;
-    },
+    editable,
+    onError,
   };
 
   return (
@@ -73,13 +88,13 @@ export function EditorRoot({
           }
           placeholder={
             <div className="scribex-placeholder">
-              Start writing...
+              {placeholder}
             </div>
           }
           ErrorBoundary={LexicalErrorBoundary}
         />
         <HistoryPlugin />
-        <AutoFocusPlugin />
+        {autoFocus && <AutoFocusPlugin />}
         {dir && dir !== "auto" && <SetInitialDirection dir={dir} />}
         {children}
       </div>
