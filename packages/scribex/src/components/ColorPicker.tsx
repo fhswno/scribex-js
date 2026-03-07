@@ -76,6 +76,7 @@ export function ColorPicker({
               key={`text-${entry.label}`}
               type="button"
               title={entry.label}
+              aria-label={entry.label}
               data-testid={`color-text-${entry.label.toLowerCase()}`}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -114,7 +115,7 @@ export function ColorPicker({
                   style={{
                     position: "absolute",
                     bottom: "1px",
-                    right: "1px",
+                    insetInlineEnd: "1px",
                     color: "var(--scribex-accent, #007AFF)",
                   }}
                 />
@@ -159,6 +160,7 @@ export function ColorPicker({
               key={`highlight-${entry.label}`}
               type="button"
               title={entry.label}
+              aria-label={entry.label}
               data-testid={`color-highlight-${entry.label.toLowerCase()}`}
               onMouseDown={(e) => {
                 e.preventDefault();
