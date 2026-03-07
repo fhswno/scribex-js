@@ -1,5 +1,8 @@
 "use client";
 
+// REACT
+import { useEffect } from "react";
+
 // LEXICAL
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -7,6 +10,8 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $getRoot } from "lexical";
 
 // NODES
 import { ALL_NODES } from "../nodes";
@@ -21,6 +26,21 @@ interface EditorRootProps {
   initialState?: string | null;
   children?: React.ReactNode;
   className?: string;
+  /** Document-level text direction. Omit for per-paragraph auto-detection (default). */
+  dir?: "ltr" | "rtl" | "auto";
+}
+
+/** Sets the root node direction on mount when an explicit dir is provided. */
+function SetInitialDirection({ dir }: { dir: "ltr" | "rtl" }) {
+  const [editor] = useLexicalComposerContext();
+  useEffect(() => {
+    editor.update(() => {
+      $getRoot().setDirection(dir);
+    });
+    // Only on mount — do not override per-block directions on re-render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
 }
 
 export function EditorRoot({
@@ -28,6 +48,7 @@ export function EditorRoot({
   initialState,
   children,
   className,
+  dir,
 }: EditorRootProps) {
   const initialConfig = {
     namespace,
@@ -42,7 +63,7 @@ export function EditorRoot({
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className={className} data-scribex-root data-namespace={namespace}>
+      <div className={className} dir={dir} data-scribex-root data-namespace={namespace}>
         <RichTextPlugin
           contentEditable={
             <ContentEditable
@@ -59,6 +80,7 @@ export function EditorRoot({
         />
         <HistoryPlugin />
         <AutoFocusPlugin />
+        {dir && dir !== "auto" && <SetInitialDirection dir={dir} />}
         {children}
       </div>
     </LexicalComposer>
