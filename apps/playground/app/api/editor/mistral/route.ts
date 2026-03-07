@@ -1,10 +1,6 @@
-// NEXT
 import { NextRequest } from "next/server";
-
-// ZOD
 import { z } from "zod";
 
-// SCHEMA
 const RequestSchema = z.object({
   prompt: z.string().min(1).max(10000),
   context: z.string().max(50000),
@@ -75,7 +71,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Transform the Mistral SSE stream into a plain text stream
   const readableStream = new ReadableStream({
     async start(controller) {
       const reader = response.body?.getReader();
@@ -94,7 +89,6 @@ export async function POST(request: NextRequest) {
 
           buffer += decoder.decode(value, { stream: true });
 
-          // Parse SSE events
           const lines = buffer.split("\n");
           buffer = lines.pop() ?? "";
 
