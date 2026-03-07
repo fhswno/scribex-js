@@ -1,0 +1,222 @@
+---
+title: AIPlugin
+description: AI content generation with streaming preview.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Import
+
+```tsx
+import { AIPlugin } from '@scribex/core';
+```
+
+## Overview
+
+The `AIPlugin` provides AI-powered content generation with an isolated streaming preview. When the user triggers an AI prompt (via the `/ai` slash menu item or programmatically), an `AIPreviewNode` is inserted into the AST. The streamed response is rendered in a visually distinct block using the `--scribex-ai-stream` CSS token. The preview uses local React state during streaming -- it never calls `editor.update()` until the user explicitly accepts or discards the result.
+
+This architecture guarantees zero undo history entries during streaming, and exactly one history entry when the user accepts.
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `provider` | `AIProvider` | (required) | The AI streaming provider configuration. See below. |
+| `config` | `AIPluginConfig` | `{}` | Optional configuration for behavior, labels, and callbacks. |
+
+## The `AIProvider` interface
+
+```ts
+interface AIProvider {
+  /** The URL to POST the AI prompt to. Must return a streaming text response. */
+  endpoint: string;
+  /**
+   * Optional: custom headers to include with the request.
+   * Use this for authentication tokens.
+   */
+  headers?: Record<string, string>;
+  /**
+   * Optional: transform the request body before sending.
+   * Receives { prompt, context } and should return the body object.
+   */
+  transformRequest?: (data: { prompt: string; context: string }) => unknown;
+}
+```
+
+## The `AIPluginConfig` interface
+
+```ts
+interface AIPluginConfig {
+  /** Configuration for the content generation behavior. */
+  generate?: {
+    /** System prompt prepended to every request. */
+    systemPrompt?: string;
+    /** Maximum tokens to generate. */
+    maxTokens?: number;
+  };
+  /** Custom labels for the UI elements. */
+  labels?: {
+    /** Placeholder text in the prompt input. Default: "Ask AI to write..." */
+    promptPlaceholder?: string;
+    /** Accept button text. Default: "Accept" */
+    accept?: string;
+    /** Discard button text. Default: "Discard" */
+    discard?: string;
+    /** Retry button text. Default: "Retry" */
+    retry?: string;
+  };
+  /** Retry configuration. */
+  retry?: {
+    /** Maximum number of retries on failure. Default: 0 */
+    maxRetries?: number;
+  };
+  /** Number of surrounding paragraphs to include as context. Default: 3 */
+  contextWindowSize?: number;
+  /** Called when the stream endpoint returns an error. */
+  onError?: (error: Error) => void;
+  /** Called when the user accepts the AI-generated content. */
+  onAccept?: (content: string) => void;
+  /** Called when the user discards the AI-generated content. */
+  onDiscard?: () => void;
+  /**
+   * Optional: custom render function for the prompt input.
+   * Receives a submit callback and should return a React element.
+   */
+  renderPrompt?: (onSubmit: (prompt: string) => void) => React.ReactNode;
+}
+```
+
+## Usage
+
+### Basic setup
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, AIPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <InputRulePlugin />
+      <SlashMenu />
+      <AIPlugin
+        provider={{
+          endpoint: '/api/editor/gemini',
+        }}
+      />
+    </EditorRoot>
+  );
+}
+```
+
+### With full configuration
+
+```tsx
+<AIPlugin
+  provider={{
+    endpoint: '/api/editor/gemini',
+    headers: {
+      Authorization: `Bearer ${session.token}`,
+    },
+    transformRequest: ({ prompt, context }) => ({
+      prompt,
+      context,
+      model: 'gemini-2.0-flash',
+    }),
+  }}
+  config={{
+    generate: {
+      systemPrompt: 'You are a helpful writing assistant. Respond in Markdown.',
+      maxTokens: 2048,
+    },
+    labels: {
+      promptPlaceholder: 'Describe what you want to write...',
+      accept: 'Insert',
+      discard: 'Cancel',
+    },
+    contextWindowSize: 5,
+    onAccept: (content) => {
+      analytics.track('ai_content_accepted', { length: content.length });
+    },
+    onDiscard: () => {
+      analytics.track('ai_content_discarded');
+    },
+    onError: (error) => {
+      toast.error('AI generation failed. Please try again.');
+      console.error('[AI Error]', error);
+    },
+  }}
+/>
+```
+
+## Registered commands
+
+| Command | Payload | Description |
+|---|---|---|
+| `OPEN_AI_PROMPT_COMMAND` | `void` | Opens the inline AI prompt input at the current cursor position. |
+| `INSERT_AI_PREVIEW_COMMAND` | `{ prompt: string; context: string }` | Inserts an `AIPreviewNode` and begins streaming. |
+
+### Dispatching programmatically
+
+```tsx
+import { OPEN_AI_PROMPT_COMMAND } from '@scribex/core';
+
+// Open the AI prompt from a custom button
+editor.dispatchCommand(OPEN_AI_PROMPT_COMMAND, undefined);
+```
+
+## Streaming flow
+
+```
+User types /ai --> OPEN_AI_PROMPT_COMMAND dispatched
+  |
+  v
+Inline prompt input opens (Radix Popover)
+  |
+  v
+User submits prompt
+  |
+  v
+Read surrounding nodes (contextWindowSize paragraphs)
+  |
+  v
+Serialize context to Markdown via serializeNodesToMarkdown()
+  |
+  v
+Insert AIPreviewNode -- single editor.update()
+  |
+  v
+AIPreviewNode mounts, begins fetch to provider.endpoint
+  |
+  v
+Tokens stream in --> AIPreviewNode local React state updates
+  (NO editor.update() calls during streaming)
+  |
+  v
+Stream completes --> "Accept" / "Discard" buttons appear
+  |
+  +--[Accept]---> Parse Markdown into Lexical nodes
+  |               Replace AIPreviewNode -- single editor.update()
+  |               (creates exactly 1 undo history entry)
+  |
+  +--[Discard]--> Remove AIPreviewNode -- single editor.update()
+                  (AST unchanged from before insertion)
+```
+
+## Context serialization
+
+Before any AI call, surrounding nodes are serialized to Markdown using `serializeNodesToMarkdown()`. Raw Lexical JSON is never sent to the model -- it is token-inefficient and the model does not understand it. Plain text is not used either because it destroys structural semantics (headings, lists, links).
+
+<Callout type="warn">
+The `AIPreviewNode` must never call `editor.update()` during streaming. All streamed tokens are held in local React state (`useState`). This protects the undo history from being polluted with intermediate streaming states.
+</Callout>
+
+<Callout type="info">
+After accepting AI content, a single `Cmd+Z` undo removes all accepted content in one step -- not token by token.
+</Callout>
+
+## Related
+
+- [AI Integration Guide](/docs/guides/ai-integration) -- End-to-end tutorial with Vertex AI setup
+- [Serialization Guide](/docs/guides/serialization) -- How nodes are serialized to Markdown
