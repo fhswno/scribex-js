@@ -2,6 +2,7 @@
   "files": [],
   "references": [
     { "path": "./packages/scribex" },
-    { "path": "./apps/playground" }
+    { "path": "./apps/playground" },
+    { "path": "./apps/docs" }
   ]
 }
