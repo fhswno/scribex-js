@@ -3,7 +3,7 @@ title: Utilities
 description: Utility functions for Markdown serialization, HTML sanitization, and video parsing.
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+import { Callout } from "fumadocs-ui/components/callout";
 
 Scribex exports four utility functions for common tasks: sanitizing pasted HTML, serializing to and from Markdown, and parsing video embed URLs.
 
@@ -15,7 +15,7 @@ import {
   serializeNodesToMarkdown,
   $parseMarkdownToLexicalNodes,
   parseVideoEmbed,
-} from '@scribex/core';
+} from "@scribex/core";
 ```
 
 ---
@@ -32,9 +32,9 @@ function sanitizePastedHTML(html: string): string;
 
 ### Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `html` | `string` | Raw HTML string from the clipboard (typically from `ClipboardEvent.clipboardData.getData('text/html')`). |
+| Parameter | Type     | Description                                                                                              |
+| --------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `html`    | `string` | Raw HTML string from the clipboard (typically from `ClipboardEvent.clipboardData.getData('text/html')`). |
 
 ### Returns
 
@@ -79,13 +79,15 @@ Additionally, `b`, `i`, `del`, and `strike` are accepted but normalized to their
 ### Example
 
 ```ts
-const dirty = '<div style="font-size: 32px" class="heading"><b onclick="alert()">Title</b></div>';
+const dirty =
+  '<div style="font-size: 32px" class="heading"><b onclick="alert()">Title</b></div>';
 const clean = sanitizePastedHTML(dirty);
 // Result: '<h1><strong>Title</strong></h1>'
 ```
 
 <Callout type="info">
-This function is automatically called by the `PastePlugin`. You typically do not need to call it directly unless building a custom paste handler.
+  This function is automatically called by the `PastePlugin`. You typically do
+  not need to call it directly unless building a custom paste handler.
 </Callout>
 
 ---
@@ -102,9 +104,9 @@ function serializeNodesToMarkdown(nodes: LexicalNode[]): string;
 
 ### Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `nodes` | `LexicalNode[]` | An array of Lexical nodes to serialize. Typically obtained via `$getRoot().getChildren()` inside `editor.read()`. |
+| Parameter | Type            | Description                                                                                                       |
+| --------- | --------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `nodes`   | `LexicalNode[]` | An array of Lexical nodes to serialize. Typically obtained via `$getRoot().getChildren()` inside `editor.read()`. |
 
 ### Returns
 
@@ -112,26 +114,26 @@ A Markdown string with double newlines (`\n\n`) separating block-level elements.
 
 ### Supported node types
 
-| Node type | Markdown output |
-|---|---|
-| HeadingNode (h1-h6) | `# `, `## `, `### `, etc. |
-| ParagraphNode | Plain text |
-| QuoteNode | `> text` |
-| ListNode (bullet) | `- item` |
-| ListNode (number) | `1. item` |
-| ListNode (check) | `- [x] item` or `- [ ] item` |
-| ImageNode | `![alt](src)` |
-| VideoNode | `[title](src)` |
-| HorizontalRuleNode | `---` |
-| CalloutNode | `> [!emoji] text` |
-| ToggleContainerNode | `<details><summary>...</summary>...</details>` |
-| TableNode | Pipe-delimited Markdown table with header separator |
-| LinkNode (inline) | `[text](url)` |
-| Bold text | `**text**` |
-| Italic text | `*text*` |
-| Strikethrough text | `~~text~~` |
-| Code text | `` `text` `` |
-| Unknown nodes | Falls back to `getTextContent()` |
+| Node type           | Markdown output                                     |
+| ------------------- | --------------------------------------------------- |
+| HeadingNode (h1-h6) | `# `, `## `, `### `, etc.                           |
+| ParagraphNode       | Plain text                                          |
+| QuoteNode           | `> text`                                            |
+| ListNode (bullet)   | `- item`                                            |
+| ListNode (number)   | `1. item`                                           |
+| ListNode (check)    | `- [x] item` or `- [ ] item`                        |
+| ImageNode           | `![alt](src)`                                       |
+| VideoNode           | `[title](src)`                                      |
+| HorizontalRuleNode  | `---`                                               |
+| CalloutNode         | `> [!emoji] text`                                   |
+| ToggleContainerNode | `<details><summary>...</summary>...</details>`      |
+| TableNode           | Pipe-delimited Markdown table with header separator |
+| LinkNode (inline)   | `[text](url)`                                       |
+| Bold text           | `**text**`                                          |
+| Italic text         | `*text*`                                            |
+| Strikethrough text  | `~~text~~`                                          |
+| Code text           | `` `text` ``                                        |
+| Unknown nodes       | Falls back to `getTextContent()`                    |
 
 ### Example
 
@@ -151,7 +153,9 @@ console.log(markdown);
 ```
 
 <Callout type="warn">
-This function must be called with pre-read nodes. Call it inside `editor.read()` or with nodes that have already been extracted from the editor state. Do not call it inside `editor.update()`.
+  This function must be called with pre-read nodes. Call it inside
+  `editor.read()` or with nodes that have already been extracted from the editor
+  state. Do not call it inside `editor.update()`.
 </Callout>
 
 ---
@@ -168,8 +172,8 @@ function $parseMarkdownToLexicalNodes(markdown: string): LexicalNode[];
 
 ### Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
+| Parameter  | Type     | Description                 |
+| ---------- | -------- | --------------------------- |
 | `markdown` | `string` | A Markdown string to parse. |
 
 ### Returns
@@ -178,24 +182,26 @@ An array of Lexical nodes ready to be inserted into the AST.
 
 ### Supported Markdown syntax
 
-| Markdown | Lexical node |
-|---|---|
-| `# Heading` through `###### Heading` | HeadingNode (h1-h6) |
-| `> Quote text` | QuoteNode |
-| `- item` or `* item` | ListNode (bullet) |
-| `1. item` | ListNode (number) |
-| `- [x] item` or `- [ ] item` | ListNode (check) with checked/unchecked items |
-| `**bold**` | TextNode with bold format |
-| `*italic*` | TextNode with italic format |
-| `` `code` `` | TextNode with code format |
-| `~~strikethrough~~` | TextNode with strikethrough format |
-| Plain text | ParagraphNode |
+| Markdown                             | Lexical node                                  |
+| ------------------------------------ | --------------------------------------------- |
+| `# Heading` through `###### Heading` | HeadingNode (h1-h6)                           |
+| `> Quote text`                       | QuoteNode                                     |
+| `- item` or `* item`                 | ListNode (bullet)                             |
+| `1. item`                            | ListNode (number)                             |
+| `- [x] item` or `- [ ] item`         | ListNode (check) with checked/unchecked items |
+| `**bold**`                           | TextNode with bold format                     |
+| `*italic*`                           | TextNode with italic format                   |
+| `` `code` ``                         | TextNode with code format                     |
+| `~~strikethrough~~`                  | TextNode with strikethrough format            |
+| Plain text                           | ParagraphNode                                 |
 
 ### Example
 
 ```ts
 editor.update(() => {
-  const nodes = $parseMarkdownToLexicalNodes('# Hello\n\nThis is **bold** text.');
+  const nodes = $parseMarkdownToLexicalNodes(
+    "# Hello\n\nThis is **bold** text.",
+  );
   const root = $getRoot();
   root.clear();
   nodes.forEach((node) => root.append(node));
@@ -203,7 +209,9 @@ editor.update(() => {
 ```
 
 <Callout type="warn">
-This function creates Lexical nodes that require an active editor context. Always call it inside `editor.update()`. Calling it outside an update context will throw.
+  This function creates Lexical nodes that require an active editor context.
+  Always call it inside `editor.update()`. Calling it outside an update context
+  will throw.
 </Callout>
 
 ---
@@ -220,9 +228,9 @@ function parseVideoEmbed(url: string): VideoEmbedInfo | null;
 
 ### Parameters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `url` | `string` | A URL string to parse. |
+| Parameter | Type     | Description            |
+| --------- | -------- | ---------------------- |
+| `url`     | `string` | A URL string to parse. |
 
 ### Returns
 
@@ -230,7 +238,7 @@ A `VideoEmbedInfo` object if the URL is valid, or `null` if the input is not a v
 
 ```ts
 interface VideoEmbedInfo {
-  provider: 'youtube' | 'vimeo' | 'loom' | 'generic';
+  provider: "youtube" | "vimeo" | "loom" | "generic";
   embedUrl: string;
   thumbnailUrl?: string;
 }
@@ -238,45 +246,45 @@ interface VideoEmbedInfo {
 
 ### Supported providers
 
-| Provider | Recognized URL patterns | Embed URL format |
-|---|---|---|
-| YouTube | `youtube.com/watch?v=ID`, `youtu.be/ID`, `youtube.com/embed/ID`, `youtube.com/shorts/ID`, `youtube.com/live/ID`, `m.youtube.com/watch?v=ID` | `https://www.youtube.com/embed/{ID}` |
-| Vimeo | `vimeo.com/ID`, `player.vimeo.com/video/ID`, `vimeo.com/channels/*/ID` | `https://player.vimeo.com/video/{ID}` |
-| Loom | `loom.com/share/ID`, `loom.com/embed/ID` | `https://www.loom.com/embed/{ID}` |
-| Generic | Any other valid HTTP(S) URL | The original URL (passed through) |
+| Provider | Recognized URL patterns                                                                                                                     | Embed URL format                      |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| YouTube  | `youtube.com/watch?v=ID`, `youtu.be/ID`, `youtube.com/embed/ID`, `youtube.com/shorts/ID`, `youtube.com/live/ID`, `m.youtube.com/watch?v=ID` | `https://www.youtube.com/embed/{ID}`  |
+| Vimeo    | `vimeo.com/ID`, `player.vimeo.com/video/ID`, `vimeo.com/channels/*/ID`                                                                      | `https://player.vimeo.com/video/{ID}` |
+| Loom     | `loom.com/share/ID`, `loom.com/embed/ID`                                                                                                    | `https://www.loom.com/embed/{ID}`     |
+| Generic  | Any other valid HTTP(S) URL                                                                                                                 | The original URL (passed through)     |
 
 ### Examples
 
 ```ts
-parseVideoEmbed('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+parseVideoEmbed("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 // {
 //   provider: 'youtube',
 //   embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
 //   thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
 // }
 
-parseVideoEmbed('https://vimeo.com/123456789');
+parseVideoEmbed("https://vimeo.com/123456789");
 // {
 //   provider: 'vimeo',
 //   embedUrl: 'https://player.vimeo.com/video/123456789',
 // }
 
-parseVideoEmbed('https://www.loom.com/share/abc123def456');
+parseVideoEmbed("https://www.loom.com/share/abc123def456");
 // {
 //   provider: 'loom',
 //   embedUrl: 'https://www.loom.com/embed/abc123def456',
 // }
 
-parseVideoEmbed('https://example.com/my-video.mp4');
+parseVideoEmbed("https://example.com/my-video.mp4");
 // {
 //   provider: 'generic',
 //   embedUrl: 'https://example.com/my-video.mp4',
 // }
 
-parseVideoEmbed('not a url');
+parseVideoEmbed("not a url");
 // null
 
-parseVideoEmbed('ftp://files.example.com/video.mp4');
+parseVideoEmbed("ftp://files.example.com/video.mp4");
 // null (only http and https are supported)
 ```
 
