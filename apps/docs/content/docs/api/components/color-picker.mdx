@@ -8,38 +8,38 @@ description: Text and highlight color picker component.
 ## Import
 
 ```tsx
-import { ColorPicker } from '@scribex/core';
-import type { ColorPalette, ColorEntry } from '@scribex/core';
+import { ColorPicker } from "@scribex/core";
+import type { ColorPalette, ColorEntry } from "@scribex/core";
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `palette` | `ColorPalette` | `DEFAULT_COLOR_PALETTE` | Color palette configuration with text and highlight color arrays. |
-| `activeTextColor` | `string \| null` | **required** | The currently active text color CSS value, or `null` if using the default color. |
-| `activeHighlightColor` | `string \| null` | **required** | The currently active highlight/background color CSS value, or `null` if using the default. |
-| `onClose` | `() => void` | **required** | Callback invoked after a color is selected. Typically used to close the picker dropdown. |
+| Prop                   | Type             | Default                 | Description                                                                                |
+| ---------------------- | ---------------- | ----------------------- | ------------------------------------------------------------------------------------------ |
+| `palette`              | `ColorPalette`   | `DEFAULT_COLOR_PALETTE` | Color palette configuration with text and highlight color arrays.                          |
+| `activeTextColor`      | `string \| null` | **required**            | The currently active text color CSS value, or `null` if using the default color.           |
+| `activeHighlightColor` | `string \| null` | **required**            | The currently active highlight/background color CSS value, or `null` if using the default. |
+| `onClose`              | `() => void`     | **required**            | Callback invoked after a color is selected. Typically used to close the picker dropdown.   |
 
 ## Basic usage
 
 The `ColorPicker` is typically used inside the `FloatingToolbar` and does not need to be added separately. However, you can use it in a custom toolbar or UI:
 
 ```tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { ColorPicker } from '@scribex/core';
+import { useState } from "react";
+import { ColorPicker } from "@scribex/core";
 
 function CustomColorControl() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: "relative" }}>
       <button onClick={() => setIsOpen(!isOpen)}>Colors</button>
 
       {isOpen && (
-        <div style={{ position: 'absolute', top: '100%', zIndex: 50 }}>
+        <div style={{ position: "absolute", top: "100%", zIndex: 50 }}>
           <ColorPicker
             activeTextColor={null}
             activeHighlightColor={null}
@@ -78,52 +78,52 @@ The default palette includes 10 text colors and 10 highlight colors:
 
 ### Text colors
 
-| Color | CSS Variable | Swatch |
-|---|---|---|
-| Default | (removes color) | currentColor |
-| Gray | `var(--scribex-text-gray)` | #9b9a97 |
-| Brown | `var(--scribex-text-brown)` | #64473a |
-| Orange | `var(--scribex-text-orange)` | #d9730d |
-| Yellow | `var(--scribex-text-yellow)` | #dfab01 |
-| Green | `var(--scribex-text-green)` | #0f7b6c |
-| Blue | `var(--scribex-text-blue)` | #0b6e99 |
-| Purple | `var(--scribex-text-purple)` | #6940a5 |
-| Pink | `var(--scribex-text-pink)` | #ad1a72 |
-| Red | `var(--scribex-text-red)` | #e03e3e |
+| Color   | CSS Variable                 | Swatch       |
+| ------- | ---------------------------- | ------------ |
+| Default | (removes color)              | currentColor |
+| Gray    | `var(--scribex-text-gray)`   | #9b9a97      |
+| Brown   | `var(--scribex-text-brown)`  | #64473a      |
+| Orange  | `var(--scribex-text-orange)` | #d9730d      |
+| Yellow  | `var(--scribex-text-yellow)` | #dfab01      |
+| Green   | `var(--scribex-text-green)`  | #0f7b6c      |
+| Blue    | `var(--scribex-text-blue)`   | #0b6e99      |
+| Purple  | `var(--scribex-text-purple)` | #6940a5      |
+| Pink    | `var(--scribex-text-pink)`   | #ad1a72      |
+| Red     | `var(--scribex-text-red)`    | #e03e3e      |
 
 ### Highlight colors
 
-| Color | CSS Variable | Swatch |
-|---|---|---|
-| Default | (removes highlight) | transparent |
-| Gray | `var(--scribex-highlight-gray)` | #ebeced |
-| Brown | `var(--scribex-highlight-brown)` | #e9e5e3 |
-| Orange | `var(--scribex-highlight-orange)` | #faebdd |
-| Yellow | `var(--scribex-highlight-yellow)` | #fbf3db |
-| Green | `var(--scribex-highlight-green)` | #ddedea |
-| Blue | `var(--scribex-highlight-blue)` | #ddebf1 |
-| Purple | `var(--scribex-highlight-purple)` | #eae4f2 |
-| Pink | `var(--scribex-highlight-pink)` | #f4dfeb |
-| Red | `var(--scribex-highlight-red)` | #fbe4e4 |
+| Color   | CSS Variable                      | Swatch      |
+| ------- | --------------------------------- | ----------- |
+| Default | (removes highlight)               | transparent |
+| Gray    | `var(--scribex-highlight-gray)`   | #ebeced     |
+| Brown   | `var(--scribex-highlight-brown)`  | #e9e5e3     |
+| Orange  | `var(--scribex-highlight-orange)` | #faebdd     |
+| Yellow  | `var(--scribex-highlight-yellow)` | #fbf3db     |
+| Green   | `var(--scribex-highlight-green)`  | #ddedea     |
+| Blue    | `var(--scribex-highlight-blue)`   | #ddebf1     |
+| Purple  | `var(--scribex-highlight-purple)` | #eae4f2     |
+| Pink    | `var(--scribex-highlight-pink)`   | #f4dfeb     |
+| Red     | `var(--scribex-highlight-red)`    | #fbe4e4     |
 
 ## Custom palette
 
 Override the default palette by passing a custom `ColorPalette`:
 
 ```tsx
-import type { ColorPalette } from '@scribex/core';
+import type { ColorPalette } from "@scribex/core";
 
 const brandPalette: ColorPalette = {
   text: [
-    { label: 'Default', value: '', swatch: 'currentColor' },
-    { label: 'Primary', value: 'var(--brand-primary)', swatch: '#6366f1' },
-    { label: 'Secondary', value: 'var(--brand-secondary)', swatch: '#8b5cf6' },
-    { label: 'Danger', value: 'var(--brand-danger)', swatch: '#ef4444' },
+    { label: "Default", value: "", swatch: "currentColor" },
+    { label: "Primary", value: "var(--brand-primary)", swatch: "#6366f1" },
+    { label: "Secondary", value: "var(--brand-secondary)", swatch: "#8b5cf6" },
+    { label: "Danger", value: "var(--brand-danger)", swatch: "#ef4444" },
   ],
   highlight: [
-    { label: 'Default', value: '', swatch: 'transparent' },
-    { label: 'Highlight', value: 'var(--brand-highlight)', swatch: '#fef08a' },
-    { label: 'Success', value: 'var(--brand-success-bg)', swatch: '#dcfce7' },
+    { label: "Default", value: "", swatch: "transparent" },
+    { label: "Highlight", value: "var(--brand-highlight)", swatch: "#fef08a" },
+    { label: "Success", value: "var(--brand-success-bg)", swatch: "#dcfce7" },
   ],
 };
 
@@ -132,7 +132,7 @@ const brandPalette: ColorPalette = {
   activeTextColor={null}
   activeHighlightColor={null}
   onClose={() => {}}
-/>
+/>;
 ```
 
 ## Commands dispatched

@@ -8,29 +8,34 @@ description: The root editor component that wraps Lexical's LexicalComposer.
 ## Import
 
 ```tsx
-import { EditorRoot } from '@scribex/core';
+import { EditorRoot } from "@scribex/core";
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `namespace` | `string` | **required** | Unique identifier for multi-editor isolation. Each editor on the page must have a distinct namespace. |
-| `initialState` | `string \| null` | `undefined` | Serialized Lexical JSON state. Pass `null` or omit for a blank editor. |
-| `children` | `React.ReactNode` | `undefined` | Plugin and UI components (FloatingToolbar, SlashMenu, etc.) |
-| `className` | `string` | `undefined` | CSS class applied to the editor container `<div>`. |
-| `dir` | `"ltr" \| "rtl" \| "auto"` | `undefined` | Document-level text direction. When set to `"ltr"` or `"rtl"`, the root node direction is set on mount. Omit for per-paragraph auto-detection. |
-| `placeholder` | `string` | `"Start writing..."` | Placeholder text shown when the editor is empty. |
-| `editable` | `boolean` | `true` | Whether the editor content is editable. Set to `false` for read-only mode. |
-| `autoFocus` | `boolean` | `true` | Whether the editor auto-focuses on mount. |
-| `onError` | `(error: Error) => void` | `console.error` + `throw` | Custom error handler for Lexical errors. The default handler logs to the console and re-throws. |
+| Prop           | Type                       | Default                   | Description                                                                                                                                    |
+| -------------- | -------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `namespace`    | `string`                   | **required**              | Unique identifier for multi-editor isolation. Each editor on the page must have a distinct namespace.                                          |
+| `initialState` | `string \| null`           | `undefined`               | Serialized Lexical JSON state. Pass `null` or omit for a blank editor.                                                                         |
+| `children`     | `React.ReactNode`          | `undefined`               | Plugin and UI components (FloatingToolbar, SlashMenu, etc.)                                                                                    |
+| `className`    | `string`                   | `undefined`               | CSS class applied to the editor container `<div>`.                                                                                             |
+| `dir`          | `"ltr" \| "rtl" \| "auto"` | `undefined`               | Document-level text direction. When set to `"ltr"` or `"rtl"`, the root node direction is set on mount. Omit for per-paragraph auto-detection. |
+| `placeholder`  | `string`                   | `"Start writing..."`      | Placeholder text shown when the editor is empty.                                                                                               |
+| `editable`     | `boolean`                  | `true`                    | Whether the editor content is editable. Set to `false` for read-only mode.                                                                     |
+| `autoFocus`    | `boolean`                  | `true`                    | Whether the editor auto-focuses on mount.                                                                                                      |
+| `onError`      | `(error: Error) => void`   | `console.error` + `throw` | Custom error handler for Lexical errors. The default handler logs to the console and re-throws.                                                |
 
 ## Basic usage
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, FloatingToolbar, SlashMenu, InputRulePlugin } from '@scribex/core';
+import {
+  EditorRoot,
+  FloatingToolbar,
+  SlashMenu,
+  InputRulePlugin,
+} from "@scribex/core";
 
 export default function EditorPage() {
   return (
@@ -52,7 +57,7 @@ export default function EditorPage() {
 Every feature in Scribex is a composable plugin passed as a React child. There is no prop explosion -- you only include what you need:
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
 import {
   EditorRoot,
@@ -68,15 +73,15 @@ import {
   ColorPlugin,
   BlockSelectionPlugin,
   useEditorState,
-} from '@scribex/core';
+} from "@scribex/core";
 
 function StateTracker() {
   const { serializedState } = useEditorState({
     debounceMs: 300,
     onChange: (json) => {
       // Persist to your backend
-      fetch('/api/save', {
-        method: 'POST',
+      fetch("/api/save", {
+        method: "POST",
         body: json,
       });
     },
@@ -86,8 +91,8 @@ function StateTracker() {
 
 const uploadHandler = async (file: File): Promise<string> => {
   const formData = new FormData();
-  formData.append('file', file);
-  const res = await fetch('/api/upload', { method: 'POST', body: formData });
+  formData.append("file", file);
+  const res = await fetch("/api/upload", { method: "POST", body: formData });
   const { url } = await res.json();
   return url;
 };
@@ -124,9 +129,9 @@ export default function EditorPage() {
 Multiple `EditorRoot` instances can coexist on the same page. Each must have a unique `namespace`:
 
 ```tsx title="app/document/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, FloatingToolbar, InputRulePlugin } from '@scribex/core';
+import { EditorRoot, FloatingToolbar, InputRulePlugin } from "@scribex/core";
 
 export default function DocumentPage() {
   return (
@@ -177,14 +182,11 @@ Set `editable={false}` to render the editor in read-only mode. This is useful fo
 Pass a serialized Lexical JSON string to `initialState` to restore previously saved content:
 
 ```tsx
-const savedState = localStorage.getItem('editor-state');
+const savedState = localStorage.getItem("editor-state");
 
-<EditorRoot
-  namespace="my-editor"
-  initialState={savedState}
->
+<EditorRoot namespace="my-editor" initialState={savedState}>
   {/* plugins */}
-</EditorRoot>
+</EditorRoot>;
 ```
 
 ## RTL support
@@ -192,11 +194,7 @@ const savedState = localStorage.getItem('editor-state');
 For right-to-left languages, set the `dir` prop:
 
 ```tsx
-<EditorRoot
-  namespace="rtl-editor"
-  dir="rtl"
-  placeholder="...ابدأ الكتابة"
->
+<EditorRoot namespace="rtl-editor" dir="rtl" placeholder="...ابدأ الكتابة">
   <FloatingToolbar />
   <InputRulePlugin />
 </EditorRoot>

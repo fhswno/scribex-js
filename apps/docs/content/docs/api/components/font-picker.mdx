@@ -8,41 +8,38 @@ description: Font family picker component.
 ## Import
 
 ```tsx
-import { FontPicker } from '@scribex/core';
-import type { FontFamilyEntry } from '@scribex/core';
+import { FontPicker } from "@scribex/core";
+import type { FontFamilyEntry } from "@scribex/core";
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `fonts` | `FontFamilyEntry[]` | `DEFAULT_FONT_FAMILIES` | Array of available font families. |
-| `activeFont` | `string \| null` | **required** | The currently active font family CSS value, or `null` if using the default font. |
-| `onClose` | `() => void` | **required** | Callback invoked after a font is selected. Typically used to close the picker dropdown. |
+| Prop         | Type                | Default                 | Description                                                                             |
+| ------------ | ------------------- | ----------------------- | --------------------------------------------------------------------------------------- |
+| `fonts`      | `FontFamilyEntry[]` | `DEFAULT_FONT_FAMILIES` | Array of available font families.                                                       |
+| `activeFont` | `string \| null`    | **required**            | The currently active font family CSS value, or `null` if using the default font.        |
+| `onClose`    | `() => void`        | **required**            | Callback invoked after a font is selected. Typically used to close the picker dropdown. |
 
 ## Basic usage
 
 The `FontPicker` is typically used inside the `FloatingToolbar` and does not need to be added separately. However, you can use it in a custom toolbar:
 
 ```tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { FontPicker } from '@scribex/core';
+import { useState } from "react";
+import { FontPicker } from "@scribex/core";
 
 function CustomFontControl() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: "relative" }}>
       <button onClick={() => setIsOpen(!isOpen)}>Font</button>
 
       {isOpen && (
-        <div style={{ position: 'absolute', top: '100%', zIndex: 50 }}>
-          <FontPicker
-            activeFont={null}
-            onClose={() => setIsOpen(false)}
-          />
+        <div style={{ position: "absolute", top: "100%", zIndex: 50 }}>
+          <FontPicker activeFont={null} onClose={() => setIsOpen(false)} />
         </div>
       )}
     </div>
@@ -69,42 +66,58 @@ interface FontFamilyEntry {
 
 The default set includes four options:
 
-| Label | CSS Value | Preview Font Stack |
-|---|---|---|
-| Default | (removes font override) | `var(--scribex-font-sans)` |
-| Serif | `var(--scribex-font-serif)` | `var(--scribex-font-serif)` |
-| Mono | `var(--scribex-font-mono)` | `var(--scribex-font-mono)` |
-| Hand | `var(--scribex-font-hand)` | `var(--scribex-font-hand)` |
+| Label   | CSS Value                   | Preview Font Stack          |
+| ------- | --------------------------- | --------------------------- |
+| Default | (removes font override)     | `var(--scribex-font-sans)`  |
+| Serif   | `var(--scribex-font-serif)` | `var(--scribex-font-serif)` |
+| Mono    | `var(--scribex-font-mono)`  | `var(--scribex-font-mono)`  |
+| Hand    | `var(--scribex-font-hand)`  | `var(--scribex-font-hand)`  |
 
 ## Custom font families
 
 Override the defaults by passing a custom `FontFamilyEntry[]`:
 
 ```tsx
-import type { FontFamilyEntry } from '@scribex/core';
+import type { FontFamilyEntry } from "@scribex/core";
 
 const customFonts: FontFamilyEntry[] = [
-  { label: 'Default', value: '', preview: 'system-ui, sans-serif' },
-  { label: 'Georgia', value: 'Georgia, serif', preview: 'Georgia, serif' },
-  { label: 'Courier', value: '"Courier New", monospace', preview: '"Courier New", monospace' },
-  { label: 'Comic Sans', value: '"Comic Sans MS", cursive', preview: '"Comic Sans MS", cursive' },
+  { label: "Default", value: "", preview: "system-ui, sans-serif" },
+  { label: "Georgia", value: "Georgia, serif", preview: "Georgia, serif" },
+  {
+    label: "Courier",
+    value: '"Courier New", monospace',
+    preview: '"Courier New", monospace',
+  },
+  {
+    label: "Comic Sans",
+    value: '"Comic Sans MS", cursive',
+    preview: '"Comic Sans MS", cursive',
+  },
 ];
 
-<FontPicker
-  fonts={customFonts}
-  activeFont={null}
-  onClose={() => {}}
-/>
+<FontPicker fonts={customFonts} activeFont={null} onClose={() => {}} />;
 ```
 
 To add web fonts (e.g., Google Fonts), ensure the font is loaded in your application first, then reference it in the `value` and `preview` fields:
 
 ```tsx
 const googleFonts: FontFamilyEntry[] = [
-  { label: 'Default', value: '', preview: 'system-ui, sans-serif' },
-  { label: 'Inter', value: '"Inter", sans-serif', preview: '"Inter", sans-serif' },
-  { label: 'Playfair Display', value: '"Playfair Display", serif', preview: '"Playfair Display", serif' },
-  { label: 'JetBrains Mono', value: '"JetBrains Mono", monospace', preview: '"JetBrains Mono", monospace' },
+  { label: "Default", value: "", preview: "system-ui, sans-serif" },
+  {
+    label: "Inter",
+    value: '"Inter", sans-serif',
+    preview: '"Inter", sans-serif',
+  },
+  {
+    label: "Playfair Display",
+    value: '"Playfair Display", serif',
+    preview: '"Playfair Display", serif',
+  },
+  {
+    label: "JetBrains Mono",
+    value: '"JetBrains Mono", monospace',
+    preview: '"JetBrains Mono", monospace',
+  },
 ];
 ```
 
