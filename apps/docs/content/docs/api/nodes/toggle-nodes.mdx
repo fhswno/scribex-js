@@ -1,0 +1,238 @@
+---
+title: Toggle Nodes
+description: ToggleContainerNode, ToggleTitleNode, and ToggleContentNode for collapsible content.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Scribex's toggle (collapsible/accordion) feature is implemented with three cooperating `ElementNode` subclasses. They form a strict parent-child hierarchy in the AST:
+
+```
+ToggleContainerNode
+  ├── ToggleTitleNode (summary line)
+  └── ToggleContentNode (collapsible body)
+        ├── ParagraphNode
+        ├── ...any block-level children
+```
+
+## Import
+
+```tsx
+import {
+  ToggleContainerNode,
+  $createToggleContainerNode,
+  $isToggleContainerNode,
+  ToggleTitleNode,
+  $createToggleTitleNode,
+  $isToggleTitleNode,
+  ToggleContentNode,
+  $createToggleContentNode,
+  $isToggleContentNode,
+} from '@scribex/core';
+import type { ToggleContainerPayload } from '@scribex/core';
+```
+
+---
+
+## ToggleContainerNode
+
+The root container for a toggle block. Extends `ElementNode`.
+
+### ToggleContainerPayload
+
+```ts
+interface ToggleContainerPayload {
+  open?: boolean;
+  key?: NodeKey;
+}
+```
+
+| Field | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `open` | `boolean` | No | `true` | Whether the toggle is expanded on creation. |
+| `key` | `NodeKey` | No | auto | Explicit Lexical node key. |
+
+### Functions
+
+#### `$createToggleContainerNode(payload?: ToggleContainerPayload): ToggleContainerNode`
+
+Creates a new `ToggleContainerNode`. Must be called inside `editor.update()`.
+
+```ts
+editor.update(() => {
+  const container = $createToggleContainerNode({ open: true });
+  const title = $createToggleTitleNode();
+  title.append($createTextNode('Click to expand'));
+  const content = $createToggleContentNode();
+  const paragraph = $createParagraphNode();
+  paragraph.append($createTextNode('Hidden content here.'));
+  content.append(paragraph);
+  container.append(title, content);
+  $getRoot().append(container);
+});
+```
+
+#### `$isToggleContainerNode(node: LexicalNode | null | undefined): node is ToggleContainerNode`
+
+Type guard that returns `true` if the given node is a `ToggleContainerNode`.
+
+### Instance methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `getOpen()` | `boolean` | Returns whether the toggle is currently expanded. Uses `getLatest()`. |
+| `setOpen(open: boolean)` | `void` | Sets the open state. Uses `getWritable()`. Must be called inside `editor.update()`. |
+| `toggleOpen()` | `void` | Toggles the open state. Equivalent to `setOpen(!getOpen())`. |
+| `isShadowRoot()` | `true` | Always returns `true`. The container acts as a structural boundary in the AST, preventing block-level operations (like Enter to create a new paragraph) from escaping the toggle. |
+| `collapseAtStart(selection)` | `boolean` | Handles Backspace at the start of the first child: unwraps the entire container, moving all children to the parent level, then removes the empty container. |
+
+### DOM rendering
+
+The container renders differently based on the browser:
+
+- **Chrome**: Uses a `<div>` with `data-toggle-container="true"` and `data-open="true|false"` attributes. This is because Chrome has known issues with `<details>` elements inside `contenteditable` contexts.
+- **Other browsers**: Uses a native `<details>` element with the `open` attribute, getting native toggle behavior.
+
+### Serialized format
+
+```ts
+type SerializedToggleContainerNode = SerializedElementNode & {
+  type: 'toggle-container';
+  version: 1;
+  open: boolean;
+};
+```
+
+### DOM import/export
+
+- **exportDOM**: Produces a `<details>` element (with `open` attribute if expanded).
+- **importDOM**: Converts pasted `<details>` elements into `ToggleContainerNode` instances.
+
+---
+
+## ToggleTitleNode
+
+The summary/title line of a toggle. Extends `ElementNode`. Renders as a `<summary>` element.
+
+### Functions
+
+#### `$createToggleTitleNode(): ToggleTitleNode`
+
+Creates a new `ToggleTitleNode`. Takes no arguments.
+
+#### `$isToggleTitleNode(node: LexicalNode | null | undefined): node is ToggleTitleNode`
+
+Type guard.
+
+### Keyboard behavior
+
+| Key | Behavior |
+|---|---|
+| **Enter** | If toggle is **open**: moves cursor into the content area (creates a paragraph if content is empty). If toggle is **closed**: inserts a new paragraph after the entire container. |
+| **Backspace** (at start) | Delegates to `ToggleContainerNode.collapseAtStart()`, which unwraps the entire toggle into flat content. |
+
+### Chrome click handling
+
+On Chrome (where `<details>` is replaced by `<div>`), the title node registers a click handler that detects clicks within the first 28px from the inline start (the disclosure triangle area). In RTL layouts, this is measured from the inline end. Clicking in this region toggles the container's `open` state.
+
+### DOM import/export
+
+- **importDOM**: Converts `<summary>` elements.
+- The title node renders a `data-placeholder="Toggle heading"` attribute for placeholder styling.
+
+### Serialized format
+
+```ts
+type SerializedToggleTitleNode = SerializedElementNode & {
+  type: 'toggle-title';
+  version: 1;
+};
+```
+
+---
+
+## ToggleContentNode
+
+The collapsible body of a toggle. Extends `ElementNode`. Contains the content that appears when the toggle is expanded.
+
+### Functions
+
+#### `$createToggleContentNode(): ToggleContentNode`
+
+Creates a new `ToggleContentNode`. Takes no arguments.
+
+#### `$isToggleContentNode(node: LexicalNode | null | undefined): node is ToggleContentNode`
+
+Type guard.
+
+### Instance methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `isShadowRoot()` | `true` | Always returns `true`. Block-level operations are contained within the content area. |
+
+### DOM rendering
+
+Renders as a `<div>` with `data-toggle-content="true"`. Themed via `config.theme.toggleContent`.
+
+### Serialized format
+
+```ts
+type SerializedToggleContentNode = SerializedElementNode & {
+  type: 'toggle-content';
+  version: 1;
+};
+```
+
+---
+
+## Creating a complete toggle
+
+The `TogglePlugin` handles creation via the `INSERT_TOGGLE_COMMAND`, but if you need to create a toggle programmatically:
+
+```ts
+import {
+  $createToggleContainerNode,
+  $createToggleTitleNode,
+  $createToggleContentNode,
+} from '@scribex/core';
+import { $createParagraphNode, $createTextNode, $getRoot } from 'lexical';
+
+editor.update(() => {
+  const container = $createToggleContainerNode({ open: true });
+
+  const title = $createToggleTitleNode();
+  title.append($createTextNode('FAQ: How does this work?'));
+
+  const content = $createToggleContentNode();
+  const answer = $createParagraphNode();
+  answer.append($createTextNode('It works by combining three ElementNode subclasses.'));
+  content.append(answer);
+
+  container.append(title, content);
+  $getRoot().append(container);
+});
+```
+
+<Callout type="warn">
+Always create the full three-node structure: `ToggleContainerNode` with both a `ToggleTitleNode` and a `ToggleContentNode` as children. A container without both children will behave unpredictably.
+</Callout>
+
+## Markdown serialization
+
+The `serializeNodesToMarkdown` utility outputs toggles as HTML `<details>` blocks:
+
+```markdown
+<details>
+<summary>Title text</summary>
+
+Content paragraph text
+
+</details>
+```
+
+## Related
+
+- [TogglePlugin](/docs/api/plugins/toggle-plugin) -- Plugin that registers the toggle command
+- [Toggles guide](/docs/guides/toggles) -- Full tutorial with examples
+- [INSERT_TOGGLE_COMMAND](/docs/api/commands#insert_toggle_command) -- The command to insert a toggle
