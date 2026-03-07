@@ -11,10 +11,14 @@ import {
   $isTextNode,
   $isElementNode,
   $isRootNode,
+  CAN_REDO_COMMAND,
+  CAN_UNDO_COMMAND,
   COMMAND_PRIORITY_LOW,
   FORMAT_TEXT_COMMAND,
   KEY_ESCAPE_COMMAND,
+  REDO_COMMAND,
   SELECTION_CHANGE_COMMAND,
+  UNDO_COMMAND,
 } from "lexical";
 import { $isTableSelection } from "@lexical/table";
 
@@ -32,6 +36,8 @@ import {
   TextAaIcon,
   TextAlignLeftIcon,
   TextAlignRightIcon,
+  ArrowCounterClockwiseIcon,
+  ArrowClockwiseIcon,
 } from "@phosphor-icons/react";
 import type { IconWeight } from "@phosphor-icons/react";
 
@@ -48,18 +54,24 @@ import type { FontFamilyEntry } from "../data/font-families";
 
 type TextFormat = "bold" | "italic" | "underline" | "strikethrough" | "code";
 
+const MOD =
+  typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.platform)
+    ? "Cmd"
+    : "Ctrl";
+
 interface ToolbarButton {
   icon: React.ComponentType<{ size?: number; weight?: IconWeight }>;
   format: TextFormat;
   label: string;
+  shortcut: string;
 }
 
 const TOOLBAR_BUTTONS: ToolbarButton[] = [
-  { icon: TextBIcon, format: "bold", label: "Bold" },
-  { icon: TextItalicIcon, format: "italic", label: "Italic" },
-  { icon: TextUnderlineIcon, format: "underline", label: "Underline" },
-  { icon: TextStrikethroughIcon, format: "strikethrough", label: "Strikethrough" },
-  { icon: CodeIcon, format: "code", label: "Inline Code" },
+  { icon: TextBIcon, format: "bold", label: "Bold", shortcut: `${MOD}+B` },
+  { icon: TextItalicIcon, format: "italic", label: "Italic", shortcut: `${MOD}+I` },
+  { icon: TextUnderlineIcon, format: "underline", label: "Underline", shortcut: `${MOD}+U` },
+  { icon: TextStrikethroughIcon, format: "strikethrough", label: "Strikethrough", shortcut: `${MOD}+Shift+S` },
+  { icon: CodeIcon, format: "code", label: "Inline Code", shortcut: `${MOD}+E` },
 ];
 
 interface FloatingToolbarProps {
@@ -84,6 +96,8 @@ export function FloatingToolbar({ colorPalette, fontFamilies }: FloatingToolbarP
   const [blockDirection, setBlockDirection] = useState<"ltr" | "rtl" | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showFontPicker, setShowFontPicker] = useState(false);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
     null,
@@ -94,6 +108,30 @@ export function FloatingToolbar({ colorPalette, fontFamilies }: FloatingToolbarP
     if (typeof window === "undefined") return;
     setPortalContainer(document.body);
   }, []);
+
+  // Track undo/redo availability
+  useEffect(() => {
+    const unregisterUndo = editor.registerCommand(
+      CAN_UNDO_COMMAND,
+      (payload) => {
+        setCanUndo(payload);
+        return false;
+      },
+      COMMAND_PRIORITY_LOW,
+    );
+    const unregisterRedo = editor.registerCommand(
+      CAN_REDO_COMMAND,
+      (payload) => {
+        setCanRedo(payload);
+        return false;
+      },
+      COMMAND_PRIORITY_LOW,
+    );
+    return () => {
+      unregisterUndo();
+      unregisterRedo();
+    };
+  }, [editor]);
 
   // Callback - Update Toolbar Position and Active Formats
   const updateToolbar = useCallback(() => {
@@ -305,11 +343,83 @@ export function FloatingToolbar({ colorPalette, fontFamilies }: FloatingToolbarP
           '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
       }}
     >
-      {TOOLBAR_BUTTONS.map(({ icon: Icon, format, label }) => (
+      {/* Undo button */}
+      <button
+        type="button"
+        title={`Undo (${MOD}+Z)`}
+        aria-label="Undo"
+        disabled={!canUndo}
+        data-testid="toolbar-undo"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          editor.dispatchCommand(UNDO_COMMAND, undefined);
+          editor.focus();
+        }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "30px",
+          height: "30px",
+          borderRadius: "7px",
+          border: "none",
+          cursor: "default",
+          backgroundColor: "transparent",
+          color: "var(--scribex-icon-secondary)",
+          opacity: canUndo ? 1 : 0.3,
+          pointerEvents: canUndo ? "auto" : "none",
+          transition: "opacity 80ms ease",
+        }}
+      >
+        <ArrowCounterClockwiseIcon size={15} weight="regular" />
+      </button>
+
+      {/* Redo button */}
+      <button
+        type="button"
+        title={`Redo (${MOD}+Shift+Z)`}
+        aria-label="Redo"
+        disabled={!canRedo}
+        data-testid="toolbar-redo"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          editor.dispatchCommand(REDO_COMMAND, undefined);
+          editor.focus();
+        }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "30px",
+          height: "30px",
+          borderRadius: "7px",
+          border: "none",
+          cursor: "default",
+          backgroundColor: "transparent",
+          color: "var(--scribex-icon-secondary)",
+          opacity: canRedo ? 1 : 0.3,
+          pointerEvents: canRedo ? "auto" : "none",
+          transition: "opacity 80ms ease",
+        }}
+      >
+        <ArrowClockwiseIcon size={15} weight="regular" />
+      </button>
+
+      {/* Separator */}
+      <div
+        style={{
+          width: "1px",
+          height: "18px",
+          backgroundColor: "var(--scribex-separator)",
+          margin: "0 2px",
+        }}
+      />
+
+      {TOOLBAR_BUTTONS.map(({ icon: Icon, format, label, shortcut }) => (
         <button
           key={format}
           type="button"
-          title={label}
+          title={`${label} (${shortcut})`}
           aria-label={label}
           aria-pressed={activeFormats.has(format)}
           data-testid={`toolbar-${format}`}
