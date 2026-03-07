@@ -1,0 +1,293 @@
+---
+title: Utilities
+description: Utility functions for Markdown serialization, HTML sanitization, and video parsing.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Scribex exports four utility functions for common tasks: sanitizing pasted HTML, serializing to and from Markdown, and parsing video embed URLs.
+
+## Import
+
+```tsx
+import {
+  sanitizePastedHTML,
+  serializeNodesToMarkdown,
+  $parseMarkdownToLexicalNodes,
+  parseVideoEmbed,
+} from '@scribex/core';
+```
+
+---
+
+## sanitizePastedHTML
+
+Sanitizes raw HTML from the clipboard for safe insertion into the Lexical AST. Uses `DOMParser` to parse the HTML and applies a strict allowlist-based sanitization pipeline.
+
+### Signature
+
+```ts
+function sanitizePastedHTML(html: string): string;
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `html` | `string` | Raw HTML string from the clipboard (typically from `ClipboardEvent.clipboardData.getData('text/html')`). |
+
+### Returns
+
+A sanitized HTML string safe for conversion into Lexical nodes via `$generateNodesFromDOM`.
+
+### What it does
+
+The sanitization pipeline performs the following operations:
+
+1. **Strips dangerous tags entirely** (element and all children): `<script>`, `<style>`, `<iframe>`, `<object>`, `<noscript>`.
+
+2. **Strips all `style` attributes** -- removes inline font sizes, colors, margins.
+
+3. **Strips all `class` attributes**.
+
+4. **Normalizes heading levels** -- Google Docs uses generic elements with inline font-size styles. Before stripping styles, the sanitizer checks font sizes and converts them to semantic headings:
+   - 32px+ maps to `<h1>`
+   - 24px+ maps to `<h2>`
+   - 18px+ maps to `<h3>`
+
+5. **Unwraps `<span>` and `<font>` elements** -- these are non-semantic after style stripping.
+
+6. **Converts `<div>` to `<p>`** -- divs are treated as paragraphs.
+
+7. **Normalizes non-semantic tags**: `<b>` becomes `<strong>`, `<i>` becomes `<em>`, `<del>` and `<strike>` become `<s>`.
+
+8. **Preserves only semantic attributes**: `href` on `<a>`, `src` and `alt` on `<img>`. All other attributes are stripped.
+
+9. **Applies a strict element allowlist** -- anything not on the list is unwrapped to its text content.
+
+### Allowlist
+
+The following HTML elements survive sanitization:
+
+```
+p, br, h1, h2, h3, h4, h5, h6, strong, em, u, s, code, pre,
+blockquote, ul, ol, li, a, img, table, thead, tbody, tr, th, td, hr
+```
+
+Additionally, `b`, `i`, `del`, and `strike` are accepted but normalized to their semantic equivalents (`strong`, `em`, `s`).
+
+### Example
+
+```ts
+const dirty = '<div style="font-size: 32px" class="heading"><b onclick="alert()">Title</b></div>';
+const clean = sanitizePastedHTML(dirty);
+// Result: '<h1><strong>Title</strong></h1>'
+```
+
+<Callout type="info">
+This function is automatically called by the `PastePlugin`. You typically do not need to call it directly unless building a custom paste handler.
+</Callout>
+
+---
+
+## serializeNodesToMarkdown
+
+Serializes an array of Lexical nodes to a Markdown string. This is a pure function with no side effects -- it does not read from or write to the editor.
+
+### Signature
+
+```ts
+function serializeNodesToMarkdown(nodes: LexicalNode[]): string;
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `nodes` | `LexicalNode[]` | An array of Lexical nodes to serialize. Typically obtained via `$getRoot().getChildren()` inside `editor.read()`. |
+
+### Returns
+
+A Markdown string with double newlines (`\n\n`) separating block-level elements.
+
+### Supported node types
+
+| Node type | Markdown output |
+|---|---|
+| HeadingNode (h1-h6) | `# `, `## `, `### `, etc. |
+| ParagraphNode | Plain text |
+| QuoteNode | `> text` |
+| ListNode (bullet) | `- item` |
+| ListNode (number) | `1. item` |
+| ListNode (check) | `- [x] item` or `- [ ] item` |
+| ImageNode | `![alt](src)` |
+| VideoNode | `[title](src)` |
+| HorizontalRuleNode | `---` |
+| CalloutNode | `> [!emoji] text` |
+| ToggleContainerNode | `<details><summary>...</summary>...</details>` |
+| TableNode | Pipe-delimited Markdown table with header separator |
+| LinkNode (inline) | `[text](url)` |
+| Bold text | `**text**` |
+| Italic text | `*text*` |
+| Strikethrough text | `~~text~~` |
+| Code text | `` `text` `` |
+| Unknown nodes | Falls back to `getTextContent()` |
+
+### Example
+
+```ts
+const markdown = editor.read(() => {
+  const root = $getRoot();
+  return serializeNodesToMarkdown(root.getChildren());
+});
+
+console.log(markdown);
+// # Hello World
+//
+// This is a paragraph with **bold** and *italic* text.
+//
+// - Item one
+// - Item two
+```
+
+<Callout type="warn">
+This function must be called with pre-read nodes. Call it inside `editor.read()` or with nodes that have already been extracted from the editor state. Do not call it inside `editor.update()`.
+</Callout>
+
+---
+
+## $parseMarkdownToLexicalNodes
+
+Parses a Markdown string into an array of Lexical nodes. The `$` prefix indicates that this function creates Lexical nodes and **must be called inside `editor.update()`**.
+
+### Signature
+
+```ts
+function $parseMarkdownToLexicalNodes(markdown: string): LexicalNode[];
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `markdown` | `string` | A Markdown string to parse. |
+
+### Returns
+
+An array of Lexical nodes ready to be inserted into the AST.
+
+### Supported Markdown syntax
+
+| Markdown | Lexical node |
+|---|---|
+| `# Heading` through `###### Heading` | HeadingNode (h1-h6) |
+| `> Quote text` | QuoteNode |
+| `- item` or `* item` | ListNode (bullet) |
+| `1. item` | ListNode (number) |
+| `- [x] item` or `- [ ] item` | ListNode (check) with checked/unchecked items |
+| `**bold**` | TextNode with bold format |
+| `*italic*` | TextNode with italic format |
+| `` `code` `` | TextNode with code format |
+| `~~strikethrough~~` | TextNode with strikethrough format |
+| Plain text | ParagraphNode |
+
+### Example
+
+```ts
+editor.update(() => {
+  const nodes = $parseMarkdownToLexicalNodes('# Hello\n\nThis is **bold** text.');
+  const root = $getRoot();
+  root.clear();
+  nodes.forEach((node) => root.append(node));
+});
+```
+
+<Callout type="warn">
+This function creates Lexical nodes that require an active editor context. Always call it inside `editor.update()`. Calling it outside an update context will throw.
+</Callout>
+
+---
+
+## parseVideoEmbed
+
+Parses a URL string and returns embed information for known video providers. Pure function with no side effects.
+
+### Signature
+
+```ts
+function parseVideoEmbed(url: string): VideoEmbedInfo | null;
+```
+
+### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `url` | `string` | A URL string to parse. |
+
+### Returns
+
+A `VideoEmbedInfo` object if the URL is valid, or `null` if the input is not a valid URL.
+
+```ts
+interface VideoEmbedInfo {
+  provider: 'youtube' | 'vimeo' | 'loom' | 'generic';
+  embedUrl: string;
+  thumbnailUrl?: string;
+}
+```
+
+### Supported providers
+
+| Provider | Recognized URL patterns | Embed URL format |
+|---|---|---|
+| YouTube | `youtube.com/watch?v=ID`, `youtu.be/ID`, `youtube.com/embed/ID`, `youtube.com/shorts/ID`, `youtube.com/live/ID`, `m.youtube.com/watch?v=ID` | `https://www.youtube.com/embed/{ID}` |
+| Vimeo | `vimeo.com/ID`, `player.vimeo.com/video/ID`, `vimeo.com/channels/*/ID` | `https://player.vimeo.com/video/{ID}` |
+| Loom | `loom.com/share/ID`, `loom.com/embed/ID` | `https://www.loom.com/embed/{ID}` |
+| Generic | Any other valid HTTP(S) URL | The original URL (passed through) |
+
+### Examples
+
+```ts
+parseVideoEmbed('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+// {
+//   provider: 'youtube',
+//   embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+//   thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+// }
+
+parseVideoEmbed('https://vimeo.com/123456789');
+// {
+//   provider: 'vimeo',
+//   embedUrl: 'https://player.vimeo.com/video/123456789',
+// }
+
+parseVideoEmbed('https://www.loom.com/share/abc123def456');
+// {
+//   provider: 'loom',
+//   embedUrl: 'https://www.loom.com/embed/abc123def456',
+// }
+
+parseVideoEmbed('https://example.com/my-video.mp4');
+// {
+//   provider: 'generic',
+//   embedUrl: 'https://example.com/my-video.mp4',
+// }
+
+parseVideoEmbed('not a url');
+// null
+
+parseVideoEmbed('ftp://files.example.com/video.mp4');
+// null (only http and https are supported)
+```
+
+### Thumbnail support
+
+Thumbnails are returned for YouTube videos only (`https://img.youtube.com/vi/{ID}/hqdefault.jpg`). Vimeo thumbnails require an API call and are not included. Loom thumbnails are not supported.
+
+## Related
+
+- [PastePlugin](/docs/api/plugins/paste-plugin) -- Uses `sanitizePastedHTML` internally
+- [AIPreviewNode](/docs/api/nodes/ai-preview-node) -- Uses `$parseMarkdownToLexicalNodes` on accept
+- [AI Integration guide](/docs/guides/ai-integration) -- Uses `serializeNodesToMarkdown` for context
+- [VideoPlugin](/docs/api/plugins/video-plugin) -- Uses `parseVideoEmbed` for URL processing
+- [Paste Handling guide](/docs/guides/paste-handling) -- Paste pipeline details
