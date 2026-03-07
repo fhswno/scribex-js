@@ -61,7 +61,7 @@ import "@scribex/core/styles";
 
 export function Editor() {
   return (
-    <EditorRoot namespace="my-editor" className="relative min-h-[200px] p-4">
+    <EditorRoot namespace="my-editor" className="relative min-h-50 p-4">
       <FloatingToolbar />
       <SlashMenu />
       <InputRulePlugin />
