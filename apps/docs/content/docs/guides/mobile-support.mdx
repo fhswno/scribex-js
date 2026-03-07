@@ -1,0 +1,188 @@
+---
+title: Mobile Support
+description: How Scribex adapts to touch devices.
+---
+
+Scribex automatically adapts its UI for touch devices. Desktop-only features like drag handles are disabled, and a mobile-optimized formatting toolbar appears at the bottom of the screen. This happens transparently -- no configuration is needed.
+
+## Touch detection
+
+Scribex detects touch devices on mount using multiple signals for reliability:
+
+```ts
+const isTouch =
+  window.matchMedia('(pointer: coarse)').matches ||
+  navigator.maxTouchPoints > 0 ||
+  'ontouchstart' in window;
+```
+
+This check runs once on mount and is not reactive. Screen type does not change at runtime in production -- a device is either touch or not. Multiple signals are used because Chrome DevTools device emulation does not always set `pointer: coarse`.
+
+The detection runs inside a `useEffect` to avoid SSR hydration mismatches (`window` is not available on the server).
+
+## What changes on mobile
+
+### OverlayPortal is disabled
+
+The `OverlayPortal` component (which renders the drag handle for block reordering) checks for touch capability on mount. If the device is a touch device, the component renders nothing and returns immediately:
+
+```tsx
+// Inside OverlayPortal:
+const isTouch = window.matchMedia('(pointer: coarse)').matches;
+if (isTouch) return null;
+```
+
+No drag handles are rendered, and no `mousemove` listeners are attached. This avoids unnecessary DOM event overhead on mobile.
+
+### MobileToolbar renders at the bottom
+
+The `MobileToolbar` component renders a fixed-position formatting toolbar at the bottom of the viewport when the user selects text inside the editor. It is completely hidden on non-touch devices.
+
+### TableHoverActions are disabled
+
+Table hover actions (the row/column add buttons that appear when hovering over table edges) are also disabled on touch devices, since hover interactions are not available.
+
+## MobileToolbar
+
+### Setup
+
+Add the `MobileToolbar` as a child of `EditorRoot`:
+
+```tsx title="app/editor/page.tsx"
+import { EditorRoot, MobileToolbar, FloatingToolbar } from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor" className="min-h-[400px] p-4 border rounded">
+      <FloatingToolbar />
+      <MobileToolbar />
+    </EditorRoot>
+  );
+}
+```
+
+You can include both `FloatingToolbar` and `MobileToolbar` in the same editor. They will not conflict -- `FloatingToolbar` is for desktop (shows on text selection via mouse), and `MobileToolbar` only renders on touch devices.
+
+### Features
+
+The `MobileToolbar` provides five formatting buttons:
+
+| Button | Format | Icon |
+|---|---|---|
+| Bold | `bold` | **B** |
+| Italic | `italic` | *I* |
+| Underline | `underline` | U |
+| Strikethrough | `strikethrough` | ~~S~~ |
+| Inline Code | `code` | `<>` |
+
+Each button dispatches a `FORMAT_TEXT_COMMAND` to the editor. The toolbar handles both `onMouseDown` and `onTouchStart` events to ensure reliable behavior across different mobile browsers.
+
+### Visibility logic
+
+The toolbar uses the `selectionchange` DOM event to determine when to show or hide:
+
+1. **Show**: When the user selects text (non-collapsed selection) inside the editor's root element.
+2. **Hide**: When the selection is collapsed (cursor only), when the selection is outside the editor, or when no selection exists.
+
+```ts
+document.addEventListener('selectionchange', () => {
+  const selection = window.getSelection();
+
+  // Hide if selection is collapsed or empty
+  if (!selection || selection.isCollapsed) {
+    setIsVisible(false);
+    return;
+  }
+
+  // Hide if selection is outside our editor
+  if (!rootElement.contains(selection.anchorNode)) {
+    setIsVisible(false);
+    return;
+  }
+
+  setIsVisible(true);
+});
+```
+
+### Positioning
+
+The toolbar uses `position: fixed` with `bottom: 0`, anchoring it to the bottom of the viewport. It spans the full width of the screen.
+
+For devices with a notch or home indicator (iPhone X and later), the toolbar accounts for the safe area:
+
+```css
+padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+```
+
+This ensures the toolbar buttons are not obscured by the device's home indicator.
+
+### Styling
+
+The toolbar uses the same frosted glass aesthetic as other Scribex popovers:
+
+- `backdrop-filter: blur(20px) saturate(180%)`
+- Background: `var(--scribex-popover-bg)`
+- Border: `var(--scribex-popover-border)` (top border only)
+- Button size: 44x44px (Apple's recommended minimum touch target)
+- z-index: 50
+
+### Props
+
+`MobileToolbar` takes no props. It reads the editor instance from the `LexicalComposer` context automatically.
+
+## Block reordering on mobile
+
+Block reordering via drag-and-drop is **not supported on mobile** in v1. The drag handle (`OverlayPortal`) is disabled entirely on touch devices.
+
+This is a deliberate design decision. Drag-and-drop on mobile requires complex gesture handling (long-press to initiate, scroll-while-dragging, visual feedback) that is beyond the scope of the initial release.
+
+If you need block reordering on mobile, consider implementing a custom solution using:
+- A long-press gesture to enter "reorder mode"
+- Up/Down buttons on each block
+- The `node.insertBefore()` and `node.insertAfter()` Lexical APIs for actual node movement
+
+## Testing mobile behavior
+
+Use Playwright's device emulation to test mobile-specific behavior:
+
+```ts
+import { test, devices } from '@playwright/test';
+
+test.use({ ...devices['iPhone 15 Pro'] });
+
+test('mobile toolbar appears on text selection', async ({ page }) => {
+  await page.goto('/editor');
+
+  // Type some text
+  const editor = page.locator('[data-scribex-root]');
+  await editor.click();
+  await page.keyboard.type('Hello World');
+
+  // Select text
+  await page.keyboard.down('Shift');
+  for (let i = 0; i < 5; i++) {
+    await page.keyboard.press('ArrowLeft');
+  }
+  await page.keyboard.up('Shift');
+
+  // Mobile toolbar should be visible
+  await expect(page.locator('[data-testid="mobile-toolbar"]')).toBeVisible();
+});
+
+test('drag handle is not rendered on mobile', async ({ page }) => {
+  await page.goto('/editor');
+
+  const editor = page.locator('[data-scribex-root]');
+  await editor.click();
+  await page.keyboard.type('Some text');
+
+  // Drag handle should not exist
+  await expect(page.locator('[data-testid="drag-handle"]')).not.toBeVisible();
+});
+```
+
+## Related
+
+- [Multi-Editor](/docs/guides/multi-editor) -- Multiple editors on one page
+- [API: MobileToolbar](/docs/api/components/mobile-toolbar) -- Full API reference
+- [API: OverlayPortal](/docs/api/components/overlay-portal) -- Desktop drag handle reference
