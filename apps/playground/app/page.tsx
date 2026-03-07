@@ -1,6 +1,5 @@
 "use client";
 
-// SCRIBEX
 import {
   EditorRoot,
   FloatingToolbar,
@@ -33,10 +32,7 @@ import {
   TextNode,
 } from "@scribex/core";
 
-// REACT
 import { useCallback, useEffect, useState } from "react";
-
-// TYPES
 import type {
   UploadHandler,
   AIProvider,
@@ -174,8 +170,6 @@ const aiConfig: AIPluginConfig = {
   },
 };
 
-// ─── Mock Mention Providers ──────────────────────────────────────────────────
-
 const MOCK_USERS = [
   { id: "1", label: "Alice", meta: "alice@example.com" },
   { id: "2", label: "Bob", meta: "bob@example.com" },
@@ -219,10 +213,7 @@ const mentionProviders: MentionProvider[] = [
   tagMentionProvider,
 ];
 
-// ─── Theme toggle slash menu item ────────────────────────────────────────────
-
 const ThemeIcon = ({ size }: { size?: number }) => {
-  // Dynamic icon — renders sun or moon based on current theme
   const isDark =
     typeof document !== "undefined" &&
     document.documentElement.classList.contains("dark");
@@ -262,8 +253,6 @@ function createThemeToggleItem(
   };
 }
 
-// ─── Plugins (shared between all editors) ────────────────────────────────────
-
 function EditorPlugins({
   namespace,
   toggleTheme,
@@ -301,8 +290,7 @@ function EditorPlugins({
   );
 }
 
-// ─── Hidden State Display (inside EditorRoot — satisfies test selectors) ─────
-
+// Satisfies test selectors for state display
 function HiddenStateDisplay({
   onStateChange,
 }: {
@@ -333,8 +321,6 @@ function HiddenStateDisplay({
     <pre className="sr-only" data-testid="editor-state" ref={stateRef} />
   );
 }
-
-// ─── Editor Card (for dev section secondary editors) ─────────────────────────
 
 function EditorCard({
   namespace,
@@ -388,8 +374,6 @@ function EditorCard({
   );
 }
 
-// ─── Page ────────────────────────────────────────────────────────────────────
-
 export default function Page() {
   const [editorState, setEditorState] = useState("");
   const [showJson, setShowJson] = useState(false);
@@ -440,7 +424,6 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950 transition-colors">
-      {/* ── Top bar ─────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-30 flex h-11 items-center justify-between px-3 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-sm border-b border-neutral-100 dark:border-neutral-800 transition-colors">
         <div className="flex items-center gap-2">
           <span className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight">
@@ -450,7 +433,6 @@ export default function Page() {
           <span className="text-[13px] text-neutral-400 dark:text-neutral-500">Playground</span>
         </div>
         <div className="flex items-center gap-1">
-          {/* Dark mode toggle */}
           <button
             onClick={() => setDark((d) => !d)}
             className="flex items-center justify-center w-7 h-7 rounded text-neutral-400 dark:text-neutral-500 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
@@ -493,7 +475,6 @@ export default function Page() {
         </div>
       </nav>
 
-      {/* ── Main editor area ──────────────────────────────────── */}
       <main className="mx-auto max-w-180 px-6 pt-20 pb-48">
         <EditorRoot
           namespace="playground-editor"
@@ -504,7 +485,6 @@ export default function Page() {
         </EditorRoot>
       </main>
 
-      {/* ── Dev section (below fold) ──────────────────────────── */}
       <div className="mx-auto max-w-180 px-6 pb-20">
         <div className="border-t border-neutral-100 dark:border-neutral-800 pt-8">
           <button
@@ -540,7 +520,6 @@ export default function Page() {
         </div>
       </div>
 
-      {/* ── JSON state bottom panel ───────────────────────────── */}
       {showJson && (
         <div className="fixed bottom-0 inset-x-0 z-40 bg-[#1a1a1a] border-t border-[#2a2a2a] shadow-[0_-4px_32px_rgba(0,0,0,0.2)]">
           <div className="flex items-center justify-between px-4 h-9 border-b border-[#2a2a2a]">
