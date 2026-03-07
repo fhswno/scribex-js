@@ -3,15 +3,19 @@ title: CodeBlockNode
 description: Syntax-highlighted code block with language selection.
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+import { Callout } from "fumadocs-ui/components/callout";
 
 `CodeBlockNode` is a `DecoratorNode` that renders a full code editor block with a language selector dropdown, copy-to-clipboard button, and optional Shiki-powered syntax highlighting. Code is edited as plain text via a `<textarea>` with debounced AST updates.
 
 ## Import
 
 ```tsx
-import { CodeBlockNode, $createCodeBlockNode, $isCodeBlockNode } from '@scribex/core';
-import type { CodeBlockPayload } from '@scribex/core';
+import {
+  CodeBlockNode,
+  $createCodeBlockNode,
+  $isCodeBlockNode,
+} from "@scribex/core";
+import type { CodeBlockPayload } from "@scribex/core";
 ```
 
 ## CodeBlockPayload
@@ -25,12 +29,12 @@ interface CodeBlockPayload {
 }
 ```
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `code` | `string` | Yes | The code content. |
-| `language` | `string` | Yes | The programming language identifier. Must be one of `SUPPORTED_LANGUAGES`. |
-| `key` | `NodeKey` | No | Explicit Lexical node key. |
-| `autoFocus` | `boolean` | No | When `true`, the textarea auto-focuses on mount. The flag is cleared after the first focus. |
+| Field       | Type      | Required | Description                                                                                 |
+| ----------- | --------- | -------- | ------------------------------------------------------------------------------------------- |
+| `code`      | `string`  | Yes      | The code content.                                                                           |
+| `language`  | `string`  | Yes      | The programming language identifier. Must be one of `SUPPORTED_LANGUAGES`.                  |
+| `key`       | `NodeKey` | No       | Explicit Lexical node key.                                                                  |
+| `autoFocus` | `boolean` | No       | When `true`, the textarea auto-focuses on mount. The flag is cleared after the first focus. |
 
 ## Supported languages
 
@@ -38,9 +42,22 @@ The following language identifiers are supported:
 
 ```ts
 const SUPPORTED_LANGUAGES = [
-  'javascript', 'typescript', 'python', 'css', 'html',
-  'json', 'bash', 'go', 'rust', 'java', 'c', 'cpp',
-  'sql', 'markdown', 'yaml', 'text',
+  "javascript",
+  "typescript",
+  "python",
+  "css",
+  "html",
+  "json",
+  "bash",
+  "go",
+  "rust",
+  "java",
+  "c",
+  "cpp",
+  "sql",
+  "markdown",
+  "yaml",
+  "text",
 ] as const;
 ```
 
@@ -56,7 +73,7 @@ Creates a new `CodeBlockNode`. Must be called inside `editor.update()`.
 editor.update(() => {
   const codeBlock = $createCodeBlockNode({
     code: 'console.log("Hello, world!");',
-    language: 'javascript',
+    language: "javascript",
     autoFocus: true,
   });
   const root = $getRoot();
@@ -70,16 +87,16 @@ Type guard that returns `true` if the given node is a `CodeBlockNode`.
 
 ## Instance methods
 
-| Method | Returns | Description |
-|---|---|---|
-| `getCode()` | `string` | Returns the current code content. |
+| Method          | Returns  | Description                              |
+| --------------- | -------- | ---------------------------------------- |
+| `getCode()`     | `string` | Returns the current code content.        |
 | `getLanguage()` | `string` | Returns the current language identifier. |
 
 ## Serialized format
 
 ```ts
 type SerializedCodeBlockNode = {
-  type: 'code-block';
+  type: "code-block";
   version: 1;
   code: string;
   language: string;
@@ -111,7 +128,10 @@ The `CodeBlockNode` component fetches syntax highlighting from a server endpoint
 4. Clicking on the highlighted output switches back to the editable textarea.
 
 <Callout type="info">
-The highlighting endpoint must be implemented in your application. The playground app provides a reference implementation at `apps/playground/app/api/editor/highlight/route.ts` using Shiki. The component works without the endpoint -- it simply shows unstyled code.
+  The highlighting endpoint must be implemented in your application. The
+  playground app provides a reference implementation at
+  `apps/playground/app/api/editor/highlight/route.ts` using Shiki. The component
+  works without the endpoint -- it simply shows unstyled code.
 </Callout>
 
 ## Copy behavior

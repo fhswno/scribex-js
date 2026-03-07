@@ -3,12 +3,12 @@ title: AIPlugin
 description: AI content generation with streaming preview.
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+import { Callout } from "fumadocs-ui/components/callout";
 
 ## Import
 
 ```tsx
-import { AIPlugin } from '@scribex/core';
+import { AIPlugin } from "@scribex/core";
 ```
 
 ## Overview
@@ -19,10 +19,10 @@ This architecture guarantees zero undo history entries during streaming, and exa
 
 ## Props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `provider` | `AIProvider` | (required) | The AI streaming provider configuration. See below. |
-| `config` | `AIPluginConfig` | `{}` | Optional configuration for behavior, labels, and callbacks. |
+| Prop       | Type             | Default    | Description                                                 |
+| ---------- | ---------------- | ---------- | ----------------------------------------------------------- |
+| `provider` | `AIProvider`     | (required) | The AI streaming provider configuration. See below.         |
+| `config`   | `AIPluginConfig` | `{}`       | Optional configuration for behavior, labels, and callbacks. |
 
 ## The `AIProvider` interface
 
@@ -91,9 +91,14 @@ interface AIPluginConfig {
 ### Basic setup
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, AIPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+import {
+  EditorRoot,
+  AIPlugin,
+  InputRulePlugin,
+  SlashMenu,
+} from "@scribex/core";
 
 export default function EditorPage() {
   return (
@@ -102,7 +107,7 @@ export default function EditorPage() {
       <SlashMenu />
       <AIPlugin
         provider={{
-          endpoint: '/api/editor/gemini',
+          endpoint: "/api/editor/gemini",
         }}
       />
     </EditorRoot>
@@ -115,36 +120,36 @@ export default function EditorPage() {
 ```tsx
 <AIPlugin
   provider={{
-    endpoint: '/api/editor/gemini',
+    endpoint: "/api/editor/gemini",
     headers: {
       Authorization: `Bearer ${session.token}`,
     },
     transformRequest: ({ prompt, context }) => ({
       prompt,
       context,
-      model: 'gemini-2.0-flash',
+      model: "gemini-2.0-flash",
     }),
   }}
   config={{
     generate: {
-      systemPrompt: 'You are a helpful writing assistant. Respond in Markdown.',
+      systemPrompt: "You are a helpful writing assistant. Respond in Markdown.",
       maxTokens: 2048,
     },
     labels: {
-      promptPlaceholder: 'Describe what you want to write...',
-      accept: 'Insert',
-      discard: 'Cancel',
+      promptPlaceholder: "Describe what you want to write...",
+      accept: "Insert",
+      discard: "Cancel",
     },
     contextWindowSize: 5,
     onAccept: (content) => {
-      analytics.track('ai_content_accepted', { length: content.length });
+      analytics.track("ai_content_accepted", { length: content.length });
     },
     onDiscard: () => {
-      analytics.track('ai_content_discarded');
+      analytics.track("ai_content_discarded");
     },
     onError: (error) => {
-      toast.error('AI generation failed. Please try again.');
-      console.error('[AI Error]', error);
+      toast.error("AI generation failed. Please try again.");
+      console.error("[AI Error]", error);
     },
   }}
 />
@@ -152,15 +157,15 @@ export default function EditorPage() {
 
 ## Registered commands
 
-| Command | Payload | Description |
-|---|---|---|
-| `OPEN_AI_PROMPT_COMMAND` | `void` | Opens the inline AI prompt input at the current cursor position. |
-| `INSERT_AI_PREVIEW_COMMAND` | `{ prompt: string; context: string }` | Inserts an `AIPreviewNode` and begins streaming. |
+| Command                     | Payload                               | Description                                                      |
+| --------------------------- | ------------------------------------- | ---------------------------------------------------------------- |
+| `OPEN_AI_PROMPT_COMMAND`    | `void`                                | Opens the inline AI prompt input at the current cursor position. |
+| `INSERT_AI_PREVIEW_COMMAND` | `{ prompt: string; context: string }` | Inserts an `AIPreviewNode` and begins streaming.                 |
 
 ### Dispatching programmatically
 
 ```tsx
-import { OPEN_AI_PROMPT_COMMAND } from '@scribex/core';
+import { OPEN_AI_PROMPT_COMMAND } from "@scribex/core";
 
 // Open the AI prompt from a custom button
 editor.dispatchCommand(OPEN_AI_PROMPT_COMMAND, undefined);
@@ -209,11 +214,14 @@ Stream completes --> "Accept" / "Discard" buttons appear
 Before any AI call, surrounding nodes are serialized to Markdown using `serializeNodesToMarkdown()`. Raw Lexical JSON is never sent to the model -- it is token-inefficient and the model does not understand it. Plain text is not used either because it destroys structural semantics (headings, lists, links).
 
 <Callout type="warn">
-The `AIPreviewNode` must never call `editor.update()` during streaming. All streamed tokens are held in local React state (`useState`). This protects the undo history from being polluted with intermediate streaming states.
+  The `AIPreviewNode` must never call `editor.update()` during streaming. All
+  streamed tokens are held in local React state (`useState`). This protects the
+  undo history from being polluted with intermediate streaming states.
 </Callout>
 
 <Callout type="info">
-After accepting AI content, a single `Cmd+Z` undo removes all accepted content in one step -- not token by token.
+  After accepting AI content, a single `Cmd+Z` undo removes all accepted content
+  in one step -- not token by token.
 </Callout>
 
 ## Related
