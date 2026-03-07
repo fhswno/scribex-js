@@ -1,0 +1,94 @@
+---
+title: Installation
+description: Install Scribex and its peer dependencies in your Next.js project.
+---
+
+## Prerequisites
+
+- [Bun](https://bun.sh) (recommended) or npm/pnpm/yarn
+- [Next.js](https://nextjs.org) 14+ with App Router
+- React 18+
+
+## Install the package
+
+```bash
+bun add @scribex/core
+```
+
+Or with npm/pnpm:
+
+```bash
+npm install @scribex/core
+# or
+pnpm add @scribex/core
+```
+
+## Peer dependencies
+
+Scribex requires the following peer dependencies. Most Next.js projects already have these installed:
+
+```bash
+bun add react react-dom next lexical @lexical/react @lexical/rich-text @lexical/history @lexical/selection @lexical/utils @lexical/list @lexical/table @lexical/link
+```
+
+## Radix UI primitives
+
+Scribex uses Radix UI for accessible dropdown menus, popovers, and toasts:
+
+```bash
+bun add @radix-ui/react-popover @radix-ui/react-dropdown-menu @radix-ui/react-toast
+```
+
+## Icons
+
+```bash
+bun add lucide-react
+```
+
+## Copy the theme tokens
+
+Copy the CSS custom properties file into your project. This file defines all design tokens that Scribex components use:
+
+```css title="styles/scribex-tokens.css"
+:root {
+  --scribex-background: hsl(0 0% 100%);
+  --scribex-foreground: hsl(222.2 84% 4.9%);
+  --scribex-border: hsl(214.3 31.8% 91.4%);
+  --scribex-ring: hsl(221.2 83.2% 53.3%);
+  --scribex-muted: hsl(210 40% 96.1%);
+  --scribex-muted-foreground: hsl(215.4 16.3% 46.9%);
+  --scribex-accent: hsl(221.2 83.2% 53.3%);
+  --scribex-accent-foreground: hsl(0 0% 100%);
+  --scribex-destructive: hsl(0 84.2% 60.2%);
+  --scribex-ai-stream: hsl(262 83% 58%);
+  --scribex-radius: 0.5rem;
+  --scribex-font-sans: ui-sans-serif, system-ui, sans-serif;
+  --scribex-font-mono: ui-monospace, monospace;
+}
+```
+
+Import this file in your root layout or global CSS.
+
+## Verify the installation
+
+Create a minimal editor to verify everything is working:
+
+```tsx title="app/page.tsx"
+'use client';
+
+import { EditorRoot } from '@scribex/core';
+
+export default function Page() {
+  return (
+    <EditorRoot namespace="test" className="min-h-[200px] p-4 border rounded" />
+  );
+}
+```
+
+If you see an editable area with the placeholder "Start writing...", the installation is complete.
+
+## Next steps
+
+- [Quick Start](/docs/quick-start) — Build a full-featured editor
+- [Theming](/docs/guides/theming) — Customize the design tokens
+- [Project Structure](/docs/project-structure) — Understand the library layout
