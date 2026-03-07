@@ -22,6 +22,7 @@ import {
   CalloutPlugin,
   VideoPlugin,
   TogglePlugin,
+  DirectionPlugin,
   $createMentionNode,
   useEditorState,
   sanitizePastedHTML,
@@ -231,6 +232,7 @@ function EditorPlugins({ namespace }: { namespace: string }) {
       <CalloutPlugin />
       <VideoPlugin uploadHandler={mockUploadHandler} />
       <TogglePlugin />
+      <DirectionPlugin />
       <PastePlugin />
       <EmojiPickerPlugin />
       <LinkPlugin />
