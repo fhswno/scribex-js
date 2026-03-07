@@ -8,28 +8,31 @@ description: A floating format toolbar that appears on text selection.
 ## Import
 
 ```tsx
-import { FloatingToolbar } from '@scribex/core';
+import { FloatingToolbar } from "@scribex/core";
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `colorPalette` | `ColorPalette` | `DEFAULT_COLOR_PALETTE` | Custom color palette for text color and highlight color pickers. |
-| `fontFamilies` | `FontFamilyEntry[]` | `DEFAULT_FONT_FAMILIES` | Custom font family options for the font picker. |
+| Prop           | Type                | Default                 | Description                                                      |
+| -------------- | ------------------- | ----------------------- | ---------------------------------------------------------------- |
+| `colorPalette` | `ColorPalette`      | `DEFAULT_COLOR_PALETTE` | Custom color palette for text color and highlight color pickers. |
+| `fontFamilies` | `FontFamilyEntry[]` | `DEFAULT_FONT_FAMILIES` | Custom font family options for the font picker.                  |
 
 ## Basic usage
 
 Add `FloatingToolbar` as a child of `EditorRoot`:
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, FloatingToolbar, InputRulePlugin } from '@scribex/core';
+import { EditorRoot, FloatingToolbar, InputRulePlugin } from "@scribex/core";
 
 export default function EditorPage() {
   return (
-    <EditorRoot namespace="my-editor" className="min-h-[400px] p-4 border rounded">
+    <EditorRoot
+      namespace="my-editor"
+      className="min-h-[400px] p-4 border rounded"
+    >
       <FloatingToolbar />
       <InputRulePlugin />
     </EditorRoot>
@@ -43,22 +46,22 @@ The floating toolbar includes the following controls, organized into groups sepa
 
 ### Undo / Redo
 
-| Button | Action | Shortcut |
-|---|---|---|
-| Undo | Undo the last change | Cmd+Z (Mac) / Ctrl+Z |
-| Redo | Redo the last undone change | Cmd+Shift+Z (Mac) / Ctrl+Shift+Z |
+| Button | Action                      | Shortcut                         |
+| ------ | --------------------------- | -------------------------------- |
+| Undo   | Undo the last change        | Cmd+Z (Mac) / Ctrl+Z             |
+| Redo   | Redo the last undone change | Cmd+Shift+Z (Mac) / Ctrl+Shift+Z |
 
 Undo and Redo buttons are automatically disabled when there is nothing to undo or redo.
 
 ### Text formatting
 
-| Button | Format | Shortcut |
-|---|---|---|
-| Bold | `bold` | Cmd+B |
-| Italic | `italic` | Cmd+I |
-| Underline | `underline` | Cmd+U |
+| Button        | Format          | Shortcut    |
+| ------------- | --------------- | ----------- |
+| Bold          | `bold`          | Cmd+B       |
+| Italic        | `italic`        | Cmd+I       |
+| Underline     | `underline`     | Cmd+U       |
 | Strikethrough | `strikethrough` | Cmd+Shift+S |
-| Inline Code | `code` | Cmd+E |
+| Inline Code   | `code`          | Cmd+E       |
 
 Active formats are visually highlighted with the `--scribex-accent` color.
 
@@ -66,9 +69,9 @@ Active formats are visually highlighted with the `--scribex-accent` color.
 
 Opens the link input dialog. Active when the cursor is inside a link node.
 
-| Button | Action | Shortcut |
-|---|---|---|
-| Link | Open link input | Cmd+K |
+| Button | Action          | Shortcut |
+| ------ | --------------- | -------- |
+| Link   | Open link input | Cmd+K    |
 
 ### Color picker
 
@@ -92,22 +95,22 @@ Toggles the current block's text direction between LTR and RTL. The icon changes
 Pass a custom `ColorPalette` to override the default colors:
 
 ```tsx
-import { FloatingToolbar } from '@scribex/core';
-import type { ColorPalette } from '@scribex/core';
+import { FloatingToolbar } from "@scribex/core";
+import type { ColorPalette } from "@scribex/core";
 
 const customPalette: ColorPalette = {
   text: [
-    { label: 'Default', value: '', swatch: 'currentColor' },
-    { label: 'Brand', value: 'var(--brand-color)', swatch: '#6366f1' },
-    { label: 'Muted', value: 'var(--muted-color)', swatch: '#94a3b8' },
+    { label: "Default", value: "", swatch: "currentColor" },
+    { label: "Brand", value: "var(--brand-color)", swatch: "#6366f1" },
+    { label: "Muted", value: "var(--muted-color)", swatch: "#94a3b8" },
   ],
   highlight: [
-    { label: 'Default', value: '', swatch: 'transparent' },
-    { label: 'Highlight', value: 'var(--highlight-color)', swatch: '#fef08a' },
+    { label: "Default", value: "", swatch: "transparent" },
+    { label: "Highlight", value: "var(--highlight-color)", swatch: "#fef08a" },
   ],
 };
 
-<FloatingToolbar colorPalette={customPalette} />
+<FloatingToolbar colorPalette={customPalette} />;
 ```
 
 ## Custom font families
@@ -115,16 +118,20 @@ const customPalette: ColorPalette = {
 Pass a custom `FontFamilyEntry[]` to override the default fonts:
 
 ```tsx
-import { FloatingToolbar } from '@scribex/core';
-import type { FontFamilyEntry } from '@scribex/core';
+import { FloatingToolbar } from "@scribex/core";
+import type { FontFamilyEntry } from "@scribex/core";
 
 const customFonts: FontFamilyEntry[] = [
-  { label: 'Default', value: '', preview: 'system-ui, sans-serif' },
-  { label: 'Georgia', value: 'Georgia, serif', preview: 'Georgia, serif' },
-  { label: 'Courier', value: '"Courier New", monospace', preview: '"Courier New", monospace' },
+  { label: "Default", value: "", preview: "system-ui, sans-serif" },
+  { label: "Georgia", value: "Georgia, serif", preview: "Georgia, serif" },
+  {
+    label: "Courier",
+    value: '"Courier New", monospace',
+    preview: '"Courier New", monospace',
+  },
 ];
 
-<FloatingToolbar fontFamilies={customFonts} />
+<FloatingToolbar fontFamilies={customFonts} />;
 ```
 
 ## Positioning behavior
@@ -139,10 +146,12 @@ Position updates are throttled to one `requestAnimationFrame` per frame to avoid
 ## Visibility rules
 
 The toolbar shows when:
+
 - A non-collapsed `RangeSelection` exists (text is selected)
 - The selection has a non-zero bounding rectangle
 
 The toolbar hides when:
+
 - The selection is collapsed (no text selected)
 - A `TableSelection` is active (tables have their own context menu)
 - The user presses Escape

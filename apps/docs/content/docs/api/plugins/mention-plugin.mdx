@@ -3,12 +3,12 @@ title: MentionPlugin
 description: "@mentions, #tags, and custom trigger-based mentions."
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+import { Callout } from "fumadocs-ui/components/callout";
 
 ## Import
 
 ```tsx
-import { MentionPlugin } from '@scribex/core';
+import { MentionPlugin } from "@scribex/core";
 ```
 
 ## Overview
@@ -17,8 +17,8 @@ The `MentionPlugin` provides a fully extensible mention system supporting `@` (u
 
 ## Props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
+| Prop        | Type                | Default    | Description                                                                        |
+| ----------- | ------------------- | ---------- | ---------------------------------------------------------------------------------- |
 | `providers` | `MentionProvider[]` | (required) | Array of mention providers, each defining a trigger character and search behavior. |
 
 ## The `MentionProvider` interface
@@ -65,37 +65,46 @@ interface MentionItem {
 ### Basic setup with user mentions
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, MentionPlugin } from '@scribex/core';
-import { $createMentionNode } from '@scribex/core';
+import { EditorRoot, MentionPlugin } from "@scribex/core";
+import { $createMentionNode } from "@scribex/core";
 
 const userProvider = {
-  trigger: '@',
+  trigger: "@",
   onSearch: async (query: string) => {
-    const response = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`);
+    const response = await fetch(
+      `/api/users/search?q=${encodeURIComponent(query)}`,
+    );
     const users = await response.json();
-    return users.map((user: { id: string; name: string; email: string; avatar: string }) => ({
-      id: user.id,
-      label: user.name,
-      meta: user.email,
-      icon: user.avatar,
-    }));
+    return users.map(
+      (user: { id: string; name: string; email: string; avatar: string }) => ({
+        id: user.id,
+        label: user.name,
+        meta: user.email,
+        icon: user.avatar,
+      }),
+    );
   },
   renderItem: (item) => (
     <div className="flex items-center gap-2">
-      {item.icon && <img src={item.icon} alt="" className="w-5 h-5 rounded-full" />}
+      {item.icon && (
+        <img src={item.icon} alt="" className="w-5 h-5 rounded-full" />
+      )}
       <div>
         <div className="font-medium">{item.label}</div>
-        {item.meta && <div className="text-xs text-muted-foreground">{item.meta}</div>}
+        {item.meta && (
+          <div className="text-xs text-muted-foreground">{item.meta}</div>
+        )}
       </div>
     </div>
   ),
-  onSelect: (item) => $createMentionNode({
-    id: item.id,
-    label: item.label,
-    trigger: '@',
-  }),
+  onSelect: (item) =>
+    $createMentionNode({
+      id: item.id,
+      label: item.label,
+      trigger: "@",
+    }),
 };
 
 export default function EditorPage() {
@@ -111,9 +120,11 @@ export default function EditorPage() {
 
 ```tsx
 const tagProvider = {
-  trigger: '#',
+  trigger: "#",
   onSearch: async (query: string) => {
-    const response = await fetch(`/api/tags/search?q=${encodeURIComponent(query)}`);
+    const response = await fetch(
+      `/api/tags/search?q=${encodeURIComponent(query)}`,
+    );
     return response.json();
   },
   renderItem: (item) => (
@@ -122,27 +133,28 @@ const tagProvider = {
       <span>{item.label}</span>
     </div>
   ),
-  onSelect: (item) => $createMentionNode({
-    id: item.id,
-    label: item.label,
-    trigger: '#',
-  }),
+  onSelect: (item) =>
+    $createMentionNode({
+      id: item.id,
+      label: item.label,
+      trigger: "#",
+    }),
 };
 
-<MentionPlugin providers={[userProvider, tagProvider]} />
+<MentionPlugin providers={[userProvider, tagProvider]} />;
 ```
 
 ## Dropdown behavior
 
 The mention dropdown is implemented using `@radix-ui/react-popover` and supports full keyboard navigation:
 
-| Key | Action |
-|---|---|
-| Arrow Down | Move selection to next item |
-| Arrow Up | Move selection to previous item |
-| Enter | Select the highlighted item and insert the `MentionNode` |
-| Escape | Dismiss the dropdown and leave the trigger text as plain text |
-| Backspace (past trigger) | Dismiss the dropdown |
+| Key                      | Action                                                        |
+| ------------------------ | ------------------------------------------------------------- |
+| Arrow Down               | Move selection to next item                                   |
+| Arrow Up                 | Move selection to previous item                               |
+| Enter                    | Select the highlighted item and insert the `MentionNode`      |
+| Escape                   | Dismiss the dropdown and leave the trigger text as plain text |
+| Backspace (past trigger) | Dismiss the dropdown                                          |
 
 Focus remains in the editor at all times -- it is never transferred to the popover. This allows the user to continue typing to refine the search query while the dropdown is open.
 
@@ -157,13 +169,13 @@ The `MentionNode` is a Lexical `DecoratorNode` that stores `{ id, label, trigger
 ### Creating a MentionNode programmatically
 
 ```tsx
-import { $createMentionNode, $isMentionNode } from '@scribex/core';
+import { $createMentionNode, $isMentionNode } from "@scribex/core";
 
 editor.update(() => {
   const mention = $createMentionNode({
-    id: 'user-123',
-    label: 'Alice',
-    trigger: '@',
+    id: "user-123",
+    label: "Alice",
+    trigger: "@",
   });
 
   const selection = $getSelection();
@@ -176,19 +188,24 @@ editor.update(() => {
 ### Type guard
 
 ```tsx
-import { $isMentionNode } from '@scribex/core';
+import { $isMentionNode } from "@scribex/core";
 
 if ($isMentionNode(node)) {
-  console.log('Mention:', node.getTrigger(), node.getLabel());
+  console.log("Mention:", node.getTrigger(), node.getLabel());
 }
 ```
 
 <Callout type="info">
-A mention is triggered when the user types a trigger character at a position preceded by a space or at the start of a line. Trigger characters in the middle of words (e.g., typing "email@address") do not activate the mention dropdown.
+  A mention is triggered when the user types a trigger character at a position
+  preceded by a space or at the start of a line. Trigger characters in the
+  middle of words (e.g., typing "email@address") do not activate the mention
+  dropdown.
 </Callout>
 
 <Callout type="warn">
-Keep `renderItem` lightweight. This function is called on every keystroke while the dropdown is open. Avoid expensive computations or heavy DOM trees inside the render callback.
+  Keep `renderItem` lightweight. This function is called on every keystroke
+  while the dropdown is open. Avoid expensive computations or heavy DOM trees
+  inside the render callback.
 </Callout>
 
 ## Related
