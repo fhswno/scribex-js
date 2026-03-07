@@ -1,0 +1,143 @@
+---
+title: TableActionMenu
+description: Right-click context menu for table cell operations.
+---
+
+`TableActionMenu` provides a right-click context menu for table operations. When the user right-clicks inside a table cell, a popover menu appears with actions for inserting, deleting, merging rows and columns, setting cell background colors, and deleting the entire table.
+
+## Import
+
+```tsx
+import { TableActionMenu } from '@scribex/core';
+```
+
+## Props
+
+`TableActionMenu` accepts no props. It automatically detects right-click events on table cells within the editor.
+
+## Basic usage
+
+Add `TableActionMenu` alongside `TablePlugin` as children of `EditorRoot`:
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import {
+  EditorRoot,
+  TablePlugin,
+  TableActionMenu,
+  TableHoverActions,
+  SlashMenu,
+  InputRulePlugin,
+} from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor" className="min-h-[400px] p-4 border rounded">
+      <SlashMenu />
+      <InputRulePlugin />
+      <TablePlugin />
+      <TableActionMenu />
+      <TableHoverActions />
+    </EditorRoot>
+  );
+}
+```
+
+All three table components work together:
+- `TablePlugin` registers the table node and handles insertion commands
+- `TableActionMenu` provides the right-click context menu
+- `TableHoverActions` provides visual hover handles
+
+## Menu actions
+
+The context menu includes the following actions:
+
+| Action | Description |
+|---|---|
+| **Insert row above** | Adds a new row above the current row |
+| **Insert row below** | Adds a new row below the current row |
+| **Insert column left** | Adds a new column to the left of the current column |
+| **Insert column right** | Adds a new column to the right of the current column |
+| **Delete row** | Removes the current row |
+| **Delete column** | Removes the current column |
+| **Merge cells** | Merges selected cells (visible only when a table selection with multiple cells is active) |
+| **Unmerge cell** | Splits a previously merged cell back into individual cells (visible only when the right-clicked cell has `colSpan > 1` or `rowSpan > 1`) |
+| **Cell background** | Opens a color submenu to set the background color of the current cell or all selected cells |
+| **Delete table** | Removes the entire table (styled in red as a destructive action) |
+
+### Conditional actions
+
+- **Merge cells** only appears when a `TableSelection` is active (multiple cells selected via click-and-drag).
+- **Unmerge cell** only appears when the right-clicked cell is a merged cell (has `colSpan > 1` or `rowSpan > 1`).
+
+## Cell background colors
+
+The "Cell background" action reveals a submenu with 10 color options:
+
+| Color | CSS Variable | Swatch |
+|---|---|---|
+| Default | (clears background) | transparent |
+| Gray | `var(--scribex-cell-bg-gray)` | #f1f1ef |
+| Brown | `var(--scribex-cell-bg-brown)` | #f4f0ee |
+| Orange | `var(--scribex-cell-bg-orange)` | #fbecdd |
+| Yellow | `var(--scribex-cell-bg-yellow)` | #fbf3db |
+| Green | `var(--scribex-cell-bg-green)` | #edf3ec |
+| Blue | `var(--scribex-cell-bg-blue)` | #e7f3f8 |
+| Purple | `var(--scribex-cell-bg-purple)` | #f4f0f7 |
+| Pink | `var(--scribex-cell-bg-pink)` | #f9f0f5 |
+| Red | `var(--scribex-cell-bg-red)` | #fdebec |
+
+When a `TableSelection` is active (multiple cells selected), the background color is applied to all selected cells. Otherwise, it applies to the single right-clicked cell.
+
+The currently active cell background color is indicated by a blue accent border on the corresponding swatch.
+
+## Menu behavior
+
+### Opening
+
+The menu opens on `contextmenu` events (right-click) when:
+- The selection is a `RangeSelection` with the anchor inside a table cell, or
+- The selection is a `TableSelection` (multiple cells selected)
+
+The native browser context menu is suppressed (`e.preventDefault()`).
+
+### Closing
+
+The menu closes when:
+- The user clicks outside the menu
+- The user presses Escape
+- An action is selected
+
+### Positioning
+
+The menu appears at the exact click coordinates (`e.clientX`, `e.clientY`) using `position: fixed`.
+
+## Styling
+
+The menu uses inline styles with CSS custom properties:
+
+- `--scribex-popover-bg` -- menu background
+- `--scribex-popover-border` -- menu border
+- `--scribex-popover-shadow` -- menu shadow
+- `--scribex-foreground` -- item text color
+- `--scribex-destructive` -- "Delete table" text color
+- `--scribex-separator` -- divider before "Delete table"
+- `--scribex-accent` -- active cell color swatch border
+
+A frosted glass effect is applied via `backdrop-filter: blur(20px) saturate(180%)`.
+
+## Notes
+
+- `TableActionMenu` is a client component (`'use client'`).
+- It renders into a React Portal on `document.body`, so it works correctly regardless of the editor's overflow or stacking context.
+- The menu uses `z-index: 100` to appear above all other editor UI.
+- All actions are performed inside a single `editor.update()` call for a clean undo history.
+- The color submenu appears on hover over the "Cell background" item, flying out to the right.
+- The `onMouseDown` handler on the menu container calls `e.preventDefault()` to prevent the editor from losing focus.
+
+## Related
+
+- [TablePlugin](/docs/api/plugins/table-plugin) -- Registers the table node and handles commands
+- [TableHoverActions](/docs/api/components/table-hover-actions) -- Row/column handles and resize controls
+- [Tables guide](/docs/guides/tables) -- Complete table usage guide
