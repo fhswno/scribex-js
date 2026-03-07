@@ -1,0 +1,180 @@
+---
+title: Image Nodes
+description: ImageNode and LoadingImageNode for image content.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+Scribex provides two nodes for image handling: `ImageNode` for permanent images with remote URLs, and `LoadingImageNode` for optimistic previews during upload. Together they implement the upload flow described in the [Images & Uploads guide](/docs/guides/images-and-uploads).
+
+---
+
+## ImageNode
+
+A `DecoratorNode` that renders a responsive `<img>` element with click-to-select behavior and a selection ring. It stores the remote URL and metadata, supports full JSON serialization, and handles DOM import/export (including pasted `<img>` elements).
+
+### Import
+
+```tsx
+import { ImageNode, $createImageNode, $isImageNode } from '@scribex/core';
+import type { ImagePayload } from '@scribex/core';
+```
+
+### ImagePayload
+
+```ts
+interface ImagePayload {
+  src: string;
+  altText: string;
+  width?: number;
+  height?: number;
+  key?: NodeKey;
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `src` | `string` | Yes | The image URL. Must be a remote URL, never a base64 string. |
+| `altText` | `string` | Yes | Alt text for accessibility. |
+| `width` | `number` | No | Intrinsic width in pixels. |
+| `height` | `number` | No | Intrinsic height in pixels. |
+| `key` | `NodeKey` | No | Explicit Lexical node key. Omit to let Lexical auto-generate one. |
+
+### Functions
+
+#### `$createImageNode(payload: ImagePayload): ImageNode`
+
+Creates a new `ImageNode`. Must be called inside `editor.update()` or a node transform.
+
+```ts
+editor.update(() => {
+  const image = $createImageNode({
+    src: 'https://cdn.example.com/photo.jpg',
+    altText: 'A landscape photo',
+    width: 800,
+    height: 600,
+  });
+  // Insert into the AST
+  const selection = $getSelection();
+  if ($isRangeSelection(selection)) {
+    selection.insertNodes([image]);
+  }
+});
+```
+
+#### `$isImageNode(node: LexicalNode | null | undefined): node is ImageNode`
+
+Type guard that returns `true` if the given node is an `ImageNode`.
+
+```ts
+editor.read(() => {
+  const root = $getRoot();
+  root.getChildren().forEach((child) => {
+    if ($isImageNode(child)) {
+      console.log('Image source:', child.getSrc());
+    }
+  });
+});
+```
+
+### Instance methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `getSrc()` | `string` | Returns the image URL. |
+| `getAltText()` | `string` | Returns the alt text. |
+
+### Serialized format
+
+```ts
+type SerializedImageNode = {
+  type: 'image';
+  version: 1;
+  src: string;
+  altText: string;
+  width?: number;
+  height?: number;
+};
+```
+
+### DOM behavior
+
+- **exportDOM**: Produces an `<img>` element with `src`, `alt`, and optional `width`/`height` attributes.
+- **importDOM**: Converts pasted `<img>` elements back into `ImageNode` instances (requires a valid `src` attribute).
+
+### Selection behavior
+
+Clicking on the image selects the node and renders a selection ring (`--scribex-ring` token). When selected, pressing `Backspace` or `Delete` removes the image from the AST.
+
+---
+
+## LoadingImageNode
+
+A transient `DecoratorNode` used during the upload flow. It renders an optimistic preview of the image using a local `objectURL` with a semi-transparent spinner overlay. This node should never be persisted to a database.
+
+### Import
+
+```tsx
+import { LoadingImageNode, $createLoadingImageNode, $isLoadingImageNode } from '@scribex/core';
+```
+
+### Functions
+
+#### `$createLoadingImageNode(objectURL: string): LoadingImageNode`
+
+Creates a new `LoadingImageNode`. The `objectURL` should come from `URL.createObjectURL(file)`. Must be called inside `editor.update()`.
+
+```ts
+editor.update(() => {
+  const objectURL = URL.createObjectURL(file);
+  const loadingNode = $createLoadingImageNode(objectURL);
+  // Insert at current selection
+  const selection = $getSelection();
+  if ($isRangeSelection(selection)) {
+    selection.insertNodes([loadingNode]);
+  }
+});
+```
+
+#### `$isLoadingImageNode(node: LexicalNode | null | undefined): node is LoadingImageNode`
+
+Type guard that returns `true` if the given node is a `LoadingImageNode`.
+
+### Instance methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `getObjectURL()` | `string` | Returns the local blob object URL. |
+
+### Serialized format
+
+```ts
+type SerializedLoadingImageNode = {
+  type: 'loading-image';
+  version: 1;
+  objectURL: string;
+};
+```
+
+<Callout type="warn">
+`LoadingImageNode` is transient. It exists only while the upload is in progress. After the upload resolves or rejects, the `ImagePlugin` replaces or removes it in a single `editor.update()` call. You should not serialize this node to your database. Always call `URL.revokeObjectURL()` after the upload completes to prevent memory leaks.
+</Callout>
+
+### Upload lifecycle
+
+The full upload lifecycle is managed by `ImagePlugin`:
+
+1. File is dropped or pasted.
+2. A `LoadingImageNode` is inserted with a local `objectURL` preview.
+3. The developer's `UploadHandler` is called.
+4. On success: the `LoadingImageNode` is replaced with a permanent `ImageNode` using the remote URL.
+5. On failure: the `LoadingImageNode` is removed and an error toast is surfaced.
+6. In both cases, `URL.revokeObjectURL()` is called to release the blob.
+
+---
+
+## Related
+
+- [ImagePlugin](/docs/api/plugins/image-plugin) -- Plugin that manages the upload flow
+- [Images & Uploads guide](/docs/guides/images-and-uploads) -- Full tutorial with examples
+- [UploadHandler type](/docs/api/types#uploadhandler) -- The upload handler interface
