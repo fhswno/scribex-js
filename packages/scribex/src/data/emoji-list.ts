@@ -5,9 +5,6 @@ export interface EmojiItem {
 }
 
 export const DEFAULT_EMOJIS: EmojiItem[] = [
-  // ============================================================
-  // Smileys & Emotion (~80)
-  // ============================================================
   { emoji: "\u{1F600}", name: "grinning_face", keywords: ["happy", "smile", "joy", "grin"] },
   { emoji: "\u{1F603}", name: "grinning_face_with_big_eyes", keywords: ["happy", "smile", "joy", "excited"] },
   { emoji: "\u{1F604}", name: "grinning_face_with_smiling_eyes", keywords: ["happy", "smile", "joy", "laugh"] },
@@ -126,9 +123,6 @@ export const DEFAULT_EMOJIS: EmojiItem[] = [
   { emoji: "\u{1FAE1}", name: "saluting_face", keywords: ["salute", "respect", "yes_sir", "honor"] },
   { emoji: "\u{1FAE8}", name: "shaking_face", keywords: ["shake", "shock", "earthquake", "vibrate"] },
 
-  // ============================================================
-  // People & Gestures (~40)
-  // ============================================================
   { emoji: "\u{1F44D}", name: "thumbs_up", keywords: ["thumbsup", "yes", "approve", "good", "like", "ok"] },
   { emoji: "\u{1F44E}", name: "thumbs_down", keywords: ["thumbsdown", "no", "dislike", "bad", "disapprove"] },
   { emoji: "\u{1F44F}", name: "clapping_hands", keywords: ["clap", "applause", "bravo", "congratulations", "well_done"] },
@@ -203,9 +197,6 @@ export const DEFAULT_EMOJIS: EmojiItem[] = [
   { emoji: "\u{1F9D1}\u{200D}\u{1F3EB}", name: "teacher", keywords: ["teacher", "school", "education", "professor"] },
   { emoji: "\u{1F9D1}\u{200D}\u{1F373}", name: "cook", keywords: ["cook", "chef", "food", "kitchen"] },
 
-  // ============================================================
-  // Hearts & Love (~15)
-  // ============================================================
   { emoji: "\u{2764}\u{FE0F}", name: "red_heart", keywords: ["love", "heart", "red", "romance", "like", "valentines"] },
   { emoji: "\u{1F9E1}", name: "orange_heart", keywords: ["love", "heart", "orange", "warm"] },
   { emoji: "\u{1F49B}", name: "yellow_heart", keywords: ["love", "heart", "yellow", "friendship"] },
@@ -231,9 +222,6 @@ export const DEFAULT_EMOJIS: EmojiItem[] = [
   { emoji: "\u{1F48D}", name: "ring", keywords: ["ring", "engagement", "wedding", "marriage", "diamond"] },
   { emoji: "\u{1F490}", name: "bouquet", keywords: ["flowers", "bouquet", "romance", "gift", "love"] },
 
-  // ============================================================
-  // Animals & Nature (~40)
-  // ============================================================
   { emoji: "\u{1F436}", name: "dog_face", keywords: ["dog", "puppy", "pet", "animal", "cute", "woof"] },
   { emoji: "\u{1F431}", name: "cat_face", keywords: ["cat", "kitten", "pet", "animal", "cute", "meow"] },
   { emoji: "\u{1F42D}", name: "mouse_face", keywords: ["mouse", "rodent", "animal", "small"] },
@@ -327,9 +315,6 @@ export const DEFAULT_EMOJIS: EmojiItem[] = [
   { emoji: "\u{1FABA}", name: "nest_with_eggs", keywords: ["nest", "eggs", "bird", "home", "family"] },
   { emoji: "\u{1FAB5}", name: "wood", keywords: ["wood", "log", "lumber", "timber", "nature"] },
 
-  // ============================================================
-  // Weather & Sky (~15)
-  // ============================================================
   { emoji: "\u{2600}\u{FE0F}", name: "sun", keywords: ["sun", "sunny", "weather", "hot", "bright", "summer"] },
   { emoji: "\u{1F324}\u{FE0F}", name: "sun_behind_small_cloud", keywords: ["sun", "cloud", "partly_cloudy", "weather"] },
   { emoji: "\u{26C5}", name: "sun_behind_cloud", keywords: ["sun", "cloud", "partly_cloudy", "weather"] },
@@ -349,9 +334,6 @@ export const DEFAULT_EMOJIS: EmojiItem[] = [
   { emoji: "\u{1F4A7}", name: "droplet", keywords: ["water", "drop", "sweat", "rain", "tear"] },
   { emoji: "\u{1F30A}", name: "water_wave", keywords: ["wave", "water", "ocean", "sea", "surf"] },
 
-  // ============================================================
-  // Food & Drink (~40)
-  // ============================================================
   { emoji: "\u{1F34E}", name: "red_apple", keywords: ["apple", "fruit", "red", "healthy", "food"] },
   { emoji: "\u{1F34A}", name: "tangerine", keywords: ["orange", "tangerine", "fruit", "citrus"] },
   { emoji: "\u{1F34B}", name: "lemon", keywords: ["lemon", "fruit", "citrus", "yellow", "sour"] },
@@ -428,9 +410,6 @@ export const DEFAULT_EMOJIS: EmojiItem[] = [
   { emoji: "\u{1F37E}", name: "bottle_with_popping_cork", keywords: ["champagne", "bottle", "celebrate", "party", "pop"] },
   { emoji: "\u{1F4A5}", name: "collision", keywords: ["boom", "explosion", "crash", "impact", "pow"] },
 
-  // ============================================================
-  // Travel & Places (~30)
-  // ============================================================
   { emoji: "\u{1F697}", name: "automobile", keywords: ["car", "drive", "vehicle", "transport", "auto"] },
   { emoji: "\u{1F695}", name: "taxi", keywords: ["taxi", "cab", "car", "ride", "transport"] },
   { emoji: "\u{1F68C}", name: "bus", keywords: ["bus", "transport", "public", "vehicle"] },
@@ -490,9 +469,6 @@ export const DEFAULT_EMOJIS: EmojiItem[] = [
   { emoji: "\u{26FD}", name: "fuel_pump", keywords: ["fuel", "gas", "petrol", "station", "pump"] },
   { emoji: "\u{1F5FF}", name: "moai", keywords: ["moai", "statue", "easter_island", "stone", "face"] },
 
-  // ============================================================
-  // Activities & Sports (~20)
-  // ============================================================
   { emoji: "\u{26BD}", name: "soccer_ball", keywords: ["soccer", "football", "sport", "ball", "game"] },
   { emoji: "\u{1F3C0}", name: "basketball", keywords: ["basketball", "sport", "ball", "game", "nba"] },
   { emoji: "\u{1F3C8}", name: "american_football", keywords: ["football", "american", "sport", "nfl"] },
@@ -550,9 +526,6 @@ export const DEFAULT_EMOJIS: EmojiItem[] = [
   { emoji: "\u{1FA95}", name: "banjo", keywords: ["banjo", "music", "instrument", "string", "country"] },
   { emoji: "\u{1F941}", name: "drum", keywords: ["drum", "music", "instrument", "beat", "percussion"] },
 
-  // ============================================================
-  // Objects (~50)
-  // ============================================================
   { emoji: "\u{1F4F1}", name: "mobile_phone", keywords: ["phone", "mobile", "cell", "smartphone", "iphone"] },
   { emoji: "\u{1F4F2}", name: "mobile_phone_with_arrow", keywords: ["phone", "call", "incoming", "mobile"] },
   { emoji: "\u{260E}\u{FE0F}", name: "telephone", keywords: ["phone", "call", "telephone", "landline"] },
@@ -710,9 +683,6 @@ export const DEFAULT_EMOJIS: EmojiItem[] = [
   { emoji: "\u{1F45F}", name: "running_shoe", keywords: ["shoe", "sneaker", "running", "sport", "nike"] },
   { emoji: "\u{1F460}", name: "high_heeled_shoe", keywords: ["heel", "shoe", "fashion", "stiletto"] },
 
-  // ============================================================
-  // Symbols (~30)
-  // ============================================================
   { emoji: "\u{2705}", name: "check_mark_button", keywords: ["check", "done", "yes", "complete", "approve", "green"] },
   { emoji: "\u{2714}\u{FE0F}", name: "check_mark", keywords: ["check", "done", "yes", "tick", "correct"] },
   { emoji: "\u{274C}", name: "cross_mark", keywords: ["x", "no", "wrong", "delete", "cancel", "red"] },
@@ -805,9 +775,6 @@ export const DEFAULT_EMOJIS: EmojiItem[] = [
   { emoji: "\u{1F171}\u{FE0F}", name: "b_button_blood_type", keywords: ["b", "blood", "type", "letter"] },
   { emoji: "\u{1F17E}\u{FE0F}", name: "o_button_blood_type", keywords: ["o", "blood", "type", "letter"] },
 
-  // ============================================================
-  // Flags (~20)
-  // ============================================================
   { emoji: "\u{1F1FA}\u{1F1F8}", name: "flag_united_states", keywords: ["flag", "us", "usa", "america", "united_states"] },
   { emoji: "\u{1F1EC}\u{1F1E7}", name: "flag_united_kingdom", keywords: ["flag", "uk", "britain", "england", "united_kingdom"] },
   { emoji: "\u{1F1EB}\u{1F1F7}", name: "flag_france", keywords: ["flag", "france", "french", "paris"] },
