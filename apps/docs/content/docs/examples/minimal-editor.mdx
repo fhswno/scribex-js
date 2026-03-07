@@ -1,0 +1,199 @@
+---
+title: Minimal Editor
+description: The simplest possible Scribex editor setup.
+---
+
+Scribex is designed to be incrementally adoptable. You can start with a bare-bones editor in under 10 lines of code, then progressively add features by composing plugins as React children.
+
+## The absolute minimum
+
+The smallest possible Scribex editor requires only `EditorRoot`. This gives you a rich text area with undo/redo history and auto-focus -- nothing else.
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot } from '@scribex/core';
+
+export default function MinimalEditorPage() {
+  return (
+    <div className="max-w-2xl mx-auto py-12 px-4">
+      <EditorRoot
+        namespace="minimal"
+        className="min-h-[300px] p-4 border rounded-lg focus-within:ring-2 focus-within:ring-blue-500"
+        placeholder="Start writing..."
+      />
+    </div>
+  );
+}
+```
+
+That is it. No configuration objects, no provider wrappers, no theme files. The editor mounts, accepts keyboard input, and supports undo/redo via `Cmd+Z` / `Cmd+Shift+Z`.
+
+## Adding markdown shortcuts
+
+The `InputRulePlugin` enables markdown-style shortcuts. Type `# ` for a heading, `> ` for a blockquote, `- ` for a list, and so on. It renders `null` -- it is a headless plugin that extends behavior without adding any UI.
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, InputRulePlugin } from '@scribex/core';
+
+export default function EditorWithShortcutsPage() {
+  return (
+    <div className="max-w-2xl mx-auto py-12 px-4">
+      <EditorRoot
+        namespace="shortcuts"
+        className="min-h-[300px] p-4 border rounded-lg"
+        placeholder="Try typing # followed by a space..."
+      >
+        <InputRulePlugin />
+      </EditorRoot>
+    </div>
+  );
+}
+```
+
+With `InputRulePlugin` included, you get all of these shortcuts out of the box:
+
+| Shortcut | Result |
+|---|---|
+| `# ` | Heading 1 |
+| `## ` | Heading 2 |
+| `### ` | Heading 3 |
+| `> ` | Blockquote |
+| `- ` or `* ` | Bullet list |
+| `1. ` | Numbered list |
+| `[ ] ` | Task list (unchecked) |
+| `[x] ` | Task list (checked) |
+| ` ``` ` | Code block |
+| `---` | Horizontal divider |
+
+## Adding paste sanitization
+
+The `PastePlugin` intercepts paste events and sanitizes incoming HTML. Without it, pasting from Google Docs or Word can inject unwanted styles and broken markup into your editor. With it, pasted content is stripped to clean semantic HTML before entering the AST.
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, InputRulePlugin, PastePlugin } from '@scribex/core';
+
+export default function MinimalEditorPage() {
+  return (
+    <div className="max-w-2xl mx-auto py-12 px-4">
+      <h1 className="text-2xl font-bold mb-6">Minimal Editor</h1>
+      <EditorRoot
+        namespace="minimal"
+        className="relative min-h-[300px] p-4 border rounded-lg"
+        placeholder="Start writing..."
+      >
+        <InputRulePlugin />
+        <PastePlugin />
+      </EditorRoot>
+    </div>
+  );
+}
+```
+
+This is the recommended baseline for any Scribex editor. Two plugins, zero configuration, and you have markdown shortcuts plus safe paste handling.
+
+## Persisting state
+
+To save and restore editor content, add the `useEditorState` hook. Because hooks must be called inside the `EditorRoot` (which provides the Lexical context), create a small inner component:
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { useState } from 'react';
+import { EditorRoot, InputRulePlugin, PastePlugin, useEditorState } from '@scribex/core';
+
+function StatePersistence() {
+  const { serializedState } = useEditorState({
+    debounceMs: 300,
+    onChange: (json) => {
+      localStorage.setItem('minimal-editor-state', json);
+    },
+  });
+
+  return null; // This component has no UI -- it only manages persistence.
+}
+
+export default function MinimalEditorPage() {
+  const [initialState] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('minimal-editor-state');
+  });
+
+  return (
+    <div className="max-w-2xl mx-auto py-12 px-4">
+      <h1 className="text-2xl font-bold mb-6">Minimal Editor with Persistence</h1>
+      <EditorRoot
+        namespace="minimal-persistent"
+        initialState={initialState}
+        className="relative min-h-[300px] p-4 border rounded-lg"
+        placeholder="Your content is saved to localStorage..."
+      >
+        <StatePersistence />
+        <InputRulePlugin />
+        <PastePlugin />
+      </EditorRoot>
+    </div>
+  );
+}
+```
+
+Reload the page and your content is still there.
+
+## Complete self-contained file
+
+Here is the full example as a single copy-paste file. This is a production-ready minimal editor with markdown shortcuts, paste sanitization, and localStorage persistence:
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { useState } from 'react';
+import {
+  EditorRoot,
+  InputRulePlugin,
+  PastePlugin,
+  useEditorState,
+} from '@scribex/core';
+
+function EditorState() {
+  useEditorState({
+    debounceMs: 300,
+    onChange: (json) => {
+      localStorage.setItem('scribex-minimal', json);
+    },
+  });
+  return null;
+}
+
+export default function Page() {
+  const [initialState] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('scribex-minimal');
+  });
+
+  return (
+    <main className="max-w-2xl mx-auto py-12 px-4">
+      <h1 className="text-2xl font-bold mb-6">Minimal Editor</h1>
+      <EditorRoot
+        namespace="minimal"
+        initialState={initialState}
+        className="relative min-h-[300px] p-4 border rounded-lg"
+        placeholder="Start writing..."
+      >
+        <EditorState />
+        <InputRulePlugin />
+        <PastePlugin />
+      </EditorRoot>
+    </main>
+  );
+}
+```
+
+## Next steps
+
+- [Full-Featured Editor](/docs/examples/full-featured) -- Add all plugins and UI components
+- [Theming](/docs/guides/theming) -- Customize colors, fonts, and spacing
+- [Slash Menu](/docs/guides/slash-menu) -- Add the `/` command palette
