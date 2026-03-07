@@ -1,0 +1,11 @@
+{
+  "title": "Examples",
+  "pages": [
+    "minimal-editor",
+    "full-featured",
+    "read-only-viewer",
+    "custom-ai-provider",
+    "custom-upload-handler",
+    "custom-slash-items"
+  ]
+}
