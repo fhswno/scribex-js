@@ -1,12 +1,9 @@
 "use client";
 
-// REACT
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// REACT DOM
 import { createPortal } from "react-dom";
 
-// LEXICAL
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getRoot,
@@ -16,7 +13,6 @@ import {
   COMMAND_PRIORITY_LOW,
 } from "lexical";
 
-// INTERNAL
 import type { AIProvider, AIPluginConfig, AIPromptInputRenderProps } from "../types";
 import {
   registerAIProvider,
@@ -29,7 +25,6 @@ import {
 import { $createAIPreviewNode } from "../nodes/AIPreviewNode";
 import { serializeNodesToMarkdown } from "../utils/markdown";
 
-// PHOSPHOR
 import { PaperPlaneRightIcon } from "@phosphor-icons/react";
 
 interface AIPluginProps {
@@ -55,7 +50,6 @@ export function AIPlugin({ provider, config = {} }: AIPluginProps) {
   // Configurable context window size (default: 3 blocks)
   const contextWindowSize = config.contextWindowSize ?? 3;
 
-  // Portal container
   useEffect(() => {
     if (typeof window === "undefined") return;
     setPortalContainer(document.body);
@@ -69,7 +63,6 @@ export function AIPlugin({ provider, config = {} }: AIPluginProps) {
     };
   }, [editor, provider, config]);
 
-  // Handle OPEN_AI_PROMPT_COMMAND — show the prompt input
   useEffect(() => {
     return editor.registerCommand(
       OPEN_AI_PROMPT_COMMAND,
@@ -93,7 +86,6 @@ export function AIPlugin({ provider, config = {} }: AIPluginProps) {
     );
   }, [editor, config.renderPrompt]);
 
-  // Handle INSERT_AI_PREVIEW_COMMAND — insert the AIPreviewNode
   useEffect(() => {
     return editor.registerCommand(
       INSERT_AI_PREVIEW_COMMAND,
@@ -150,7 +142,6 @@ export function AIPlugin({ provider, config = {} }: AIPluginProps) {
     );
   }, [editor, contextWindowSize]);
 
-  // Submit prompt
   const handleSubmit = useCallback(
     (promptText: string) => {
       if (!promptText.trim()) return;
@@ -163,7 +154,6 @@ export function AIPlugin({ provider, config = {} }: AIPluginProps) {
     [editor],
   );
 
-  // Close prompt
   const handleClose = useCallback(() => {
     setIsPromptOpen(false);
     editor.focus();
@@ -197,8 +187,6 @@ export function AIPlugin({ provider, config = {} }: AIPluginProps) {
     </>
   );
 }
-
-// ─── Prompt Input ────────────────────────────────────────────────────────────
 
 import { forwardRef } from "react";
 

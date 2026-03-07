@@ -27,8 +27,6 @@ import type { CalloutPreset } from "../data/callout-presets";
 import { DEFAULT_CALLOUT_PRESETS } from "../data/callout-presets";
 import { DEFAULT_EMOJIS } from "../data/emoji-list";
 
-// ─── Props ──────────────────────────────────────────────────────────────────
-
 interface CalloutPluginProps {
   /** Override the default color presets */
   presets?: CalloutPreset[];
@@ -37,8 +35,6 @@ interface CalloutPluginProps {
   /** Default color preset for newly created callouts */
   defaultPreset?: string;
 }
-
-// ─── Plugin Component ───────────────────────────────────────────────────────
 
 export function CalloutPlugin({
   presets,
@@ -65,8 +61,6 @@ export function CalloutPlugin({
     setPortalContainer(document.body);
   }, []);
 
-  // ── Register INSERT_CALLOUT_COMMAND ────────────────────────────────────
-
   useEffect(() => {
     return editor.registerCommand(
       INSERT_CALLOUT_COMMAND,
@@ -80,18 +74,15 @@ export function CalloutPlugin({
             colorPreset: payload.colorPreset ?? defaultPreset,
           });
 
-          // Add an empty paragraph inside the callout
           const paragraph = $createParagraphNode();
           calloutNode.append(paragraph);
 
-          // Find the current block and replace/insert after it
           const anchor = selection.anchor.getNode();
           let block = anchor as import("lexical").LexicalNode;
           while (block.getParent() && !$isRootNode(block.getParent())) {
             block = block.getParent()!;
           }
 
-          // Remove "/" trigger text if present
           if (anchor instanceof TextNode) {
             const text = anchor.getTextContent();
             if (text.trim() === "/") {
@@ -119,8 +110,6 @@ export function CalloutPlugin({
     );
   }, [editor, defaultEmoji, defaultPreset]);
 
-  // ── Detect active callout via selection changes ───────────────────────
-
   const checkActiveCallout = useCallback(() => {
     editor.read(() => {
       const selection = $getSelection();
@@ -129,7 +118,6 @@ export function CalloutPlugin({
         return;
       }
 
-      // Walk up ancestors to find a CalloutNode
       let node = selection.anchor.getNode() as import("lexical").LexicalNode | null;
       while (node) {
         if ($isCalloutNode(node)) {
@@ -294,8 +282,6 @@ export function CalloutPlugin({
     );
   }, [editor]);
 
-  // ── Backspace at start of callout → unwrap children out ─────────────
-
   useEffect(() => {
     const handleBackspace = (event: KeyboardEvent) => {
       const selection = $getSelection();
@@ -337,7 +323,6 @@ export function CalloutPlugin({
       const parentBlock = $isParagraphNode(anchorNode) ? anchorNode : anchorNode.getParent();
       if (parentBlock !== firstChild) return false;
 
-      // Unwrap: move all children out before the callout, then remove it
       event.preventDefault();
       const children = calloutNode.getChildren();
       for (const child of children) {
@@ -345,7 +330,6 @@ export function CalloutPlugin({
       }
       calloutNode.remove();
 
-      // Restore cursor to start of first unwrapped child
       if (children[0] && "selectStart" in children[0] && typeof children[0].selectStart === "function") {
         (children[0] as import("lexical").ElementNode).selectStart();
       }
@@ -373,8 +357,6 @@ export function CalloutPlugin({
     return () => { u1(); u2(); };
   }, [editor]);
 
-  // ── Click on emoji span in DOM to open picker ──────────────────────────
-
   useEffect(() => {
     const rootElement = editor.getRootElement();
     if (!rootElement) return;
@@ -392,7 +374,6 @@ export function CalloutPlugin({
     return () => rootElement.removeEventListener("click", handleClick);
   }, [editor]);
 
-  // Close emoji picker when callout changes
   useEffect(() => {
     if (!activeCallout) {
       setShowEmojiPicker(false);
@@ -400,14 +381,11 @@ export function CalloutPlugin({
     }
   }, [activeCallout]);
 
-  // Focus emoji search input when picker opens
   useEffect(() => {
     if (showEmojiPicker && emojiInputRef.current) {
       emojiInputRef.current.focus();
     }
   }, [showEmojiPicker]);
-
-  // ── Change emoji ──────────────────────────────────────────────────────
 
   const changeEmoji = useCallback(
     (newEmoji: string) => {
@@ -426,8 +404,6 @@ export function CalloutPlugin({
     [editor, activeCallout],
   );
 
-  // ── Change color preset ───────────────────────────────────────────────
-
   const changePreset = useCallback(
     (presetId: string) => {
       if (!activeCallout) return;
@@ -442,8 +418,6 @@ export function CalloutPlugin({
     },
     [editor, activeCallout],
   );
-
-  // ── Delete callout (unwrap children) ──────────────────────────────────
 
   const deleteCallout = useCallback(() => {
     if (!activeCallout) return;
@@ -464,8 +438,6 @@ export function CalloutPlugin({
     editor.focus();
   }, [editor, activeCallout]);
 
-  // ── Filter emojis ─────────────────────────────────────────────────────
-
   const filteredEmojis = emojiSearch.trim()
     ? DEFAULT_EMOJIS.filter(
         (e) =>
@@ -473,8 +445,6 @@ export function CalloutPlugin({
           e.keywords.some((k) => k.includes(emojiSearch.toLowerCase())),
       ).slice(0, 40)
     : DEFAULT_EMOJIS.slice(0, 40);
-
-  // ─── Render ───────────────────────────────────────────────────────────
 
   if (!portalContainer || !activeCallout) return null;
 
@@ -488,7 +458,6 @@ export function CalloutPlugin({
 
   return createPortal(
     <div data-callout-toolbar>
-      {/* ── Callout toolbar ─────────────────────────────────────── */}
       <div
         style={{
           position: "fixed",
@@ -510,7 +479,6 @@ export function CalloutPlugin({
         }}
         onMouseDown={(e) => e.preventDefault()}
       >
-        {/* Emoji button */}
         <button
           type="button"
           title="Change emoji"
@@ -535,7 +503,6 @@ export function CalloutPlugin({
           {activeCallout.emoji}
         </button>
 
-        {/* Separator */}
         <div
           style={{
             width: "1px",
@@ -545,7 +512,6 @@ export function CalloutPlugin({
           }}
         />
 
-        {/* Color preset dots */}
         {resolvedPresets.map((preset) => (
           <button
             key={preset.id}
@@ -585,7 +551,6 @@ export function CalloutPlugin({
           </button>
         ))}
 
-        {/* Separator */}
         <div
           style={{
             width: "1px",
@@ -595,7 +560,6 @@ export function CalloutPlugin({
           }}
         />
 
-        {/* Delete button */}
         <button
           type="button"
           title="Remove callout"
@@ -632,7 +596,6 @@ export function CalloutPlugin({
         </button>
       </div>
 
-      {/* ── Emoji picker popover ────────────────────────────────── */}
       {showEmojiPicker && (
         <div
           data-callout-toolbar
@@ -653,7 +616,6 @@ export function CalloutPlugin({
               '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
           }}
         >
-          {/* Search input */}
           <div style={{ padding: "8px 8px 4px" }}>
             <input
               ref={emojiInputRef}
@@ -683,7 +645,6 @@ export function CalloutPlugin({
             />
           </div>
 
-          {/* Emoji grid */}
           <div
             style={{
               display: "grid",

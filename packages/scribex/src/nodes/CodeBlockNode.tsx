@@ -1,10 +1,8 @@
 "use client";
 
-// REACT
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 
-// LEXICAL
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -26,10 +24,7 @@ import {
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
 
-// PHOSPHOR
 import { CopyIcon, CheckIcon } from "@phosphor-icons/react";
-
-// ─── Constants ──────────────────────────────────────────────────────────────
 
 const SUPPORTED_LANGUAGES = [
   "javascript",
@@ -50,8 +45,6 @@ const SUPPORTED_LANGUAGES = [
   "text",
 ] as const;
 
-// ─── Types ──────────────────────────────────────────────────────────────────
-
 export interface CodeBlockPayload {
   code: string;
   language: string;
@@ -66,8 +59,6 @@ export type SerializedCodeBlockNode = Spread<
   },
   SerializedLexicalNode
 >;
-
-// ─── Node Class ─────────────────────────────────────────────────────────────
 
 export class CodeBlockNode extends DecoratorNode<ReactElement> {
   __code: string;
@@ -159,8 +150,6 @@ export class CodeBlockNode extends DecoratorNode<ReactElement> {
   }
 }
 
-// ─── DOM Conversion ─────────────────────────────────────────────────────────
-
 function convertPreElement(domNode: Node): DOMConversionOutput | null {
   if (domNode instanceof HTMLPreElement) {
     const codeEl = domNode.querySelector("code");
@@ -176,8 +165,6 @@ function convertPreElement(domNode: Node): DOMConversionOutput | null {
   }
   return null;
 }
-
-// ─── React Component ────────────────────────────────────────────────────────
 
 function CodeBlockComponent({
   code,
@@ -229,7 +216,6 @@ function CodeBlockComponent({
     setLocalLanguage(language);
   }, [language]);
 
-  // Handle click to select/edit this node
   useEffect(() => {
     return editor.registerCommand(
       CLICK_COMMAND,
@@ -258,7 +244,6 @@ function CodeBlockComponent({
     );
   }, [editor, clearSelection, setSelected]);
 
-  // Handle Delete/Backspace to remove when selected (not editing)
   const onDelete = useCallback(
     (event: KeyboardEvent) => {
       if (isSelected && !isEditing) {
@@ -293,7 +278,6 @@ function CodeBlockComponent({
     };
   }, [editor, onDelete]);
 
-  // Debounced code update to Lexical
   const updateNodeCode = useCallback(
     (newCode: string) => {
       if (debounceTimerRef.current) {
@@ -312,7 +296,6 @@ function CodeBlockComponent({
     [editor, nodeKey],
   );
 
-  // Handle code change
   const handleCodeChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newCode = e.target.value;
@@ -322,7 +305,6 @@ function CodeBlockComponent({
     [updateNodeCode],
   );
 
-  // Handle language change
   const handleLanguageChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newLanguage = e.target.value;
@@ -354,7 +336,6 @@ function CodeBlockComponent({
     [localLanguage],
   );
 
-  // Copy button handler
   const handleCopy = useCallback(() => {
     const html = buildClipboardHtml(localCode);
     const htmlBlob = new Blob([html], { type: "text/html" });
@@ -443,7 +424,6 @@ function CodeBlockComponent({
     };
   }, [localCode, localLanguage]);
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current && isEditing) {
       const ta = textareaRef.current;
@@ -468,7 +448,6 @@ function CodeBlockComponent({
         outlineOffset: "2px",
       }}
     >
-      {/* Header bar */}
       <div
         style={{
           display: "flex",
@@ -479,7 +458,6 @@ function CodeBlockComponent({
           fontSize: "12px",
         }}
       >
-        {/* Language selector */}
         <select
           data-testid="code-block-language"
           value={localLanguage}
@@ -502,7 +480,6 @@ function CodeBlockComponent({
           ))}
         </select>
 
-        {/* Copy button */}
         <button
           type="button"
           data-testid="code-block-copy"
@@ -536,14 +513,12 @@ function CodeBlockComponent({
         </button>
       </div>
 
-      {/* Code area */}
       <div
         style={{
           position: "relative",
           minHeight: "40px",
         }}
       >
-        {/* Highlighted output (shown when not editing and highlight is available) */}
         {!isEditing && highlightedHtml ? (
           <div
             data-testid="code-block-highlighted"
@@ -561,7 +536,6 @@ function CodeBlockComponent({
           />
         ) : null}
 
-        {/* Textarea (always present when editing, or when no highlight) */}
         {isEditing || !highlightedHtml ? (
           <textarea
             ref={textareaRef}
@@ -601,8 +575,6 @@ function CodeBlockComponent({
     </div>
   );
 }
-
-// ─── Factory Functions ──────────────────────────────────────────────────────
 
 export function $createCodeBlockNode(payload: CodeBlockPayload): CodeBlockNode {
   const node = new CodeBlockNode(payload.code, payload.language, payload.key);

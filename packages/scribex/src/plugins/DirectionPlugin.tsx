@@ -1,9 +1,7 @@
 "use client";
 
-// REACT
 import { useEffect } from "react";
 
-// LEXICAL
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getSelection,
@@ -15,7 +13,6 @@ import {
   LexicalNode,
 } from "lexical";
 
-// PLUGINS
 import { SET_BLOCK_DIRECTION_COMMAND } from "../commands";
 
 // Same regex Lexical uses internally to detect RTL text
@@ -28,10 +25,8 @@ const LTR =
 const RTL_REGEX = new RegExp("^[^" + LTR + "]*[" + RTL + "]");
 
 export const DirectionPlugin = () => {
-  // Hook - Lexical Editor Context
   const [editor] = useLexicalComposerContext();
 
-  // Command handler for explicit direction changes
   useEffect(() => {
     return editor.registerCommand(
       SET_BLOCK_DIRECTION_COMMAND,

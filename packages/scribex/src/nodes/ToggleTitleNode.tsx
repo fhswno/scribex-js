@@ -14,8 +14,6 @@ import { IS_CHROME } from "@lexical/utils";
 import { $isToggleContainerNode } from "./ToggleContainerNode";
 import { $isToggleContentNode } from "./ToggleContentNode";
 
-// ─── Node Class ─────────────────────────────────────────────────────────────
-
 export class ToggleTitleNode extends ElementNode {
   static getType(): string {
     return "toggle-title";
@@ -24,8 +22,6 @@ export class ToggleTitleNode extends ElementNode {
   static clone(node: ToggleTitleNode): ToggleTitleNode {
     return new ToggleTitleNode(node.__key);
   }
-
-  // ── DOM ─────────────────────────────────────────────────────────────────
 
   createDOM(config: EditorConfig, editor: LexicalEditor): HTMLElement {
     const dom = document.createElement("summary");
@@ -106,8 +102,6 @@ export class ToggleTitleNode extends ElementNode {
     return false;
   }
 
-  // ── DOM Import/Export ───────────────────────────────────────────────────
-
   static importDOM(): DOMConversionMap | null {
     return {
       summary: (_domNode: Node) => ({
@@ -132,13 +126,9 @@ export class ToggleTitleNode extends ElementNode {
   // Title is NOT a shadow root — it's editable inline text
 }
 
-// ─── DOM Conversion ─────────────────────────────────────────────────────────
-
 function convertSummaryElement(_domNode: Node): DOMConversionOutput | null {
   return { node: $createToggleTitleNode() };
 }
-
-// ─── Factory Functions ──────────────────────────────────────────────────────
 
 export function $createToggleTitleNode(): ToggleTitleNode {
   return new ToggleTitleNode();

@@ -1,10 +1,8 @@
 "use client";
 
-// REACT
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
 
-// LEXICAL
 import type {
   DOMConversionMap,
   DOMExportOutput,
@@ -17,15 +15,11 @@ import type {
 import { $getNodeByKey, DecoratorNode } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
-// INTERNAL
 import { getAIProvider, getAIConfig } from "../plugins/aiProviderRegistry";
 import { $parseMarkdownToLexicalNodes } from "../utils/markdown";
 import type { AIPluginConfig } from "../types";
 
-// PHOSPHOR
 import { SparkleIcon, CheckIcon, XIcon, ArrowClockwiseIcon } from "@phosphor-icons/react";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface AIPreviewPayload {
   prompt: string;
@@ -42,8 +36,6 @@ export type SerializedAIPreviewNode = Spread<
 >;
 
 type StreamStatus = "streaming" | "complete" | "error";
-
-// ─── Node Class ──────────────────────────────────────────────────────────────
 
 export class AIPreviewNode extends DecoratorNode<ReactElement> {
   __prompt: string;
@@ -113,8 +105,6 @@ export class AIPreviewNode extends DecoratorNode<ReactElement> {
     );
   }
 }
-
-// ─── React Component ─────────────────────────────────────────────────────────
 
 function AIPreviewComponent({
   nodeKey,
@@ -267,7 +257,6 @@ function AIPreviewComponent({
         fontFamily: "var(--scribex-font-sans, system-ui, sans-serif)",
       }}
     >
-      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -298,7 +287,6 @@ function AIPreviewComponent({
         )}
       </div>
 
-      {/* Content */}
       {status === "error" ? (
         <div
           data-testid="ai-preview-error"
@@ -336,7 +324,6 @@ function AIPreviewComponent({
         </div>
       )}
 
-      {/* Action buttons — shown when stream completes or errors */}
       {(status === "complete" || status === "error") && (
         <div
           style={{
@@ -428,7 +415,6 @@ function AIPreviewComponent({
         </div>
       )}
 
-      {/* Animations */}
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -446,8 +432,6 @@ function AIPreviewComponent({
     </div>
   );
 }
-
-// ─── Factory Functions ───────────────────────────────────────────────────────
 
 export function $createAIPreviewNode(
   payload: AIPreviewPayload,

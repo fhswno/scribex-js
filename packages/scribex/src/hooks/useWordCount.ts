@@ -1,9 +1,6 @@
 'use client';
 
-// REACT
 import { useEffect, useRef, useState } from 'react';
-
-// LEXICAL
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getRoot } from 'lexical';
 

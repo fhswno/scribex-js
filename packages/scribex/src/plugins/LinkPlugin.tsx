@@ -1,12 +1,9 @@
 "use client";
 
-// REACT
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// REACT DOM
 import { createPortal } from "react-dom";
 
-// LEXICAL
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getSelection,
@@ -15,10 +12,8 @@ import {
   SELECTION_CHANGE_COMMAND,
 } from "lexical";
 
-// INTERNAL
 import { OPEN_LINK_INPUT_COMMAND } from "../commands";
 
-// LEXICAL LINK
 import {
   $isLinkNode,
   $toggleLink,
@@ -26,15 +21,12 @@ import {
   LinkNode,
 } from "@lexical/link";
 
-// PHOSPHOR ICONS
 import {
   LinkIcon,
   PencilSimpleIcon,
   TrashIcon,
   ArrowSquareOutIcon,
 } from "@phosphor-icons/react";
-
-// ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface LinkInputRenderProps {
   initialUrl: string;
@@ -65,8 +57,6 @@ export interface LinkPluginConfig {
   rel?: string;
 }
 
-// ─── Plugin Component ───────────────────────────────────────────────────────
-
 export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) {
   const [editor] = useLexicalComposerContext();
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(
@@ -96,7 +86,6 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
       }
     });
 
-  // Portal container
   useEffect(() => {
     if (typeof window === "undefined") return;
     setPortalContainer(document.body);
@@ -124,7 +113,6 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
     );
   }, [editor, target, rel]);
 
-  // Get the position of the current selection
   const getSelectionPosition = useCallback(() => {
     const domSelection = window.getSelection();
     if (domSelection && domSelection.rangeCount > 0) {
@@ -138,7 +126,6 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
     return { top: 0, left: 0 };
   }, []);
 
-  // Find if cursor is inside a LinkNode
   const findLinkNode = useCallback((): LinkNode | null => {
     let linkNode: LinkNode | null = null;
     editor.read(() => {
@@ -155,7 +142,6 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
     return linkNode;
   }, [editor]);
 
-  // Open link input popover
   const openInput = useCallback(
     (initialUrl = "") => {
       setEditingUrl(initialUrl);
@@ -174,7 +160,6 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
     [getSelectionPosition, config.renderLinkInput],
   );
 
-  // Close everything
   const closeAll = useCallback(() => {
     setShowInput(false);
     setShowPreview(false);
@@ -183,7 +168,6 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
     editor.focus();
   }, [editor]);
 
-  // Submit a link URL
   const submitLink = useCallback(
     (url: string) => {
       const trimmed = url.trim();
@@ -212,13 +196,11 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
     [editor, validateUrl, target, rel, closeAll],
   );
 
-  // Remove link
   const removeLink = useCallback(() => {
     editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
     closeAll();
   }, [editor, closeAll]);
 
-  // Shared logic for opening the link input
   const triggerLinkInput = useCallback(() => {
     const linkNode = findLinkNode();
     if (linkNode) {
@@ -307,7 +289,6 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
     );
   }, [editor, triggerLinkInput]);
 
-  // Detect cursor inside link for preview popover (RAF-throttled)
   const linkSelRafRef = useRef(0);
   useEffect(() => {
     return editor.registerCommand(
@@ -340,8 +321,6 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
 
   if (!portalContainer) return null;
 
-  // ─── Link Input Popover ─────────────────────────────────────────────────
-
   const inputRenderProps: LinkInputRenderProps = {
     initialUrl: editingUrl,
     onSubmit: submitLink,
@@ -363,8 +342,6 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
         portalContainer,
       )
     : null;
-
-  // ─── Link Preview Popover ───────────────────────────────────────────────
 
   const previewRenderProps: LinkPreviewRenderProps = {
     url: currentUrl,
@@ -396,8 +373,6 @@ export function LinkPlugin({ config = {} }: { config?: LinkPluginConfig } = {}) 
     </>
   );
 }
-
-// ─── Link Input Popover (built-in) ─────────────────────────────────────────
 
 import { forwardRef } from "react";
 
@@ -567,8 +542,6 @@ const LinkInputPopover = forwardRef<HTMLInputElement, LinkInputRenderProps>(
     );
   },
 );
-
-// ─── Link Preview Popover (built-in) ───────────────────────────────────────
 
 function LinkPreviewPopover({
   url,

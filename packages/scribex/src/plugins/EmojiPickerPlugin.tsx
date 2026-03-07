@@ -1,12 +1,9 @@
 "use client";
 
-// REACT
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// REACT DOM
 import { createPortal } from "react-dom";
 
-// LEXICAL
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getSelection,
@@ -24,11 +21,8 @@ import {
 
 import { OPEN_EMOJI_PICKER_COMMAND } from "../commands";
 
-// INTERNAL
 import type { EmojiItem } from "../data/emoji-list";
 import { DEFAULT_EMOJIS } from "../data/emoji-list";
-
-// ─── Plugin Props ────────────────────────────────────────────────────────────
 
 export interface EmojiPickerPluginProps {
   /** Override the built-in emoji list. */
@@ -43,8 +37,6 @@ export interface EmojiPickerPluginProps {
     position: { top: number; left: number };
   }) => React.ReactNode;
 }
-
-// ─── Plugin Component ────────────────────────────────────────────────────────
 
 export function EmojiPickerPlugin({
   emojis,
@@ -65,13 +57,11 @@ export function EmojiPickerPlugin({
   const openedViaCommandRef = useRef(false);
   const emojiList = emojis ?? DEFAULT_EMOJIS;
 
-  // Portal container
   useEffect(() => {
     if (typeof window === "undefined") return;
     setPortalContainer(document.body);
   }, []);
 
-  // Close the dropdown
   const close = useCallback(() => {
     setIsOpen(false);
     setQuery("");
@@ -80,7 +70,6 @@ export function EmojiPickerPlugin({
     openedViaCommandRef.current = false;
   }, []);
 
-  // Filter emojis by query
   const filterEmojis = useCallback(
     (q: string): EmojiItem[] => {
       if (!q) return [];
@@ -302,7 +291,6 @@ export function EmojiPickerPlugin({
     [editor, close],
   );
 
-  // Keyboard navigation
   useEffect(() => {
     if (!isOpen) return;
 
@@ -416,8 +404,6 @@ export function EmojiPickerPlugin({
   );
 }
 
-// ─── Default Emoji Row ──────────────────────────────────────────────────────
-
 function DefaultEmojiRow({
   item,
   isSelected,
@@ -454,8 +440,6 @@ function DefaultEmojiRow({
   );
 }
 
-// ─── Dropdown Component ─────────────────────────────────────────────────────
-
 function EmojiDropdown({
   items,
   selectedIndex,
@@ -473,7 +457,6 @@ function EmojiDropdown({
 }) {
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Scroll selected item into view
   useEffect(() => {
     const list = listRef.current;
     if (!list) return;
@@ -540,7 +523,6 @@ function EmojiDropdown({
         ))
       )}
 
-      {/* Animation */}
       <style
         dangerouslySetInnerHTML={{
           __html: `

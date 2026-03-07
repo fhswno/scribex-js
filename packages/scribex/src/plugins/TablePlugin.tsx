@@ -35,24 +35,20 @@ export function TablePlugin({
 }: TablePluginProps) {
   const [editor] = useLexicalComposerContext();
 
-  // Register core table plugin (integrity transforms + built-in commands)
   useEffect(() => {
     return registerTablePlugin(editor);
   }, [editor]);
 
-  // Register table selection observer (mouse/keyboard cell selection)
   useEffect(() => {
     return registerTableSelectionObserver(editor, hasTabHandler);
   }, [editor, hasTabHandler]);
 
-  // If merged cells are disabled, register the unmerge transform
   useEffect(() => {
     if (!hasCellMerge) {
       return registerTableCellUnmergeTransform(editor);
     }
   }, [editor, hasCellMerge]);
 
-  // Handle INSERT_TABLE_COMMAND_SCRIBEX
   useEffect(() => {
     return editor.registerCommand(
       INSERT_TABLE_COMMAND_SCRIBEX,
@@ -71,7 +67,6 @@ export function TablePlugin({
           const topLevelNode = focusNode.getTopLevelElement();
           if (topLevelNode) {
             topLevelNode.insertAfter(tableNode);
-            // Remove the current node if it's an empty paragraph
             if (
               topLevelNode.getTextContent().trim() === "" &&
               topLevelNode.getType() === "paragraph"
@@ -79,7 +74,6 @@ export function TablePlugin({
               topLevelNode.remove();
             }
 
-            // Select the first cell so the cursor lands in the right place
             const firstRow = tableNode.getChildren().find($isTableRowNode);
             if (firstRow) {
               const firstCell = firstRow.getChildren().find($isTableCellNode);
@@ -95,7 +89,6 @@ export function TablePlugin({
     );
   }, [editor]);
 
-  // Delete table when it is node-selected and user presses Delete/Backspace
   useEffect(() => {
     const handleDelete = (event: KeyboardEvent) => {
       const selection = $getSelection();

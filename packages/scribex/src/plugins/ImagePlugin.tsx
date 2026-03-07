@@ -1,9 +1,7 @@
 "use client";
 
-// REACT
 import { useEffect, useRef } from "react";
 
-// LEXICAL
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getNodeByKey,
@@ -14,17 +12,14 @@ import {
   COMMAND_PRIORITY_LOW,
 } from "lexical";
 
-// NODES
 import {
   $createLoadingImageNode,
   $isLoadingImageNode,
 } from "../nodes/LoadingImageNode";
 import { $createImageNode } from "../nodes/ImageNode";
 
-// COMMANDS
 import { INSERT_IMAGE_COMMAND } from "../commands";
 
-// TYPES
 import type { UploadHandler } from "../types";
 
 const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -73,7 +68,6 @@ export function ImagePlugin({
     return true;
   };
 
-  // Register INSERT_IMAGE_COMMAND handler
   useEffect(() => {
     return editor.registerCommand(
       INSERT_IMAGE_COMMAND,
@@ -86,7 +80,6 @@ export function ImagePlugin({
     );
   }, [editor, maxFileSize, allowedFormats, onFileRejected]);
 
-  // Handle drop events
   useEffect(() => {
     const rootElement = editor.getRootElement();
     if (!rootElement) return;
@@ -113,7 +106,6 @@ export function ImagePlugin({
     return () => rootElement.removeEventListener("drop", onDrop);
   }, [editor, maxFileSize, allowedFormats, onFileRejected]);
 
-  // Handle paste events with image files
   useEffect(() => {
     const rootElement = editor.getRootElement();
     if (!rootElement) return;

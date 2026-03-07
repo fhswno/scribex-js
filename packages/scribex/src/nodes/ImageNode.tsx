@@ -1,10 +1,8 @@
 "use client";
 
-// REACT
 import { useCallback, useEffect, useRef } from "react";
 import type { ReactElement } from "react";
 
-// LEXICAL
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -181,7 +179,6 @@ function ImageComponent({
     useLexicalNodeSelection(nodeKey);
   const imgRef = useRef<HTMLDivElement>(null);
 
-  // Handle click to select this node
   useEffect(() => {
     return editor.registerCommand(
       CLICK_COMMAND,
@@ -199,7 +196,6 @@ function ImageComponent({
     );
   }, [editor, clearSelection, setSelected]);
 
-  // Handle Delete/Backspace to remove the selected image
   const onDelete = useCallback(
     (event: KeyboardEvent) => {
       if (isSelected) {

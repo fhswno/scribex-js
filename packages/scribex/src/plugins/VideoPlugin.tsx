@@ -1,12 +1,9 @@
 "use client";
 
-// REACT
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 
-// REACT DOM
 import { createPortal } from "react-dom";
 
-// LEXICAL
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $getNodeByKey,
@@ -17,7 +14,6 @@ import {
   COMMAND_PRIORITY_LOW,
 } from "lexical";
 
-// INTERNAL
 import type { UploadHandler } from "../types";
 import { INSERT_VIDEO_COMMAND, OPEN_VIDEO_INPUT_COMMAND } from "../commands";
 import {
@@ -27,13 +23,10 @@ import {
 import { $createVideoNode } from "../nodes/VideoNode";
 import { parseVideoEmbed } from "../utils/video-embeds";
 
-// PHOSPHOR
 import {
   PaperPlaneRightIcon,
   UploadSimpleIcon,
 } from "@phosphor-icons/react";
-
-// ─── Render prop types ──────────────────────────────────────────────────────
 
 export interface VideoEmbedRenderProps {
   src: string;
@@ -46,16 +39,12 @@ export interface VideoFileRenderProps {
   title: string;
 }
 
-// ─── Default validation ─────────────────────────────────────────────────────
-
 const DEFAULT_MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const DEFAULT_ALLOWED_FORMATS = [
   "video/mp4",
   "video/webm",
   "video/quicktime",
 ];
-
-// ─── Plugin Props ───────────────────────────────────────────────────────────
 
 interface VideoPluginProps {
   /** Handler for uploading video files. Same interface as ImagePlugin. Omit to disable file uploads. */
@@ -67,8 +56,6 @@ interface VideoPluginProps {
   /** Called when a file is rejected (too large or wrong format). */
   onFileRejected?: (file: File, reason: "size" | "format") => void;
 }
-
-// ─── Plugin Component ───────────────────────────────────────────────────────
 
 export function VideoPlugin({
   uploadHandler,
@@ -85,13 +72,11 @@ export function VideoPlugin({
   const uploadHandlerRef = useRef(uploadHandler);
   uploadHandlerRef.current = uploadHandler;
 
-  // Portal container
   useEffect(() => {
     if (typeof window === "undefined") return;
     setPortalContainer(document.body);
   }, []);
 
-  // Validate a file against size and format constraints
   const validateFile = useCallback(
     (file: File): boolean => {
       if (!allowedFormats.some((fmt) => file.type === fmt)) {
@@ -107,7 +92,6 @@ export function VideoPlugin({
     [allowedFormats, maxFileSize, onFileRejected],
   );
 
-  // Handle video file upload (same flow as ImagePlugin)
   const handleVideoUpload = useCallback(
     (file: File) => {
       const handler = uploadHandlerRef.current;
@@ -182,7 +166,6 @@ export function VideoPlugin({
     [editor, validateFile],
   );
 
-  // Handle video embed URL
   const handleVideoEmbed = useCallback(
     (url: string) => {
       const embedInfo = parseVideoEmbed(url);
@@ -228,7 +211,6 @@ export function VideoPlugin({
     [editor],
   );
 
-  // Handle INSERT_VIDEO_COMMAND
   useEffect(() => {
     return editor.registerCommand(
       INSERT_VIDEO_COMMAND,
@@ -244,7 +226,6 @@ export function VideoPlugin({
     );
   }, [editor, handleVideoUpload, handleVideoEmbed]);
 
-  // Handle OPEN_VIDEO_INPUT_COMMAND — show the URL input popover
   useEffect(() => {
     return editor.registerCommand(
       OPEN_VIDEO_INPUT_COMMAND,
@@ -262,7 +243,6 @@ export function VideoPlugin({
     );
   }, [editor]);
 
-  // Handle drop events (only if uploadHandler provided)
   useEffect(() => {
     if (!uploadHandler) return;
 
@@ -290,7 +270,6 @@ export function VideoPlugin({
     return () => rootElement.removeEventListener("drop", onDrop);
   }, [editor, uploadHandler, handleVideoUpload]);
 
-  // Handle paste events (only if uploadHandler provided)
   useEffect(() => {
     if (!uploadHandler) return;
 
@@ -317,7 +296,6 @@ export function VideoPlugin({
     return () => rootElement.removeEventListener("paste", onPaste);
   }, [editor, uploadHandler, handleVideoUpload]);
 
-  // Submit from the URL input
   const handleSubmitUrl = useCallback(
     (url: string) => {
       setIsInputOpen(false);
@@ -326,7 +304,6 @@ export function VideoPlugin({
     [editor],
   );
 
-  // Submit from the file picker
   const handleSubmitFile = useCallback(
     (file: File) => {
       setIsInputOpen(false);
@@ -358,8 +335,6 @@ export function VideoPlugin({
     </>
   );
 }
-
-// ─── Video URL Input Popover ────────────────────────────────────────────────
 
 interface VideoUrlInputProps {
   position: { top: number; left: number };
@@ -488,7 +463,6 @@ const VideoUrlInput = forwardRef<HTMLInputElement, VideoUrlInputProps>(
           }}
         />
 
-        {/* Submit URL button */}
         <button
           type="button"
           data-testid="video-url-submit"
@@ -518,7 +492,6 @@ const VideoUrlInput = forwardRef<HTMLInputElement, VideoUrlInputProps>(
           <PaperPlaneRightIcon size={14} weight="fill" />
         </button>
 
-        {/* Upload file button */}
         {onSubmitFile && (
           <button
             type="button"

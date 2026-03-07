@@ -15,8 +15,6 @@ import type {
 import { $createParagraphNode, $isElementNode, ElementNode } from "lexical";
 import { IS_CHROME } from "@lexical/utils";
 
-// ─── Types ──────────────────────────────────────────────────────────────────
-
 export interface ToggleContainerPayload {
   open?: boolean;
   key?: NodeKey;
@@ -26,8 +24,6 @@ export type SerializedToggleContainerNode = Spread<
   { open: boolean },
   SerializedElementNode
 >;
-
-// ─── Node Class ─────────────────────────────────────────────────────────────
 
 export class ToggleContainerNode extends ElementNode {
   __open: boolean;
@@ -49,8 +45,6 @@ export class ToggleContainerNode extends ElementNode {
   isShadowRoot(): boolean {
     return true;
   }
-
-  // ── DOM ─────────────────────────────────────────────────────────────────
 
   createDOM(config: EditorConfig, editor: LexicalEditor): HTMLElement {
     const themeClass = config.theme.toggleContainer as string | undefined;
@@ -113,8 +107,6 @@ export class ToggleContainerNode extends ElementNode {
     return true;
   }
 
-  // ── DOM Import/Export ───────────────────────────────────────────────────
-
   static importDOM(): DOMConversionMap | null {
     return {
       details: (_domNode: Node) => ({
@@ -132,8 +124,6 @@ export class ToggleContainerNode extends ElementNode {
     return { element };
   }
 
-  // ── JSON Serialization ─────────────────────────────────────────────────
-
   static importJSON(
     serialized: SerializedToggleContainerNode,
   ): ToggleContainerNode {
@@ -149,8 +139,6 @@ export class ToggleContainerNode extends ElementNode {
     };
   }
 
-  // ── Getters & Setters ──────────────────────────────────────────────────
-
   getOpen(): boolean {
     return this.getLatest().__open;
   }
@@ -165,8 +153,6 @@ export class ToggleContainerNode extends ElementNode {
   }
 }
 
-// ─── DOM Conversion ─────────────────────────────────────────────────────────
-
 function convertDetailsElement(domNode: Node): DOMConversionOutput | null {
   if (domNode instanceof HTMLElement) {
     const isOpen = (domNode as HTMLDetailsElement).open !== false;
@@ -174,8 +160,6 @@ function convertDetailsElement(domNode: Node): DOMConversionOutput | null {
   }
   return null;
 }
-
-// ─── Factory Functions ──────────────────────────────────────────────────────
 
 export function $createToggleContainerNode(
   payload?: ToggleContainerPayload,

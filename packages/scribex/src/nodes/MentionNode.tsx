@@ -1,10 +1,8 @@
 "use client";
 
-// REACT
 import { useCallback } from "react";
 import type { ReactElement } from "react";
 
-// LEXICAL
 import type {
   DOMConversionMap,
   DOMConversionOutput,
@@ -27,8 +25,6 @@ import {
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useEffect } from "react";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 export interface MentionPayload {
   id: string;
   label: string;
@@ -44,8 +40,6 @@ export type SerializedMentionNode = Spread<
   },
   SerializedLexicalNode
 >;
-
-// ─── Node Class ──────────────────────────────────────────────────────────────
 
 export class MentionNode extends DecoratorNode<ReactElement> {
   __mentionId: string;
@@ -159,8 +153,6 @@ export class MentionNode extends DecoratorNode<ReactElement> {
   }
 }
 
-// ─── React Component ─────────────────────────────────────────────────────────
-
 function MentionComponent({
   nodeKey,
   mentionId,
@@ -174,7 +166,6 @@ function MentionComponent({
 }) {
   const [editor] = useLexicalComposerContext();
 
-  // Handle Delete/Backspace when this node is selected
   useEffect(() => {
     const removeNode = () => {
       editor.update(() => {
@@ -232,7 +223,6 @@ function MentionComponent({
     };
   }, [editor, nodeKey]);
 
-  // Determine chip color based on trigger
   const chipColor =
     trigger === "#"
       ? "var(--scribex-accent, #3b82f6)"
@@ -265,8 +255,6 @@ function MentionComponent({
     </span>
   );
 }
-
-// ─── Factory Functions ───────────────────────────────────────────────────────
 
 export function $createMentionNode(
   payload: MentionPayload,

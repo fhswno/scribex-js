@@ -1,9 +1,7 @@
 "use client";
 
-// REACT
 import { useEffect } from "react";
 
-// LEXICAL
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
   $findMatchingParent,
@@ -23,7 +21,6 @@ import {
   KEY_ARROW_UP_COMMAND,
 } from "lexical";
 
-// INTERNAL
 import { INSERT_TOGGLE_COMMAND } from "../commands";
 import {
   $createToggleContainerNode,
@@ -45,8 +42,6 @@ export function TogglePlugin() {
   const [editor] = useLexicalComposerContext();
 
   useEffect(() => {
-    // ── Arrow key escape helpers ──────────────────────────────────────────
-
     const $onEscapeUp = () => {
       const selection = $getSelection();
       if (
@@ -99,8 +94,6 @@ export function TogglePlugin() {
     };
 
     return mergeRegister(
-      // ── Structure-enforcing transforms ──────────────────────────────────
-
       // ContentNode must live inside a ContainerNode
       editor.registerNodeTransform(ToggleContentNode, (node) => {
         const parent = node.getParent();
@@ -139,8 +132,6 @@ export function TogglePlugin() {
         }
       }),
 
-      // ── Arrow key navigation ───────────────────────────────────────────
-
       editor.registerCommand(
         KEY_ARROW_DOWN_COMMAND,
         $onEscapeDown,
@@ -161,8 +152,6 @@ export function TogglePlugin() {
         $onEscapeUp,
         COMMAND_PRIORITY_LOW,
       ),
-
-      // ── Enter in title: move cursor to content ─────────────────────────
 
       editor.registerCommand(
         INSERT_PARAGRAPH_COMMAND,
@@ -201,8 +190,6 @@ export function TogglePlugin() {
         },
         COMMAND_PRIORITY_LOW,
       ),
-
-      // ── INSERT_TOGGLE_COMMAND ──────────────────────────────────────────
 
       editor.registerCommand(
         INSERT_TOGGLE_COMMAND,
