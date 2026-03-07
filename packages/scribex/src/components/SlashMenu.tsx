@@ -9,6 +9,7 @@ import {
   $createParagraphNode,
   $getRoot,
   $getSelection,
+  $isElementNode,
   $isRangeSelection,
   $isRootNode,
   COMMAND_PRIORITY_LOW,
@@ -43,6 +44,8 @@ import {
   VideoCameraIcon,
   CaretCircleDownIcon,
   TextAaIcon,
+  TextAlignLeftIcon,
+  TextAlignRightIcon,
 } from "@phosphor-icons/react";
 
 // COMMANDS
@@ -115,6 +118,12 @@ const IconToggle = ({ size }: { size?: number }) => (
 const IconFont = ({ size }: { size?: number }) => (
   <TextAaIcon size={size} weight="duotone" />
 );
+const IconLTR = ({ size }: { size?: number }) => (
+  <TextAlignLeftIcon size={size} weight="duotone" />
+);
+const IconRTL = ({ size }: { size?: number }) => (
+  <TextAlignRightIcon size={size} weight="duotone" />
+);
 
 // ── Public interface ────────────────────────────────────────────────────────
 
@@ -166,7 +175,7 @@ function getCategoryForId(id: string): string {
   if (id === "bullet-list" || id === "numbered-list" || id === "check-list")
     return "lists";
   if (id === "image" || id === "emoji" || id === "video") return "media";
-  if (id.startsWith("font-")) return "format";
+  if (id.startsWith("font-") || id.startsWith("direction-")) return "format";
   return "other";
 }
 
@@ -546,6 +555,64 @@ function getDefaultItems(
         });
       },
     })),
+    // Direction items — set direction in the same update as trigger removal
+    // so the block node is still reachable from the selection
+    {
+      id: "direction-ltr",
+      label: "Left to Right",
+      description: "Set paragraph direction to LTR",
+      keywords: ["ltr", "direction", "english", "latin"],
+      icon: IconLTR,
+      onSelect: () => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+          const anchor = selection.anchor.getNode();
+
+          // Find the top-level block before removing trigger text
+          let block: import("lexical").LexicalNode = anchor;
+          while (block.getParent() && !$isRootNode(block.getParent())) {
+            block = block.getParent()!;
+          }
+
+          if (anchor instanceof TextNode) {
+            anchor.remove();
+          }
+
+          if ($isElementNode(block) && !$isRootNode(block)) {
+            block.setDirection("ltr");
+          }
+        });
+      },
+    },
+    {
+      id: "direction-rtl",
+      label: "Right to Left",
+      description: "Set paragraph direction to RTL",
+      keywords: ["rtl", "direction", "hebrew", "arabic"],
+      icon: IconRTL,
+      onSelect: () => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+          const anchor = selection.anchor.getNode();
+
+          // Find the top-level block before removing trigger text
+          let block: import("lexical").LexicalNode = anchor;
+          while (block.getParent() && !$isRootNode(block.getParent())) {
+            block = block.getParent()!;
+          }
+
+          if (anchor instanceof TextNode) {
+            anchor.remove();
+          }
+
+          if ($isElementNode(block) && !$isRootNode(block)) {
+            block.setDirection("rtl");
+          }
+        });
+      },
+    },
   ];
 }
 
@@ -872,7 +939,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
                     gap: "10px",
                     borderRadius: "8px",
                     padding: "5px 8px",
-                    textAlign: "left",
+                    textAlign: "start",
                     fontSize: "13px",
                     border: "none",
                     cursor: "default",
@@ -933,7 +1000,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
                           ? "var(--scribex-accent-foreground, rgba(255, 255, 255, 0.55))"
                           : "var(--scribex-text-tertiary)",
                         flexShrink: 0,
-                        paddingRight: "2px",
+                        paddingInlineEnd: "2px",
                       }}
                     >
                       {shortcut}
