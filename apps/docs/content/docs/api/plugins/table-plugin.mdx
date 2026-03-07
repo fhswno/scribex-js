@@ -1,0 +1,168 @@
+---
+title: TablePlugin
+description: Table creation and management.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Import
+
+```tsx
+import { TablePlugin } from '@scribex/core';
+```
+
+## Overview
+
+The `TablePlugin` provides table creation, cell editing, row/column management, and optional cell merging. It wraps Lexical's `@lexical/table` module and registers the `INSERT_TABLE_COMMAND_SCRIBEX` command for creating tables with a specified number of rows and columns. The plugin handles keyboard navigation between cells using Tab and arrow keys.
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `hasCellMerge` | `boolean` | `true` | Enable cell merge/unmerge functionality. Set to `false` for simpler table editing. |
+| `hasTabHandler` | `boolean` | `true` | Enable Tab key navigation between cells. When `true`, Tab moves to the next cell and Shift+Tab moves to the previous cell. |
+
+## Usage
+
+### Basic setup
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, TablePlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <InputRulePlugin />
+      <SlashMenu />
+      <TablePlugin />
+    </EditorRoot>
+  );
+}
+```
+
+### Without cell merge
+
+```tsx
+<TablePlugin hasCellMerge={false} hasTabHandler={true} />
+```
+
+## Registered commands
+
+| Command | Payload | Description |
+|---|---|---|
+| `INSERT_TABLE_COMMAND_SCRIBEX` | `{ rows: number; columns: number }` | Inserts a new table at the current cursor position with the specified dimensions. |
+
+### Creating a table programmatically
+
+```tsx
+import { INSERT_TABLE_COMMAND_SCRIBEX } from '@scribex/core';
+
+// Insert a 3x4 table (3 rows, 4 columns)
+editor.dispatchCommand(INSERT_TABLE_COMMAND_SCRIBEX, {
+  rows: 3,
+  columns: 4,
+});
+```
+
+## Keyboard navigation
+
+| Key | Action |
+|---|---|
+| Tab | Move to the next cell. If at the last cell, create a new row. |
+| Shift+Tab | Move to the previous cell. |
+| Arrow keys | Move to the adjacent cell in the corresponding direction. |
+| Enter | Insert a new line within the current cell. |
+| Backspace (empty cell at 1,1) | Delete the entire table if all cells are empty. |
+| Delete | Delete selected content within the cell. |
+
+## Cell merge and unmerge
+
+When `hasCellMerge` is `true`, cells can be merged and unmerged:
+
+```tsx
+import {
+  TABLE_MERGE_CELLS_COMMAND,
+  TABLE_UNMERGE_CELL_COMMAND,
+} from '@scribex/core';
+
+// Merge selected cells
+editor.dispatchCommand(TABLE_MERGE_CELLS_COMMAND, undefined);
+
+// Unmerge the current merged cell
+editor.dispatchCommand(TABLE_UNMERGE_CELL_COMMAND, undefined);
+```
+
+Merged cells store their row and column span in the node data:
+
+```json
+{
+  "type": "tablecell",
+  "colSpan": 2,
+  "rowSpan": 1,
+  "children": [{ "type": "paragraph", "children": [] }]
+}
+```
+
+## Row and column operations
+
+The plugin provides context menu actions (via right-click on a table cell) for common operations:
+
+| Action | Description |
+|---|---|
+| Insert row above | Add a new row above the current row |
+| Insert row below | Add a new row below the current row |
+| Insert column left | Add a new column to the left of the current column |
+| Insert column right | Add a new column to the right of the current column |
+| Delete row | Remove the current row |
+| Delete column | Remove the current column |
+| Delete table | Remove the entire table |
+
+These actions are also available programmatically via Lexical's table utility functions.
+
+## Slash menu integration
+
+When `TablePlugin` is mounted, a "Table" item appears in the slash menu. Selecting it opens a grid picker where the user can drag to select the desired number of rows and columns (similar to the table insertion UI in Google Docs and Notion).
+
+## Table structure in JSON
+
+A table is represented in the Lexical JSON state as nested nodes:
+
+```json
+{
+  "type": "table",
+  "children": [
+    {
+      "type": "tablerow",
+      "children": [
+        {
+          "type": "tablecell",
+          "headerState": 1,
+          "colSpan": 1,
+          "rowSpan": 1,
+          "children": [
+            {
+              "type": "paragraph",
+              "children": [{ "type": "text", "text": "Header 1" }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+<Callout type="info">
+The `TablePlugin` automatically registers `TableNode`, `TableRowNode`, and `TableCellNode` with Lexical. You do not need to add them to `ALL_NODES` manually.
+</Callout>
+
+<Callout type="warn">
+When `hasTabHandler` is `true`, the Tab key is captured by the table for cell navigation. This means Tab will not trigger indentation while the cursor is inside a table. Set `hasTabHandler` to `false` if you need Tab to pass through to other handlers.
+</Callout>
+
+## Related
+
+- [Tables Guide](/docs/guides/tables) -- Extended guide with styling and advanced usage
+- [Slash Menu Guide](/docs/guides/slash-menu) -- Configuring the table slash menu item
