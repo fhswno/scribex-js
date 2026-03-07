@@ -1,0 +1,533 @@
+---
+title: Custom AI Provider
+description: Build a custom AIProvider for any LLM backend.
+---
+
+Scribex's AI system is provider-agnostic. You implement the `AIProvider` interface, which returns a `ReadableStream<string>`, and Scribex handles everything else -- the streaming preview UI, the accept/discard flow, and the undo history management.
+
+This page shows complete, working implementations for three popular LLM backends: OpenAI, Ollama (local), and Anthropic Claude.
+
+## The `AIProvider` interface
+
+```ts
+interface AIProvider {
+  /** Human-readable name (e.g., "OpenAI", "Mistral", "Ollama") */
+  name: string;
+  /**
+   * Called with a prompt, surrounding editor context, and optional model config.
+   * Must return a ReadableStream of text chunks.
+   */
+  generate: (params: AIGenerateParams) => Promise<ReadableStream<string>>;
+}
+
+interface AIGenerateParams {
+  /** The user's prompt text. */
+  prompt: string;
+  /** Surrounding editor content serialized as Markdown. */
+  context: string;
+  /** Optional model-level configuration. */
+  config?: AIGenerateConfig;
+}
+
+interface AIGenerateConfig {
+  /** Sampling temperature (0-2). Lower = more deterministic. */
+  temperature?: number;
+  /** Maximum tokens to generate. */
+  maxTokens?: number;
+  /** System prompt / persona for the model. */
+  systemPrompt?: string;
+}
+```
+
+The key contract: `generate` must return a `ReadableStream<string>` that yields text chunks. Scribex consumes this stream inside the `AIPreviewNode`'s local React state -- no `editor.update()` calls are made during streaming, which keeps the undo stack clean.
+
+---
+
+## Example 1: OpenAI-compatible API
+
+This is the most common pattern. The client calls a Next.js API route, which proxies the request to OpenAI's streaming API. The API key never leaves the server.
+
+### Client-side provider
+
+```tsx title="lib/ai/openai-provider.ts"
+import type { AIProvider } from '@scribex/core';
+
+export const openaiProvider: AIProvider = {
+  name: 'OpenAI',
+  generate: async ({ prompt, context, config }) => {
+    const response = await fetch('/api/ai/openai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        context,
+        temperature: config?.temperature ?? 0.7,
+        maxTokens: config?.maxTokens ?? 2000,
+        systemPrompt: config?.systemPrompt,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`OpenAI request failed (${response.status}): ${error}`);
+    }
+
+    // Transform the byte stream into a string stream
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+
+    return new ReadableStream<string>({
+      async pull(controller) {
+        const { done, value } = await reader.read();
+        if (done) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(decoder.decode(value, { stream: true }));
+      },
+    });
+  },
+};
+```
+
+### Server-side API route
+
+```ts title="app/api/ai/openai/route.ts"
+import { NextRequest } from 'next/server';
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const { prompt, context, temperature, maxTokens, systemPrompt } = body;
+
+  if (!prompt || typeof prompt !== 'string') {
+    return new Response('Missing prompt', { status: 400 });
+  }
+
+  try {
+    const stream = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      stream: true,
+      temperature: temperature ?? 0.7,
+      max_tokens: maxTokens ?? 2000,
+      messages: [
+        {
+          role: 'system',
+          content:
+            systemPrompt ??
+            'You are a helpful writing assistant. Respond in Markdown format. Do not include a top-level heading unless asked.',
+        },
+        {
+          role: 'user',
+          content: `Here is the surrounding context from the document:\n\n${context}\n\n---\n\nTask: ${prompt}`,
+        },
+      ],
+    });
+
+    // Convert the OpenAI stream to a ReadableStream of raw text
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          const text = chunk.choices[0]?.delta?.content;
+          if (text) {
+            controller.enqueue(new TextEncoder().encode(text));
+          }
+        }
+        controller.close();
+      },
+    });
+
+    return new Response(readableStream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Transfer-Encoding': 'chunked',
+      },
+    });
+  } catch (error) {
+    console.error('OpenAI API error:', error);
+    return new Response('AI generation failed', { status: 500 });
+  }
+}
+```
+
+### Using it in your editor
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, AIPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+import { openaiProvider } from '@/lib/ai/openai-provider';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="ai-editor" className="min-h-[500px] p-4 border rounded-lg">
+      <InputRulePlugin />
+      <SlashMenu />
+      <AIPlugin
+        provider={openaiProvider}
+        config={{
+          generate: {
+            temperature: 0.7,
+            maxTokens: 2000,
+            systemPrompt: 'You are a helpful writing assistant. Respond in Markdown.',
+          },
+        }}
+      />
+    </EditorRoot>
+  );
+}
+```
+
+---
+
+## Example 2: Ollama (local LLM)
+
+Ollama runs large language models locally on your machine. Because the Ollama API runs on `localhost`, you can call it directly from the client without an API route -- there are no secrets to protect.
+
+Ollama's streaming API returns newline-delimited JSON objects, each containing a `response` field with the next text chunk.
+
+### Client-side provider
+
+```tsx title="lib/ai/ollama-provider.ts"
+import type { AIProvider } from '@scribex/core';
+
+export const ollamaProvider: AIProvider = {
+  name: 'Ollama',
+  generate: async ({ prompt, context, config }) => {
+    const response = await fetch('http://localhost:11434/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama3.1',
+        prompt: `Context:\n${context}\n\n---\n\nTask: ${prompt}`,
+        system:
+          config?.systemPrompt ??
+          'You are a helpful writing assistant. Respond in Markdown format.',
+        stream: true,
+        options: {
+          temperature: config?.temperature ?? 0.7,
+          num_predict: config?.maxTokens ?? 2000,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ollama request failed: ${response.status}`);
+    }
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    return new ReadableStream<string>({
+      async pull(controller) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          // Process any remaining buffered data
+          if (buffer.trim()) {
+            try {
+              const json = JSON.parse(buffer);
+              if (json.response) {
+                controller.enqueue(json.response);
+              }
+            } catch {
+              // Incomplete JSON at the end -- ignore
+            }
+          }
+          controller.close();
+          return;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Ollama sends newline-delimited JSON -- process each complete line
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? ''; // Keep the last (potentially incomplete) line
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const json = JSON.parse(line);
+            if (json.response) {
+              controller.enqueue(json.response);
+            }
+            if (json.done) {
+              controller.close();
+              return;
+            }
+          } catch {
+            // Skip malformed lines
+          }
+        }
+      },
+    });
+  },
+};
+```
+
+### Using it in your editor
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, AIPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+import { ollamaProvider } from '@/lib/ai/ollama-provider';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="ollama-editor" className="min-h-[500px] p-4 border rounded-lg">
+      <InputRulePlugin />
+      <SlashMenu />
+      <AIPlugin
+        provider={ollamaProvider}
+        config={{
+          generate: {
+            temperature: 0.8,
+            systemPrompt: 'You are a creative writing assistant. Respond in Markdown.',
+          },
+        }}
+      />
+    </EditorRoot>
+  );
+}
+```
+
+No API route, no environment variables, no cloud costs. Make sure Ollama is running locally with `ollama serve` and that the model is pulled with `ollama pull llama3.1`.
+
+---
+
+## Example 3: Anthropic Claude
+
+This example connects to the Anthropic Messages API via a server-side route. Claude uses a different streaming format (Server-Sent Events with `content_block_delta` events), so the API route parses the SSE stream and forwards raw text chunks.
+
+### Client-side provider
+
+```tsx title="lib/ai/claude-provider.ts"
+import type { AIProvider } from '@scribex/core';
+
+export const claudeProvider: AIProvider = {
+  name: 'Claude',
+  generate: async ({ prompt, context, config }) => {
+    const response = await fetch('/api/ai/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        context,
+        temperature: config?.temperature ?? 0.7,
+        maxTokens: config?.maxTokens ?? 2000,
+        systemPrompt: config?.systemPrompt,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`Claude request failed (${response.status}): ${error}`);
+    }
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+
+    return new ReadableStream<string>({
+      async pull(controller) {
+        const { done, value } = await reader.read();
+        if (done) {
+          controller.close();
+          return;
+        }
+        controller.enqueue(decoder.decode(value, { stream: true }));
+      },
+    });
+  },
+};
+```
+
+### Server-side API route
+
+```ts title="app/api/ai/claude/route.ts"
+import { NextRequest } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
+
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const { prompt, context, temperature, maxTokens, systemPrompt } = body;
+
+  if (!prompt || typeof prompt !== 'string') {
+    return new Response('Missing prompt', { status: 400 });
+  }
+
+  try {
+    const stream = anthropic.messages.stream({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens ?? 2000,
+      temperature: temperature ?? 0.7,
+      system:
+        systemPrompt ??
+        'You are a helpful writing assistant. Respond in Markdown format. Do not include a top-level heading unless asked.',
+      messages: [
+        {
+          role: 'user',
+          content: `Here is the surrounding context from the document:\n\n${context}\n\n---\n\nTask: ${prompt}`,
+        },
+      ],
+    });
+
+    // Convert the Anthropic stream to a ReadableStream of raw text
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        for await (const event of stream) {
+          if (
+            event.type === 'content_block_delta' &&
+            event.delta.type === 'text_delta'
+          ) {
+            controller.enqueue(new TextEncoder().encode(event.delta.text));
+          }
+        }
+        controller.close();
+      },
+    });
+
+    return new Response(readableStream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache',
+        'Transfer-Encoding': 'chunked',
+      },
+    });
+  } catch (error) {
+    console.error('Anthropic API error:', error);
+    return new Response('AI generation failed', { status: 500 });
+  }
+}
+```
+
+### Using it in your editor
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, AIPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+import { claudeProvider } from '@/lib/ai/claude-provider';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="claude-editor" className="min-h-[500px] p-4 border rounded-lg">
+      <InputRulePlugin />
+      <SlashMenu />
+      <AIPlugin
+        provider={claudeProvider}
+        config={{
+          generate: {
+            temperature: 0.7,
+            maxTokens: 2000,
+          },
+          labels: {
+            header: 'Claude',
+            streaming: 'Claude is writing...',
+          },
+        }}
+      />
+    </EditorRoot>
+  );
+}
+```
+
+---
+
+## Error handling
+
+All three providers follow the same error handling pattern:
+
+1. **Network errors** -- If `fetch` fails (server down, DNS error, CORS issue), the promise rejects and Scribex shows an error state in the `AIPreviewNode` with a "Dismiss" button.
+
+2. **HTTP errors** -- If the response status is not 2xx, the provider throws an `Error` with the status code and response body. Scribex catches this and displays the error message.
+
+3. **Stream errors** -- If the stream encounters an error mid-generation, the `ReadableStream` should call `controller.error(new Error(...))`. Scribex will show the partial content with an error indicator.
+
+You can handle errors globally via the `onError` callback on `AIPlugin`:
+
+```tsx
+<AIPlugin
+  provider={myProvider}
+  config={{
+    onError: (error) => {
+      // Log to your error tracking service
+      console.error('AI generation error:', error);
+    },
+    retry: {
+      maxRetries: 3, // Allow up to 3 retries
+    },
+  }}
+/>
+```
+
+## Switching providers at runtime
+
+You can allow users to choose their preferred AI provider at runtime by passing a different `AIProvider` instance:
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { useState } from 'react';
+import { EditorRoot, AIPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+import type { AIProvider } from '@scribex/core';
+import { openaiProvider } from '@/lib/ai/openai-provider';
+import { claudeProvider } from '@/lib/ai/claude-provider';
+import { ollamaProvider } from '@/lib/ai/ollama-provider';
+
+const providers: Record<string, AIProvider> = {
+  openai: openaiProvider,
+  claude: claudeProvider,
+  ollama: ollamaProvider,
+};
+
+export default function EditorPage() {
+  const [providerKey, setProviderKey] = useState<string>('openai');
+
+  return (
+    <main className="max-w-3xl mx-auto py-12 px-4">
+      <div className="flex items-center gap-4 mb-6">
+        <label htmlFor="provider" className="text-sm font-medium">
+          AI Provider:
+        </label>
+        <select
+          id="provider"
+          value={providerKey}
+          onChange={(e) => setProviderKey(e.target.value)}
+          className="border rounded px-3 py-1.5 text-sm"
+        >
+          <option value="openai">OpenAI (GPT-4o)</option>
+          <option value="claude">Anthropic (Claude)</option>
+          <option value="ollama">Ollama (Local)</option>
+        </select>
+      </div>
+
+      <EditorRoot
+        namespace="multi-provider-editor"
+        className="min-h-[500px] p-4 border rounded-lg"
+        placeholder="Type /ai to generate content..."
+      >
+        <InputRulePlugin />
+        <SlashMenu />
+        <AIPlugin provider={providers[providerKey]!} />
+      </EditorRoot>
+    </main>
+  );
+}
+```
+
+## Next steps
+
+- [AI Integration guide](/docs/guides/ai-integration) -- Full reference for the AI system
+- [Custom Upload Handler](/docs/examples/custom-upload-handler) -- Integrate with storage providers
+- [Full-Featured Editor](/docs/examples/full-featured) -- See AI in the context of all features
