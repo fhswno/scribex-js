@@ -10,9 +10,9 @@ Scribex includes a `CodeBlockNode` that provides editable code blocks with a lan
 The `CodeBlockNode` is registered automatically by `EditorRoot`. To enable the markdown shortcut (` ``` `) and the slash menu entry, include `InputRulePlugin` and `SlashMenu`:
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, InputRulePlugin, SlashMenu } from '@scribex/core';
+import { EditorRoot, InputRulePlugin, SlashMenu } from "@scribex/core";
 
 export default function EditorPage() {
   return (
@@ -32,9 +32,9 @@ The `CodeBlockNode` is a Lexical `DecoratorNode` that stores two properties:
 
 ```ts
 interface CodeBlockPayload {
-  code: string;      // The code content
-  language: string;  // The selected language (e.g., 'javascript')
-  key?: NodeKey;     // Optional Lexical node key
+  code: string; // The code content
+  language: string; // The selected language (e.g., 'javascript')
+  key?: NodeKey; // Optional Lexical node key
   autoFocus?: boolean; // Focus the textarea on mount
 }
 ```
@@ -42,12 +42,12 @@ interface CodeBlockPayload {
 ### Creating a code block programmatically
 
 ```tsx
-import { $createCodeBlockNode } from '@scribex/core';
+import { $createCodeBlockNode } from "@scribex/core";
 
 editor.update(() => {
   const codeBlock = $createCodeBlockNode({
     code: 'console.log("Hello, world!");',
-    language: 'javascript',
+    language: "javascript",
   });
 
   const root = $getRoot();
@@ -58,11 +58,11 @@ editor.update(() => {
 ### Type guard
 
 ```tsx
-import { $isCodeBlockNode } from '@scribex/core';
+import { $isCodeBlockNode } from "@scribex/core";
 
 if ($isCodeBlockNode(node)) {
-  console.log('Language:', node.getLanguage());
-  console.log('Code:', node.getCode());
+  console.log("Language:", node.getLanguage());
+  console.log("Code:", node.getCode());
 }
 ```
 
@@ -70,24 +70,24 @@ if ($isCodeBlockNode(node)) {
 
 The language selector includes the following languages:
 
-| Language | Value |
-|---|---|
+| Language   | Value        |
+| ---------- | ------------ |
 | JavaScript | `javascript` |
 | TypeScript | `typescript` |
-| Python | `python` |
-| CSS | `css` |
-| HTML | `html` |
-| JSON | `json` |
-| Bash | `bash` |
-| Go | `go` |
-| Rust | `rust` |
-| Java | `java` |
-| C | `c` |
-| C++ | `cpp` |
-| SQL | `sql` |
-| Markdown | `markdown` |
-| YAML | `yaml` |
-| Plain text | `text` |
+| Python     | `python`     |
+| CSS        | `css`        |
+| HTML       | `html`       |
+| JSON       | `json`       |
+| Bash       | `bash`       |
+| Go         | `go`         |
+| Rust       | `rust`       |
+| Java       | `java`       |
+| C          | `c`          |
+| C++        | `cpp`        |
+| SQL        | `sql`        |
+| Markdown   | `markdown`   |
+| YAML       | `yaml`       |
+| Plain text | `text`       |
 
 The default language for new code blocks is `javascript`.
 
@@ -120,21 +120,21 @@ The code block supports server-side syntax highlighting via [Shiki](https://shik
 ### Setting up the highlight route
 
 ```ts title="app/api/editor/highlight/route.ts"
-import { codeToHtml } from 'shiki';
-import { NextRequest } from 'next/server';
+import { codeToHtml } from "shiki";
+import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
   const { code, language } = await request.json();
 
   try {
     const html = await codeToHtml(code, {
-      lang: language || 'text',
-      theme: 'github-dark',
+      lang: language || "text",
+      theme: "github-dark",
     });
 
     return Response.json({ html });
   } catch {
-    return Response.json({ html: '' }, { status: 200 });
+    return Response.json({ html: "" }, { status: 200 });
   }
 }
 ```
@@ -178,10 +178,10 @@ It also exports to HTML as `<pre><code class="language-typescript">...</code></p
 
 ## Keyboard interaction
 
-| Key | Behavior |
-|---|---|
-| Type in textarea | Updates code content (debounced 300ms) |
-| Tab | Inserts spaces / standard textarea behavior |
-| Backspace / Delete (when node is selected, not editing) | Removes the entire code block |
-| Click on highlighted view | Switches to editing mode |
-| Blur textarea | Switches back to highlighted view |
+| Key                                                     | Behavior                                    |
+| ------------------------------------------------------- | ------------------------------------------- |
+| Type in textarea                                        | Updates code content (debounced 300ms)      |
+| Tab                                                     | Inserts spaces / standard textarea behavior |
+| Backspace / Delete (when node is selected, not editing) | Removes the entire code block               |
+| Click on highlighted view                               | Switches to editing mode                    |
+| Blur textarea                                           | Switches back to highlighted view           |

@@ -49,19 +49,29 @@ interface MentionItem {
 ## Basic setup
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, MentionPlugin, $createMentionNode } from '@scribex/core';
-import type { MentionProvider } from '@scribex/core';
+import { EditorRoot, MentionPlugin, $createMentionNode } from "@scribex/core";
+import type { MentionProvider } from "@scribex/core";
 
 const userProvider: MentionProvider = {
-  trigger: '@',
+  trigger: "@",
   onSearch: async (query) => {
     // Replace with your actual API call
     const users = [
-      { id: '1', label: 'Alice Johnson', meta: 'alice@example.com', icon: '/avatars/alice.jpg' },
-      { id: '2', label: 'Bob Smith', meta: 'bob@example.com', icon: '/avatars/bob.jpg' },
-      { id: '3', label: 'Charlie Brown', meta: 'charlie@example.com' },
+      {
+        id: "1",
+        label: "Alice Johnson",
+        meta: "alice@example.com",
+        icon: "/avatars/alice.jpg",
+      },
+      {
+        id: "2",
+        label: "Bob Smith",
+        meta: "bob@example.com",
+        icon: "/avatars/bob.jpg",
+      },
+      { id: "3", label: "Charlie Brown", meta: "charlie@example.com" },
     ];
     return users.filter((u) =>
       u.label.toLowerCase().includes(query.toLowerCase()),
@@ -69,7 +79,7 @@ const userProvider: MentionProvider = {
   },
   renderItem: (item) => <span>{item.label}</span>,
   onSelect: (item) =>
-    $createMentionNode({ id: item.id, label: item.label, trigger: '@' }),
+    $createMentionNode({ id: item.id, label: item.label, trigger: "@" }),
 };
 
 export default function EditorPage() {
@@ -87,29 +97,29 @@ Register multiple providers with different trigger characters. Each operates ind
 
 ```tsx
 const tagProvider: MentionProvider = {
-  trigger: '#',
+  trigger: "#",
   onSearch: async (query) => {
     const tags = [
-      { id: 'tag-1', label: 'documentation' },
-      { id: 'tag-2', label: 'feature-request' },
-      { id: 'tag-3', label: 'bug' },
-      { id: 'tag-4', label: 'enhancement' },
+      { id: "tag-1", label: "documentation" },
+      { id: "tag-2", label: "feature-request" },
+      { id: "tag-3", label: "bug" },
+      { id: "tag-4", label: "enhancement" },
     ];
     return tags.filter((t) =>
       t.label.toLowerCase().includes(query.toLowerCase()),
     );
   },
   renderItem: (item) => (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+    <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
       <span style={{ opacity: 0.5 }}>#</span>
       {item.label}
     </span>
   ),
   onSelect: (item) =>
-    $createMentionNode({ id: item.id, label: item.label, trigger: '#' }),
+    $createMentionNode({ id: item.id, label: item.label, trigger: "#" }),
 };
 
-<MentionPlugin providers={[userProvider, tagProvider]} />
+<MentionPlugin providers={[userProvider, tagProvider]} />;
 ```
 
 ## Async search with API calls
@@ -118,7 +128,7 @@ The `onSearch` function is asynchronous, so you can fetch results from your back
 
 ```tsx
 const userProvider: MentionProvider = {
-  trigger: '@',
+  trigger: "@",
   onSearch: async (query) => {
     if (query.length < 2) return []; // Don't search until 2 chars
 
@@ -127,16 +137,18 @@ const userProvider: MentionProvider = {
     );
     const users = await response.json();
 
-    return users.map((user: { id: string; name: string; email: string; avatar?: string }) => ({
-      id: user.id,
-      label: user.name,
-      meta: user.email,
-      icon: user.avatar,
-    }));
+    return users.map(
+      (user: { id: string; name: string; email: string; avatar?: string }) => ({
+        id: user.id,
+        label: user.name,
+        meta: user.email,
+        icon: user.avatar,
+      }),
+    );
   },
   renderItem: (item) => <span>{item.label}</span>,
   onSelect: (item) =>
-    $createMentionNode({ id: item.id, label: item.label, trigger: '@' }),
+    $createMentionNode({ id: item.id, label: item.label, trigger: "@" }),
 };
 ```
 
@@ -146,13 +158,13 @@ The search is debounced internally (50ms) to avoid excessive API calls during ra
 
 The mention dropdown supports full keyboard navigation:
 
-| Key | Action |
-|---|---|
-| Arrow Down | Move selection to next item |
-| Arrow Up | Move selection to previous item |
-| Enter | Select the highlighted item |
-| Tab | Select the highlighted item |
-| Escape | Close the dropdown, leave trigger text as plain text |
+| Key        | Action                                               |
+| ---------- | ---------------------------------------------------- |
+| Arrow Down | Move selection to next item                          |
+| Arrow Up   | Move selection to previous item                      |
+| Enter      | Select the highlighted item                          |
+| Tab        | Select the highlighted item                          |
+| Escape     | Close the dropdown, leave trigger text as plain text |
 
 Keyboard commands are registered at `COMMAND_PRIORITY_HIGH` to intercept them before the editor's default handlers. Focus remains in the editor (not the popover) at all times.
 
@@ -187,12 +199,12 @@ When the user selects an item, the trigger text and query are replaced with a `M
 The `$createMentionNode` helper creates a `MentionNode` instance:
 
 ```tsx
-import { $createMentionNode } from '@scribex/core';
+import { $createMentionNode } from "@scribex/core";
 
 const node = $createMentionNode({
-  id: 'user-123',
-  label: 'Alice Johnson',
-  trigger: '@',
+  id: "user-123",
+  label: "Alice Johnson",
+  trigger: "@",
 });
 ```
 
@@ -203,14 +215,14 @@ This function must be called inside an `editor.update()` context or inside the `
 Use `$isMentionNode` to check if a node is a `MentionNode`:
 
 ```tsx
-import { $isMentionNode } from '@scribex/core';
+import { $isMentionNode } from "@scribex/core";
 
 editor.read(() => {
   const root = $getRoot();
   root.getChildren().forEach((child) => {
     // Walk the tree to find mention nodes
     if ($isMentionNode(child)) {
-      console.log('Found mention:', child.getTextContent());
+      console.log("Found mention:", child.getTextContent());
     }
   });
 });
@@ -222,11 +234,11 @@ You can use any single character as a trigger. For example, a `/` trigger for sl
 
 ```tsx
 const labelProvider: MentionProvider = {
-  trigger: '+',
+  trigger: "+",
   onSearch: async (query) => {
     const labels = [
-      { id: 'l1', label: 'urgent', meta: 'High priority' },
-      { id: 'l2', label: 'review-needed', meta: 'Needs review' },
+      { id: "l1", label: "urgent", meta: "High priority" },
+      { id: "l2", label: "review-needed", meta: "Needs review" },
     ];
     return labels.filter((l) =>
       l.label.toLowerCase().includes(query.toLowerCase()),
@@ -234,7 +246,7 @@ const labelProvider: MentionProvider = {
   },
   renderItem: (item) => <span>{item.label}</span>,
   onSelect: (item) =>
-    $createMentionNode({ id: item.id, label: item.label, trigger: '+' }),
+    $createMentionNode({ id: item.id, label: item.label, trigger: "+" }),
 };
 ```
 
