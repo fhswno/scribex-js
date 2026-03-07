@@ -1,0 +1,250 @@
+---
+title: Multi-Editor
+description: Run multiple independent editor instances on the same page.
+---
+
+Scribex supports multiple independent editor instances on the same page. Each editor has its own state, history, keyboard shortcuts, and overlay portals. This is useful for common patterns like separate title and body fields, side-by-side editing, or multi-section forms.
+
+## Basic setup
+
+Each `EditorRoot` wraps its own `LexicalComposer` with a unique `namespace`. The namespace is a required prop that ensures complete isolation between editors:
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import {
+  EditorRoot,
+  FloatingToolbar,
+  SlashMenu,
+  OverlayPortal,
+  InputRulePlugin,
+  useEditorState,
+} from '@scribex/core';
+
+function TitleEditor() {
+  const { serializedState } = useEditorState({
+    onChange: (json) => console.log('Title:', json),
+  });
+  return null;
+}
+
+function BodyEditor() {
+  const { serializedState } = useEditorState({
+    onChange: (json) => console.log('Body:', json),
+  });
+  return null;
+}
+
+export default function EditorPage() {
+  return (
+    <div className="max-w-3xl mx-auto py-12 px-4 space-y-4">
+      {/* Title editor — minimal, no toolbar */}
+      <EditorRoot
+        namespace="title-editor"
+        className="text-3xl font-bold p-2 border-b"
+        placeholder="Untitled"
+        autoFocus={true}
+      >
+        <TitleEditor />
+      </EditorRoot>
+
+      {/* Body editor — full-featured */}
+      <EditorRoot
+        namespace="body-editor"
+        className="relative min-h-[500px] p-4 border rounded"
+        placeholder="Start writing..."
+        autoFocus={false}
+      >
+        <BodyEditor />
+        <FloatingToolbar />
+        <SlashMenu />
+        <OverlayPortal namespace="body-editor" />
+        <InputRulePlugin />
+      </EditorRoot>
+    </div>
+  );
+}
+```
+
+## How isolation works
+
+### Separate `LexicalComposer` instances
+
+Each `EditorRoot` creates its own `LexicalComposer` with an independent Lexical editor instance. This means:
+
+- Each editor has its own AST (document state)
+- Each editor has its own undo/redo history stack
+- Each editor has its own registered nodes, plugins, and command listeners
+- Mutations in one editor do not affect the other
+
+### Scoped keyboard shortcuts
+
+Keyboard shortcuts like `Cmd+B` (bold) and `Cmd+Z` (undo) are scoped to the editor that currently has focus. This is handled automatically by Lexical's command priority system.
+
+When you dispatch a command with `COMMAND_PRIORITY_EDITOR` or `COMMAND_PRIORITY_LOW`, the command only fires on the editor that owns the focused DOM element. There is no global shortcut interference between editors.
+
+```tsx
+// This Bold command only affects the editor that has focus
+editor.registerCommand(
+  FORMAT_TEXT_COMMAND,
+  (format) => {
+    // Only runs in the editor that received the keyboard event
+    return false;
+  },
+  COMMAND_PRIORITY_LOW,
+);
+```
+
+### Independent overlay portals
+
+Each `OverlayPortal` creates its own `<div>` appended to `document.body` as a portal mount point. The namespace is used to derive a unique element ID:
+
+```tsx
+<OverlayPortal namespace="body-editor" />
+```
+
+This ensures that the drag handle for "body-editor" only renders for nodes inside that editor. Hovering over nodes in a different editor will not trigger drag handles from the wrong portal.
+
+### No global singletons
+
+Scribex never uses module-level mutable state or global singletons to track "the active editor." All state is scoped through React context provided by `LexicalComposer`. This is a strict architectural rule -- see the [project architecture](/docs/project-structure) for details.
+
+## Using `useEditorState` in multi-editor setups
+
+The `useEditorState` hook reads from the nearest `LexicalComposer` context. When you have multiple editors, place the hook usage inside each editor's component tree:
+
+```tsx
+// This component must be a descendant of EditorRoot
+function EditorStateReader({ label }: { label: string }) {
+  const { serializedState } = useEditorState({
+    debounceMs: 300,
+    onChange: (json) => {
+      console.log(`${label} state changed:`, json);
+    },
+  });
+
+  return <pre className="text-xs mt-2">{serializedState}</pre>;
+}
+
+export default function Page() {
+  return (
+    <>
+      <EditorRoot namespace="editor-a">
+        <EditorStateReader label="A" />
+      </EditorRoot>
+
+      <EditorRoot namespace="editor-b">
+        <EditorStateReader label="B" />
+      </EditorRoot>
+    </>
+  );
+}
+```
+
+Each `EditorStateReader` will only receive updates from its parent editor. Typing in editor A will not trigger the `onChange` callback in editor B.
+
+## Restoring state for multiple editors
+
+Pass `initialState` to each editor independently:
+
+```tsx
+const [titleState, setTitleState] = useState<string | null>(null);
+const [bodyState, setBodyState] = useState<string | null>(null);
+
+useEffect(() => {
+  // Load saved state from your backend
+  const saved = await fetchDocument(docId);
+  setTitleState(saved.title);
+  setBodyState(saved.body);
+}, [docId]);
+
+return (
+  <>
+    <EditorRoot namespace="title" initialState={titleState}>
+      {/* ... */}
+    </EditorRoot>
+
+    <EditorRoot namespace="body" initialState={bodyState}>
+      {/* ... */}
+    </EditorRoot>
+  </>
+);
+```
+
+## Customizing plugins per editor
+
+Because every feature is a composable React child, you can give each editor a different set of capabilities:
+
+```tsx
+{/* Title editor: plain text only, no formatting */}
+<EditorRoot namespace="title-editor">
+  {/* No FloatingToolbar, no SlashMenu, no InputRulePlugin */}
+</EditorRoot>
+
+{/* Body editor: full-featured */}
+<EditorRoot namespace="body-editor">
+  <FloatingToolbar />
+  <SlashMenu />
+  <OverlayPortal namespace="body-editor" />
+  <InputRulePlugin />
+  <ImagePlugin uploadHandler={uploadHandler} />
+  <PastePlugin />
+  <MentionPlugin providers={mentionProviders} />
+  <AIPlugin provider={aiProvider} />
+</EditorRoot>
+
+{/* Sidebar notes: limited features */}
+<EditorRoot namespace="sidebar-notes">
+  <FloatingToolbar />
+  <InputRulePlugin />
+</EditorRoot>
+```
+
+## Namespace requirements
+
+The `namespace` prop must be:
+
+- **Unique** across all editors on the same page
+- **Stable** -- do not change the namespace after mount (it is used to create the `LexicalComposer` initial config, which does not support reconfiguration)
+- **Descriptive** -- use names that reflect the editor's purpose (e.g., `"title-editor"`, `"body-editor"`, `"comment-123"`)
+
+If you are rendering editors dynamically (e.g., a list of comments), use a unique identifier in the namespace:
+
+```tsx
+{comments.map((comment) => (
+  <EditorRoot
+    key={comment.id}
+    namespace={`comment-${comment.id}`}
+    initialState={comment.content}
+  >
+    <FloatingToolbar />
+  </EditorRoot>
+))}
+```
+
+## Performance considerations
+
+Each `EditorRoot` creates a full Lexical editor instance with its own DOM reconciliation loop. For most use cases (2-5 editors), this has negligible performance impact.
+
+If you need many editors on a single page (10+), consider:
+
+- **Lazy rendering**: Only mount editors when they scroll into view
+- **Minimal plugins**: Omit heavy plugins (like `OverlayPortal` with its `mousemove` listener) from editors that do not need them
+- **Read-only mode**: Use `editable={false}` for editors that are display-only
+
+```tsx
+<EditorRoot
+  namespace={`comment-${id}`}
+  initialState={content}
+  editable={false}   // No editing overhead
+  autoFocus={false}   // No auto-focus
+>
+  {/* No plugins needed for read-only display */}
+</EditorRoot>
+```
+
+## Related
+
+- [Serialization](/docs/guides/serialization) -- Saving and restoring editor state
+- [API: EditorRoot](/docs/api/components/editor-root) -- Full props reference
+- [API: OverlayPortal](/docs/api/components/overlay-portal) -- Portal isolation details
