@@ -71,7 +71,7 @@ export function FontPicker({
               fontFamily: entry.preview,
               fontSize: "13px",
               lineHeight: "1.4",
-              textAlign: "left",
+              textAlign: "start",
             }}
           >
             <span>{entry.label}</span>
@@ -82,7 +82,7 @@ export function FontPicker({
                 style={{
                   color: "var(--scribex-accent, #007AFF)",
                   flexShrink: 0,
-                  marginLeft: "8px",
+                  marginInlineStart: "8px",
                 }}
               />
             )}
