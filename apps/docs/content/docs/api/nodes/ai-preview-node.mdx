@@ -1,0 +1,160 @@
+---
+title: AIPreviewNode
+description: Ephemeral node for AI-generated content streaming.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`AIPreviewNode` is a `DecoratorNode` that renders an ephemeral preview of AI-generated content inside the editor. Its React component manages the streaming response entirely in local React state -- it never calls `editor.update()` during streaming. This design guarantees zero undo-history pollution while the AI is generating.
+
+## Import
+
+```tsx
+import { AIPreviewNode, $createAIPreviewNode, $isAIPreviewNode } from '@scribex/core';
+import type { AIPreviewPayload } from '@scribex/core';
+```
+
+## AIPreviewPayload
+
+```ts
+interface AIPreviewPayload {
+  prompt: string;
+  context: string;
+  key?: NodeKey;
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `prompt` | `string` | Yes | The user's prompt text. |
+| `context` | `string` | Yes | Surrounding editor content serialized as Markdown. |
+| `key` | `NodeKey` | No | Explicit Lexical node key. Omit to let Lexical auto-generate one. |
+
+## Functions
+
+### `$createAIPreviewNode(payload: AIPreviewPayload): AIPreviewNode`
+
+Creates a new `AIPreviewNode`. Must be called inside `editor.update()`. Typically invoked by the `AIPlugin` when the user triggers `/ai` from the slash menu.
+
+```ts
+editor.update(() => {
+  const node = $createAIPreviewNode({
+    prompt: 'Summarize the above in three bullet points',
+    context: markdownContext,
+  });
+  // Insert below the current cursor position
+  const selection = $getSelection();
+  if ($isRangeSelection(selection)) {
+    const anchor = selection.anchor.getNode();
+    const topLevel = anchor.getTopLevelElement();
+    if (topLevel) {
+      topLevel.insertAfter(node);
+    }
+  }
+});
+```
+
+### `$isAIPreviewNode(node: LexicalNode | null | undefined): node is AIPreviewNode`
+
+Type guard that returns `true` if the given node is an `AIPreviewNode`.
+
+## Streaming lifecycle
+
+The `AIPreviewNode`'s React component follows this lifecycle:
+
+```
+Stream starts
+  -> AIPreviewNode inserted into AST (single editor.update() call)
+  -> Tokens arrive -> local React state updates (NO editor.update())
+  -> Pulsing cursor animation while streaming
+  -> Stream ends -> "Accept" / "Discard" buttons appear
+
+"Accept" pressed
+  -> Parse final Markdown content -> $parseMarkdownToLexicalNodes()
+  -> Replace AIPreviewNode with parsed Lexical nodes (single editor.update())
+  -> Creates exactly ONE undo history entry
+
+"Discard" pressed
+  -> Remove AIPreviewNode from AST (single editor.update())
+  -> AST returns to its state before the node was inserted
+```
+
+## Stream states
+
+The component tracks three internal states:
+
+| State | Visual | Buttons |
+|---|---|---|
+| `streaming` | Content appears progressively with a pulsing cursor. | None (wait for stream to complete). |
+| `complete` | Full content displayed. | **Accept** and **Discard**. |
+| `error` | Error message displayed in destructive color. | **Retry** (if retries remain) and **Dismiss**. |
+
+## Styling
+
+The node uses the `--scribex-ai-stream` CSS variable for its accent color (left border, header text, accept button background) and `--scribex-ai-stream-bg` for its background. Override these tokens in your `tokens.css` to match your brand:
+
+```css
+:root {
+  --scribex-ai-stream: hsl(262 83% 58%);
+  --scribex-ai-stream-bg: rgba(51, 102, 204, 0.05);
+}
+```
+
+## Retry behavior
+
+When the stream encounters an error, the node shows a "Retry" button. Each click re-triggers the stream from scratch. Retry behavior is configured via `AIPluginConfig.retry`:
+
+```ts
+interface AIRetryConfig {
+  /** Maximum number of retries allowed. Set to 0 to disable retry. Default: Infinity */
+  maxRetries?: number;
+}
+```
+
+When `retryCount >= maxRetries`, the Retry button is hidden and only Dismiss remains.
+
+## Customizable labels
+
+All button labels and status text can be customized via `AIPluginConfig.labels`:
+
+```ts
+interface AIPreviewLabels {
+  header?: string;       // default: "AI"
+  streaming?: string;    // default: "generating..."
+  accept?: string;       // default: "Accept"
+  discard?: string;      // default: "Discard"
+  retry?: string;        // default: "Retry"
+  dismiss?: string;      // default: "Dismiss"
+  defaultError?: string; // default: "An error occurred"
+}
+```
+
+## Serialized format
+
+```ts
+type SerializedAIPreviewNode = {
+  type: 'ai-preview';
+  version: 1;
+  prompt: string;
+  context: string;
+};
+```
+
+<Callout type="warn">
+`AIPreviewNode` is ephemeral. While it implements `exportJSON`/`importJSON` for Lexical compatibility, it should not be persisted to a database. If the editor state is saved while an AI preview is active, it will appear as a static, non-functional block when restored.
+</Callout>
+
+## Undo stack integrity
+
+The critical design constraint of `AIPreviewNode` is undo stack protection:
+
+- **During streaming**: Zero `editor.update()` calls. All content updates happen in React `useState`. The undo stack is untouched.
+- **On accept**: Exactly one `editor.update()` call replaces the preview node with parsed Lexical nodes. This creates exactly one history entry, so pressing Cmd+Z removes all accepted AI content in a single step.
+- **On discard**: Exactly one `editor.update()` call removes the preview node. The editor returns to its pre-AI state.
+
+## Related
+
+- [AIPlugin](/docs/api/plugins/ai-plugin) -- Plugin that orchestrates AI integration
+- [AI Integration guide](/docs/guides/ai-integration) -- Full tutorial with provider setup
+- [AIProvider type](/docs/api/types#aiprovider) -- The provider interface for custom AI backends
+- [Utilities](/docs/api/utilities#parsmarkdowntolexicalnodes) -- Markdown parsing used on accept
