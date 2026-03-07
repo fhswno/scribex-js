@@ -1,0 +1,463 @@
+---
+title: Custom Upload Handler
+description: Implement UploadHandler for different storage providers.
+---
+
+Scribex does not include a default upload implementation. You provide your own `UploadHandler` function that receives a `File` and returns the public URL. This keeps the library decoupled from any specific storage backend.
+
+## The `UploadHandler` type
+
+```ts
+type UploadHandler = (file: File) => Promise<string>;
+// Resolves to the final remote URL (e.g., "https://cdn.example.com/image.png")
+// Rejects with an error if the upload fails.
+```
+
+Pass your handler to `ImagePlugin` and optionally to `VideoPlugin`:
+
+```tsx
+<ImagePlugin uploadHandler={myHandler} />
+<VideoPlugin uploadHandler={myHandler} />
+```
+
+When a file is dropped or pasted, Scribex immediately creates a local preview via `URL.createObjectURL(file)`, inserts a `LoadingImageNode` with a spinner overlay, and calls your handler. On success, the loading node is replaced with a permanent node using the remote URL. On failure, the loading node is removed and `URL.revokeObjectURL()` is called.
+
+---
+
+## Example 1: AWS S3 with presigned URLs
+
+The most common production pattern: your backend generates a presigned upload URL, the client uploads directly to S3, and the handler returns the public URL.
+
+### Upload handler
+
+```ts title="lib/upload/s3-handler.ts"
+import type { UploadHandler } from '@scribex/core';
+
+export const s3UploadHandler: UploadHandler = async (file: File): Promise<string> => {
+  // Step 1: Request a presigned URL from your backend
+  const presignResponse = await fetch('/api/upload/presign', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      filename: file.name,
+      contentType: file.type,
+      size: file.size,
+    }),
+  });
+
+  if (!presignResponse.ok) {
+    throw new Error('Failed to get presigned URL');
+  }
+
+  const { uploadUrl, publicUrl } = await presignResponse.json();
+
+  // Step 2: Upload directly to S3 using the presigned URL
+  const uploadResponse = await fetch(uploadUrl, {
+    method: 'PUT',
+    body: file,
+    headers: {
+      'Content-Type': file.type,
+    },
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`S3 upload failed: ${uploadResponse.statusText}`);
+  }
+
+  // Step 3: Return the public URL
+  return publicUrl;
+};
+```
+
+### Presign API route
+
+```ts title="app/api/upload/presign/route.ts"
+import { NextRequest, NextResponse } from 'next/server';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { randomUUID } from 'crypto';
+
+const s3 = new S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
+
+const BUCKET = process.env.AWS_S3_BUCKET!;
+const CDN_URL = process.env.CDN_URL!; // e.g., "https://cdn.example.com"
+
+export async function POST(request: NextRequest) {
+  const { filename, contentType, size } = await request.json();
+
+  // Validate file size (10MB max)
+  if (size > 10 * 1024 * 1024) {
+    return NextResponse.json({ error: 'File too large' }, { status: 400 });
+  }
+
+  // Generate a unique key
+  const extension = filename.split('.').pop() ?? 'bin';
+  const key = `uploads/${randomUUID()}.${extension}`;
+
+  // Create a presigned PUT URL (expires in 5 minutes)
+  const command = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ContentType: contentType,
+  });
+
+  const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
+  const publicUrl = `${CDN_URL}/${key}`;
+
+  return NextResponse.json({ uploadUrl, publicUrl });
+}
+```
+
+### Environment variables
+
+```bash title=".env.local"
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_S3_BUCKET=my-editor-uploads
+CDN_URL=https://cdn.example.com
+```
+
+---
+
+## Example 2: Cloudflare R2
+
+Cloudflare R2 is S3-compatible, so the pattern is nearly identical. The key difference is the endpoint URL and the public access configuration.
+
+### Upload handler
+
+```ts title="lib/upload/r2-handler.ts"
+import type { UploadHandler } from '@scribex/core';
+
+export const r2UploadHandler: UploadHandler = async (file: File): Promise<string> => {
+  const presignResponse = await fetch('/api/upload/r2-presign', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      filename: file.name,
+      contentType: file.type,
+    }),
+  });
+
+  if (!presignResponse.ok) {
+    throw new Error('Failed to get R2 presigned URL');
+  }
+
+  const { uploadUrl, publicUrl } = await presignResponse.json();
+
+  await fetch(uploadUrl, {
+    method: 'PUT',
+    body: file,
+    headers: { 'Content-Type': file.type },
+  });
+
+  return publicUrl;
+};
+```
+
+### Presign API route
+
+```ts title="app/api/upload/r2-presign/route.ts"
+import { NextRequest, NextResponse } from 'next/server';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { randomUUID } from 'crypto';
+
+const r2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+});
+
+const BUCKET = process.env.R2_BUCKET_NAME!;
+const PUBLIC_URL = process.env.R2_PUBLIC_URL!; // e.g., "https://assets.example.com"
+
+export async function POST(request: NextRequest) {
+  const { filename, contentType } = await request.json();
+
+  const extension = filename.split('.').pop() ?? 'bin';
+  const key = `uploads/${randomUUID()}.${extension}`;
+
+  const command = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ContentType: contentType,
+  });
+
+  const uploadUrl = await getSignedUrl(r2, command, { expiresIn: 300 });
+  const publicUrl = `${PUBLIC_URL}/${key}`;
+
+  return NextResponse.json({ uploadUrl, publicUrl });
+}
+```
+
+### Environment variables
+
+```bash title=".env.local"
+R2_ACCOUNT_ID=your-cloudflare-account-id
+R2_ACCESS_KEY_ID=your-r2-access-key
+R2_SECRET_ACCESS_KEY=your-r2-secret-key
+R2_BUCKET_NAME=editor-uploads
+R2_PUBLIC_URL=https://assets.example.com
+```
+
+---
+
+## Example 3: Supabase Storage
+
+Supabase Storage provides a simpler API with built-in authentication. The upload can be done directly from the client if the user is authenticated, or via an API route.
+
+### Upload handler (via API route)
+
+```ts title="lib/upload/supabase-handler.ts"
+import type { UploadHandler } from '@scribex/core';
+
+export const supabaseUploadHandler: UploadHandler = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch('/api/upload/supabase', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message ?? 'Upload failed');
+  }
+
+  const { url } = await response.json();
+  return url;
+};
+```
+
+### API route
+
+```ts title="app/api/upload/supabase/route.ts"
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use service role for server-side uploads
+);
+
+const BUCKET = 'editor-uploads';
+
+export async function POST(request: NextRequest) {
+  const formData = await request.formData();
+  const file = formData.get('file') as File;
+
+  if (!file) {
+    return NextResponse.json({ message: 'No file provided' }, { status: 400 });
+  }
+
+  // Validate file type
+  if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+    return NextResponse.json({ message: 'Invalid file type' }, { status: 400 });
+  }
+
+  const extension = file.name.split('.').pop() ?? 'bin';
+  const path = `${randomUUID()}.${extension}`;
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, buffer, {
+      contentType: file.type,
+      upsert: false,
+    });
+
+  if (error) {
+    console.error('Supabase upload error:', error);
+    return NextResponse.json({ message: 'Upload failed' }, { status: 500 });
+  }
+
+  const { data: urlData } = supabase.storage
+    .from(BUCKET)
+    .getPublicUrl(path);
+
+  return NextResponse.json({ url: urlData.publicUrl });
+}
+```
+
+### Environment variables
+
+```bash title=".env.local"
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+---
+
+## Example 4: Mock handler for development
+
+During development, you often do not want to set up a real storage backend. This mock handler simulates an upload with a short delay and returns a placeholder URL:
+
+```ts title="lib/upload/mock-handler.ts"
+import type { UploadHandler } from '@scribex/core';
+
+export const mockUploadHandler: UploadHandler = async (file: File): Promise<string> => {
+  // Simulate network delay
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+
+  // Simulate occasional failures (10% of the time)
+  if (Math.random() < 0.1) {
+    throw new Error('Simulated upload failure');
+  }
+
+  // Return a placeholder image URL based on the file dimensions
+  // In development, the local objectURL preview is shown during the "upload"
+  // and this placeholder replaces it when the mock resolves
+  const isVideo = file.type.startsWith('video/');
+
+  if (isVideo) {
+    return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+  }
+
+  return `https://picsum.photos/seed/${file.name}/800/600`;
+};
+```
+
+### Using the mock in development
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, ImagePlugin, VideoPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+import { mockUploadHandler } from '@/lib/upload/mock-handler';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="dev-editor" className="min-h-[500px] p-4 border rounded-lg">
+      <InputRulePlugin />
+      <SlashMenu />
+      <ImagePlugin
+        uploadHandler={mockUploadHandler}
+        onUploadError={(file, error) => {
+          console.error(`Failed to upload ${file.name}:`, error);
+          alert(`Upload failed: ${file.name}`);
+        }}
+      />
+      <VideoPlugin uploadHandler={mockUploadHandler} />
+    </EditorRoot>
+  );
+}
+```
+
+---
+
+## Adding progress feedback
+
+The `UploadHandler` type is intentionally simple: `(file: File) => Promise<string>`. It does not include progress callbacks by design -- progress bars for small file uploads add visual noise without meaningful benefit.
+
+If you need progress feedback for large files (such as video uploads), you can wrap the handler and track progress externally using `XMLHttpRequest` or a custom `fetch` wrapper:
+
+```ts title="lib/upload/with-progress.ts"
+import type { UploadHandler } from '@scribex/core';
+
+type ProgressCallback = (percent: number) => void;
+
+export function withProgress(
+  presignUrl: string,
+  onProgress: ProgressCallback,
+): UploadHandler {
+  return async (file: File): Promise<string> => {
+    // Step 1: Get presigned URL
+    const res = await fetch(presignUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: file.name, contentType: file.type }),
+    });
+    const { uploadUrl, publicUrl } = await res.json();
+
+    // Step 2: Upload with progress tracking via XMLHttpRequest
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', uploadUrl);
+      xhr.setRequestHeader('Content-Type', file.type);
+
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          onProgress(percent);
+        }
+      });
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(`Upload failed: ${xhr.statusText}`));
+        }
+      });
+
+      xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+      xhr.send(file);
+    });
+
+    return publicUrl;
+  };
+}
+```
+
+### Using it in your editor
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { EditorRoot, ImagePlugin } from '@scribex/core';
+import { withProgress } from '@/lib/upload/with-progress';
+
+export default function EditorPage() {
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+
+  const handler = withProgress('/api/upload/presign', (percent) => {
+    setUploadProgress(percent);
+  });
+
+  return (
+    <div>
+      {uploadProgress !== null && (
+        <div className="fixed bottom-4 right-4 bg-white shadow-lg rounded-lg p-4 text-sm">
+          Uploading: {uploadProgress}%
+          <div className="mt-1 w-48 h-1.5 bg-gray-200 rounded-full">
+            <div
+              className="h-full bg-blue-500 rounded-full transition-all"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+        </div>
+      )}
+      <EditorRoot namespace="progress-editor" className="min-h-[500px] p-4 border rounded-lg">
+        <ImagePlugin uploadHandler={handler} />
+      </EditorRoot>
+    </div>
+  );
+}
+```
+
+## Important rules
+
+- **No base64 encoding.** Never encode images as base64 strings in the editor state. Base64 bloats the JSON, hits database column size limits, and makes the serialized state unreadable.
+- **Always revoke object URLs.** Scribex calls `URL.revokeObjectURL()` automatically after the upload resolves or rejects. If you are building custom upload flows, ensure you do the same.
+- **Each upload step is a single `editor.update()`.** The `LoadingImageNode` insertion, the `ImageNode` replacement, and the cleanup on failure are each one atomic update, keeping the undo history clean.
+
+## Next steps
+
+- [Images & Uploads guide](/docs/guides/images-and-uploads) -- Full reference for the image pipeline
+- [Video Embeds guide](/docs/guides/video-embeds) -- Video upload and embed support
+- [Custom AI Provider](/docs/examples/custom-ai-provider) -- Connect to any LLM backend
