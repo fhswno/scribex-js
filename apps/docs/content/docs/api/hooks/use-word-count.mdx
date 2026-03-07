@@ -1,0 +1,114 @@
+---
+title: useWordCount
+description: Track word and character counts.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`useWordCount` is a React hook that tracks the word count and character count of the editor's text content. It uses a debounced update listener to avoid recalculating on every keystroke.
+
+## Import
+
+```tsx
+import { useWordCount } from '@scribex/core';
+```
+
+## Signature
+
+```ts
+function useWordCount(debounceMs?: number): {
+  words: number;
+  characters: number;
+};
+```
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `debounceMs` | `number` | `300` | Debounce delay in milliseconds. Controls how often the count is recalculated after editor changes. |
+
+## Return value
+
+| Field | Type | Description |
+|---|---|---|
+| `words` | `number` | The number of words in the editor. Returns `0` for empty content. |
+| `characters` | `number` | The total number of characters in the editor (including whitespace). |
+
+## Requirements
+
+This hook must be used inside an `EditorRoot` component. It calls `useLexicalComposerContext()` internally to access the Lexical editor instance.
+
+## Basic usage
+
+### Word count display
+
+```tsx title="components/WordCounter.tsx"
+'use client';
+
+import { useWordCount } from '@scribex/core';
+
+function WordCounter() {
+  const { words, characters } = useWordCount();
+
+  return (
+    <div className="text-sm text-muted-foreground">
+      {words} words, {characters} characters
+    </div>
+  );
+}
+```
+
+### Using with EditorRoot
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, InputRulePlugin, useWordCount } from '@scribex/core';
+
+function StatusBar() {
+  const { words, characters } = useWordCount(500);
+
+  return (
+    <footer className="flex justify-end gap-4 px-4 py-2 border-t text-xs text-gray-500">
+      <span>{words} words</span>
+      <span>{characters} chars</span>
+    </footer>
+  );
+}
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor" className="min-h-[400px] p-4 border rounded">
+      <InputRulePlugin />
+      <StatusBar />
+    </EditorRoot>
+  );
+}
+```
+
+### Custom debounce interval
+
+For longer documents where performance matters, increase the debounce interval:
+
+```tsx
+const { words, characters } = useWordCount(1000); // Recalculate at most once per second
+```
+
+## Implementation details
+
+The hook works by:
+
+1. Registering a Lexical update listener via `editor.registerUpdateListener()`.
+2. On each update (debounced), reading the root node's text content via `$getRoot().getTextContent()`.
+3. Counting characters as `text.length`.
+4. Counting words by trimming the text and splitting on whitespace (`/\s+/`). An empty or whitespace-only string returns `0` words.
+
+<Callout type="info">
+The word count uses a simple whitespace-based split (`text.trim().split(/\s+/).length`). This works well for Latin-script languages but may not accurately count words in CJK (Chinese, Japanese, Korean) text where words are not separated by spaces. For CJK-aware word counting, you can implement a custom hook using `Intl.Segmenter`.
+</Callout>
+
+## Related
+
+- [useEditorState](/docs/api/hooks/use-editor-state) -- Hook for reading serialized editor state
+- [EditorRoot](/docs/api/components/editor-root) -- The parent component that provides the Lexical context
