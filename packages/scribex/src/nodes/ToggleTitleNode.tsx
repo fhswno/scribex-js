@@ -37,9 +37,14 @@ export class ToggleTitleNode extends ElementNode {
 
     if (IS_CHROME) {
       // On Chrome we use <div> parent, so <summary> has no native toggle.
-      // Toggle when clicking the disclosure triangle area (left ~28px).
+      // Toggle when clicking the disclosure triangle area (~28px from inline-start).
       dom.addEventListener("click", (e: MouseEvent) => {
-        if (e.offsetX < 28) {
+        const isRtl = getComputedStyle(dom).direction === "rtl";
+        const clickedOnTriangle = isRtl
+          ? e.offsetX > dom.offsetWidth - 28
+          : e.offsetX < 28;
+
+        if (clickedOnTriangle) {
           e.preventDefault();
           editor.update(() => {
             const container = this.getLatest().getParent();
