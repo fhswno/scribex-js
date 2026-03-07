@@ -27,7 +27,7 @@ const LTR =
 // eslint-disable-next-line no-misleading-character-class
 const RTL_REGEX = new RegExp("^[^" + LTR + "]*[" + RTL + "]");
 
-const DirectionPlugin = () => {
+export const DirectionPlugin = () => {
   // Hook - Lexical Editor Context
   const [editor] = useLexicalComposerContext();
 
