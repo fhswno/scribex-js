@@ -1,0 +1,534 @@
+---
+title: Types
+description: All TypeScript types and interfaces exported by Scribex.
+---
+
+This page documents every TypeScript type and interface exported from `@scribex/core`. All types are available as named type exports.
+
+## Import
+
+```tsx
+import type {
+  UploadHandler,
+  AIProvider,
+  AIGenerateConfig,
+  AIGenerateParams,
+  AIPluginConfig,
+  AIPreviewLabels,
+  AIRetryConfig,
+  AIPromptInputRenderProps,
+  InputRule,
+  MentionProvider,
+  MentionItem,
+  SlashMenuItem,
+  ImagePayload,
+  AIPreviewPayload,
+  MentionPayload,
+  CodeBlockPayload,
+  CalloutPayload,
+  VideoPayload,
+  ToggleContainerPayload,
+  ColorEntry,
+  ColorPalette,
+  FontFamilyEntry,
+  CalloutPreset,
+  EmojiItem,
+  EmojiPickerPluginProps,
+  LinkPluginConfig,
+  LinkInputRenderProps,
+  LinkPreviewRenderProps,
+  VideoEmbedInfo,
+  VideoEmbedRenderProps,
+  VideoFileRenderProps,
+} from '@scribex/core';
+```
+
+---
+
+## UploadHandler
+
+The function signature for handling file uploads. Used by `ImagePlugin` and `VideoPlugin`.
+
+```ts
+type UploadHandler = (file: File) => Promise<string>;
+```
+
+The function receives a `File` object and must return a promise that resolves to the final remote URL (e.g., `https://cdn.example.com/image.png`). If the upload fails, the promise should reject with an `Error`.
+
+---
+
+## AI types
+
+### AIProvider
+
+The provider interface for custom AI backends. Scribex does not ship a built-in AI provider -- you must supply one.
+
+```ts
+interface AIProvider {
+  /** Human-readable name (e.g., "Mistral", "Ollama") */
+  name: string;
+  /**
+   * Called with a prompt, surrounding editor context, and optional model config.
+   * Must return a ReadableStream of text chunks.
+   */
+  generate: (params: AIGenerateParams) => Promise<ReadableStream<string>>;
+}
+```
+
+### AIGenerateParams
+
+Parameters passed to `AIProvider.generate()`.
+
+```ts
+interface AIGenerateParams {
+  /** The user's prompt text. */
+  prompt: string;
+  /** Surrounding editor content serialized as Markdown. */
+  context: string;
+  /** Optional model-level configuration. */
+  config?: AIGenerateConfig;
+}
+```
+
+### AIGenerateConfig
+
+Model-level configuration for the AI generation call.
+
+```ts
+interface AIGenerateConfig {
+  /** Sampling temperature (0-2). Lower = more deterministic. */
+  temperature?: number;
+  /** Maximum tokens to generate. */
+  maxTokens?: number;
+  /** System prompt / persona for the model. */
+  systemPrompt?: string;
+}
+```
+
+### AIPluginConfig
+
+Full configuration for the AI integration. Passed to the `AIPlugin` component.
+
+```ts
+interface AIPluginConfig {
+  /** Model-level configuration (temperature, maxTokens, systemPrompt). */
+  generate?: AIGenerateConfig;
+  /** Custom labels for the preview node UI. */
+  labels?: AIPreviewLabels;
+  /** Retry configuration. */
+  retry?: AIRetryConfig;
+  /** Number of preceding blocks to include as context. Default: 3. */
+  contextWindowSize?: number;
+  /** Called when the AI stream encounters an error. */
+  onError?: (error: Error) => void;
+  /** Called when the user accepts generated content. */
+  onAccept?: (content: string) => void;
+  /** Called when the user discards generated content. */
+  onDiscard?: () => void;
+  /** Custom prompt input component. Replaces the built-in prompt input. */
+  renderPrompt?: (props: AIPromptInputRenderProps) => React.ReactElement;
+}
+```
+
+### AIPreviewLabels
+
+Labels for the AIPreviewNode buttons and header. All fields are optional with sensible defaults.
+
+```ts
+interface AIPreviewLabels {
+  /** Header label. Default: "AI" */
+  header?: string;
+  /** Streaming status text. Default: "generating..." */
+  streaming?: string;
+  /** Accept button label. Default: "Accept" */
+  accept?: string;
+  /** Discard button label. Default: "Discard" */
+  discard?: string;
+  /** Retry button label. Default: "Retry" */
+  retry?: string;
+  /** Dismiss button label for error state. Default: "Dismiss" */
+  dismiss?: string;
+  /** Default error message. Default: "An error occurred" */
+  defaultError?: string;
+}
+```
+
+### AIRetryConfig
+
+Retry configuration for the AIPreviewNode.
+
+```ts
+interface AIRetryConfig {
+  /** Maximum number of retries allowed. Set to 0 to disable. Default: Infinity */
+  maxRetries?: number;
+}
+```
+
+### AIPromptInputRenderProps
+
+Props for a custom AI prompt input component.
+
+```ts
+interface AIPromptInputRenderProps {
+  /** Current position for fixed positioning. */
+  position: { top: number; left: number };
+  /** Call with the prompt text to submit. */
+  onSubmit: (prompt: string) => void;
+  /** Call to close/cancel the prompt. */
+  onClose: () => void;
+}
+```
+
+---
+
+## InputRule
+
+Defines a custom input rule for the `InputRulePlugin`.
+
+```ts
+interface InputRule {
+  /** The trigger pattern. Must include a trailing space or newline to fire. */
+  pattern: RegExp;
+  /** The node type this rule produces. Used for categorization. */
+  type: 'heading' | 'quote' | 'code' | 'divider' | 'custom';
+  /**
+   * Called when the pattern matches. Receives the matched text and the current TextNode.
+   * The engine clears the trigger text before calling this.
+   *
+   * IMPORTANT: Runs inside a Lexical node transform. Do NOT wrap in editor.update().
+   */
+  onMatch: (match: RegExpMatchArray, node: TextNode, editor: LexicalEditor) => void;
+}
+```
+
+---
+
+## Mention types
+
+### MentionItem
+
+A single mention result returned by a `MentionProvider`.
+
+```ts
+interface MentionItem {
+  id: string;
+  label: string;
+  /** Optional metadata rendered inside the dropdown item. */
+  meta?: string;
+  /** Optional URL to an avatar or icon. */
+  icon?: string;
+}
+```
+
+### MentionProvider
+
+Defines a mention trigger and its data source.
+
+```ts
+interface MentionProvider {
+  /** The character that triggers this provider (e.g., '@', '#'). */
+  trigger: string;
+  /** Called when the user types after the trigger. Return matching items. */
+  onSearch: (query: string) => Promise<MentionItem[]>;
+  /** Renders a single item in the dropdown. Keep lightweight. */
+  renderItem: (item: MentionItem) => React.ReactNode;
+  /** Called when the user selects an item. Return the Lexical node to insert. */
+  onSelect: (item: MentionItem) => LexicalNode;
+}
+```
+
+---
+
+## SlashMenuItem
+
+Defines an item in the slash menu dropdown.
+
+```ts
+interface SlashMenuItem {
+  id: string;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ size?: number }>;
+  onSelect: () => void;
+  /** Extra search terms (e.g., "h1" for "Heading 1"). */
+  keywords?: string[];
+}
+```
+
+---
+
+## Node payloads
+
+These types define the data required to create each custom Lexical node.
+
+### ImagePayload
+
+```ts
+interface ImagePayload {
+  src: string;
+  altText: string;
+  width?: number;
+  height?: number;
+  key?: NodeKey;
+}
+```
+
+### AIPreviewPayload
+
+```ts
+interface AIPreviewPayload {
+  prompt: string;
+  context: string;
+  key?: NodeKey;
+}
+```
+
+### MentionPayload
+
+```ts
+interface MentionPayload {
+  id: string;
+  label: string;
+  trigger: string;
+  key?: NodeKey;
+}
+```
+
+### CodeBlockPayload
+
+```ts
+interface CodeBlockPayload {
+  code: string;
+  language: string;
+  key?: NodeKey;
+  autoFocus?: boolean;
+}
+```
+
+### CalloutPayload
+
+```ts
+interface CalloutPayload {
+  emoji?: string;
+  colorPreset?: string;
+  key?: NodeKey;
+}
+```
+
+### VideoPayload
+
+```ts
+interface VideoPayload {
+  src: string;
+  videoType: 'embed' | 'file';
+  provider: string;
+  title?: string;
+  key?: NodeKey;
+}
+```
+
+### ToggleContainerPayload
+
+```ts
+interface ToggleContainerPayload {
+  open?: boolean;
+  key?: NodeKey;
+}
+```
+
+---
+
+## Color and font types
+
+### ColorEntry
+
+A single color option in the color picker.
+
+```ts
+interface ColorEntry {
+  /** Human-readable label shown in the picker. */
+  label: string;
+  /** CSS value to apply -- should be a var() reference. */
+  value: string;
+  /** Preview swatch color (raw hex/hsl for rendering the dot). */
+  swatch: string;
+}
+```
+
+### ColorPalette
+
+The complete color palette with text and highlight sections.
+
+```ts
+interface ColorPalette {
+  text: ColorEntry[];
+  highlight: ColorEntry[];
+}
+```
+
+### FontFamilyEntry
+
+A single font family option in the font picker.
+
+```ts
+interface FontFamilyEntry {
+  /** Human-readable label shown in the picker. */
+  label: string;
+  /** CSS font-family value to apply. Empty string = default. */
+  value: string;
+  /** Font stack used to render the preview text in the picker dropdown. */
+  preview: string;
+}
+```
+
+---
+
+## Callout and emoji types
+
+### CalloutPreset
+
+Defines a callout color/style preset.
+
+```ts
+interface CalloutPreset {
+  /** Unique identifier used in CSS class names and serialization. */
+  id: string;
+  /** Human-readable label shown in UI. */
+  label: string;
+  /** Default emoji for this preset. */
+  emoji: string;
+  /** Raw background color for rendering the picker dot. */
+  bgSwatch: string;
+  /** Raw border color for rendering the picker dot. */
+  borderSwatch: string;
+}
+```
+
+### EmojiItem
+
+A single emoji entry in the emoji picker.
+
+```ts
+interface EmojiItem {
+  emoji: string;
+  name: string;
+  keywords: string[];
+}
+```
+
+---
+
+## Plugin configuration types
+
+### EmojiPickerPluginProps
+
+Props for the `EmojiPickerPlugin` component.
+
+```ts
+interface EmojiPickerPluginProps {
+  /** Override the built-in emoji list. */
+  emojis?: EmojiItem[];
+  /** Max results shown in dropdown. Default: 8. */
+  maxResults?: number;
+  /** Custom render function for each emoji row. */
+  renderItem?: (item: EmojiItem, isSelected: boolean) => React.ReactNode;
+  /** Custom render function for the dropdown container. */
+  renderDropdown?: (props: {
+    children: React.ReactNode;
+    position: { top: number; left: number };
+  }) => React.ReactNode;
+}
+```
+
+### LinkPluginConfig
+
+Configuration for the `LinkPlugin` component.
+
+```ts
+interface LinkPluginConfig {
+  /** Custom render for the link input popover. */
+  renderLinkInput?: (props: LinkInputRenderProps) => React.ReactNode;
+  /** Custom render for the link preview popover. */
+  renderLinkPreview?: (props: LinkPreviewRenderProps) => React.ReactNode;
+  /** Validate URL before applying. Default: basic URL validation. */
+  validateUrl?: (url: string) => boolean;
+  /** Link target behavior. Default: "_blank". */
+  target?: string;
+  /** Link rel attribute. Default: "noopener noreferrer". */
+  rel?: string;
+}
+```
+
+### LinkInputRenderProps
+
+Props for a custom link input component.
+
+```ts
+interface LinkInputRenderProps {
+  initialUrl: string;
+  onSubmit: (url: string) => void;
+  onRemove: () => void;
+  onClose: () => void;
+  position: { top: number; left: number };
+}
+```
+
+### LinkPreviewRenderProps
+
+Props for a custom link preview component.
+
+```ts
+interface LinkPreviewRenderProps {
+  url: string;
+  onEdit: () => void;
+  onRemove: () => void;
+  onClose: () => void;
+  position: { top: number; left: number };
+}
+```
+
+---
+
+## Video types
+
+### VideoEmbedInfo
+
+Information about a parsed video embed URL. Returned by `parseVideoEmbed()`.
+
+```ts
+interface VideoEmbedInfo {
+  provider: 'youtube' | 'vimeo' | 'loom' | 'generic';
+  embedUrl: string;
+  /** Thumbnail URL when available (YouTube, Vimeo). */
+  thumbnailUrl?: string;
+}
+```
+
+### VideoEmbedRenderProps
+
+Props for rendering an embedded video.
+
+```ts
+interface VideoEmbedRenderProps {
+  src: string;
+  provider: string;
+  title: string;
+}
+```
+
+### VideoFileRenderProps
+
+Props for rendering an uploaded video file.
+
+```ts
+interface VideoFileRenderProps {
+  src: string;
+  title: string;
+}
+```
+
+## Related
+
+- [Commands](/docs/api/commands) -- All exported Lexical commands
+- [Data & Presets](/docs/api/data-and-presets) -- Default data constants
+- [Utilities](/docs/api/utilities) -- Utility functions
