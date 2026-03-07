@@ -1,0 +1,211 @@
+---
+title: Video Embeds
+description: Embed videos from YouTube, Vimeo, Loom, or upload video files.
+---
+
+Scribex supports both video embeds (from URLs) and direct video file uploads. The `VideoPlugin` handles URL parsing for known providers, file upload with optimistic UI, and renders videos as responsive players in the editor.
+
+## Basic setup
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, VideoPlugin } from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <VideoPlugin />
+    </EditorRoot>
+  );
+}
+```
+
+For embed-only support (no file uploads), pass no `uploadHandler`. To enable file uploads, provide one:
+
+```tsx
+const videoUploadHandler = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch('/api/upload/video', { method: 'POST', body: formData });
+  const { url } = await res.json();
+  return url;
+};
+
+<VideoPlugin uploadHandler={videoUploadHandler} />
+```
+
+## `VideoPlugin` props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `uploadHandler` | `UploadHandler` | -- | Handler for uploading video files. Omit to disable file uploads. |
+| `maxFileSize` | `number` | `52428800` (50MB) | Maximum video file size in bytes |
+| `allowedFormats` | `string[]` | `['video/mp4', 'video/webm', 'video/quicktime']` | Allowed MIME types for file upload |
+| `onFileRejected` | `(file: File, reason: 'size' \| 'format') => void` | -- | Called when a file is rejected |
+
+## Supported embed providers
+
+The `parseVideoEmbed` utility recognizes URLs from these providers and converts them to embeddable iframe URLs:
+
+| Provider | Recognized URL patterns | Embed URL format |
+|---|---|---|
+| **YouTube** | `youtube.com/watch?v=ID`, `youtu.be/ID`, `youtube.com/embed/ID`, `youtube.com/shorts/ID`, `youtube.com/live/ID` | `https://www.youtube.com/embed/ID` |
+| **Vimeo** | `vimeo.com/ID`, `player.vimeo.com/video/ID`, `vimeo.com/channels/NAME/ID` | `https://player.vimeo.com/video/ID` |
+| **Loom** | `loom.com/share/ID`, `loom.com/embed/ID` | `https://www.loom.com/embed/ID` |
+| **Generic** | Any valid HTTP/HTTPS URL | The URL itself (rendered in an iframe) |
+
+If the URL is not recognized as a specific provider but is a valid URL, it falls through to the `generic` provider and is rendered in an iframe as-is.
+
+## Embed flow
+
+When the user provides a video URL (via the `/video` slash menu item or programmatically):
+
+1. The URL is passed to `parseVideoEmbed(url)`.
+2. If it returns a valid `VideoEmbedInfo` object, a `VideoNode` is inserted into the AST with `videoType: 'embed'`.
+3. The node renders as a responsive iframe with the provider's embed URL.
+
+```ts
+import { parseVideoEmbed } from '@scribex/core';
+
+const result = parseVideoEmbed('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+// {
+//   provider: 'youtube',
+//   embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+//   thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+// }
+```
+
+## File upload flow
+
+When a video file is dropped, pasted, or selected via the file picker (and `uploadHandler` is provided):
+
+1. The file is validated against `maxFileSize` and `allowedFormats`.
+2. A local object URL is created via `URL.createObjectURL(file)`.
+3. A `LoadingVideoNode` is inserted with the local preview URL and a spinner overlay.
+4. `uploadHandler(file)` is called.
+5. On success: The `LoadingVideoNode` is replaced with a `VideoNode` using the remote URL, with `videoType: 'file'`.
+6. On failure: The `LoadingVideoNode` is removed from the AST. `URL.revokeObjectURL()` is called.
+
+This follows the same optimistic UI pattern as the [image upload flow](/docs/guides/images-and-uploads).
+
+## The `/video` slash menu item
+
+When `VideoPlugin` is included, a "Video" item appears in the slash menu. Selecting it opens an inline input where the user can either:
+
+- **Paste a URL** -- The URL is parsed and embedded.
+- **Upload a file** (if `uploadHandler` is provided) -- A file picker button appears next to the URL input.
+
+## Programmatic insertion
+
+Use Lexical commands to insert videos programmatically:
+
+```tsx
+import { INSERT_VIDEO_COMMAND, OPEN_VIDEO_INPUT_COMMAND } from '@scribex/core';
+
+// Insert a video embed by URL
+editor.dispatchCommand(INSERT_VIDEO_COMMAND, {
+  url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+});
+
+// Insert a video from a File object
+editor.dispatchCommand(INSERT_VIDEO_COMMAND, { file: videoFile });
+
+// Open the video URL input popup at the cursor
+editor.dispatchCommand(OPEN_VIDEO_INPUT_COMMAND, undefined);
+```
+
+## The `VideoNode`
+
+The `VideoNode` is a Lexical DecoratorNode that stores:
+
+```ts
+interface VideoPayload {
+  src: string;               // Embed URL or uploaded video URL
+  videoType: 'embed' | 'file'; // Whether this is an embed or uploaded file
+  provider: string;          // 'youtube', 'vimeo', 'loom', 'generic', or 'upload'
+  title?: string;            // Display title / original URL
+}
+```
+
+### Creating a video node programmatically
+
+```tsx
+import { $createVideoNode } from '@scribex/core';
+
+editor.update(() => {
+  const videoNode = $createVideoNode({
+    src: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    videoType: 'embed',
+    provider: 'youtube',
+    title: 'Rick Astley - Never Gonna Give You Up',
+  });
+
+  const root = $getRoot();
+  root.append(videoNode);
+});
+```
+
+### Type guard
+
+```tsx
+import { $isVideoNode } from '@scribex/core';
+
+if ($isVideoNode(node)) {
+  console.log('Video provider:', node.getProvider());
+}
+```
+
+## The `parseVideoEmbed` utility
+
+The `parseVideoEmbed` function is a pure utility (no React, no side effects) exported from `@scribex/core`:
+
+```ts
+import { parseVideoEmbed } from '@scribex/core';
+import type { VideoEmbedInfo } from '@scribex/core';
+
+const info: VideoEmbedInfo | null = parseVideoEmbed(userInput);
+
+if (info) {
+  console.log(info.provider);    // 'youtube' | 'vimeo' | 'loom' | 'generic'
+  console.log(info.embedUrl);    // The iframe-compatible URL
+  console.log(info.thumbnailUrl); // Only for YouTube (optional)
+}
+```
+
+Returns `null` for non-URL strings or invalid protocols. Returns `{ provider: 'generic' }` for valid URLs that do not match a known provider.
+
+## Example: Video with upload and embed support
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, VideoPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+
+const videoUpload = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('video', file);
+  const res = await fetch('/api/upload/video', { method: 'POST', body: formData });
+  if (!res.ok) throw new Error('Video upload failed');
+  const { url } = await res.json();
+  return url;
+};
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <InputRulePlugin />
+      <SlashMenu />
+      <VideoPlugin
+        uploadHandler={videoUpload}
+        maxFileSize={100 * 1024 * 1024} // 100MB
+        allowedFormats={['video/mp4', 'video/webm']}
+        onFileRejected={(file, reason) => {
+          if (reason === 'size') alert('Video too large. Max 100MB.');
+          if (reason === 'format') alert('Only MP4 and WebM files are supported.');
+        }}
+      />
+    </EditorRoot>
+  );
+}
+```
