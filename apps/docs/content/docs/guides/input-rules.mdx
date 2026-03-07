@@ -1,0 +1,218 @@
+---
+title: Input Rules
+description: Extend markdown shortcuts with custom input rules.
+---
+
+The Input Rule Engine converts markdown-style shortcuts into rich content as you type. Type `# ` and the paragraph becomes a heading. Type `> ` and it becomes a blockquote. The engine is fully extensible -- you can register your own patterns alongside the built-in rules.
+
+## Setup
+
+Add the `InputRulePlugin` as a child of `EditorRoot`:
+
+```tsx title="app/editor/page.tsx"
+import { EditorRoot, InputRulePlugin, SlashMenu } from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor" className="min-h-[400px] p-4 border rounded">
+      <InputRulePlugin />
+      <SlashMenu />
+    </EditorRoot>
+  );
+}
+```
+
+The `InputRulePlugin` also handles the `/` trigger for the slash menu. When the user types `/` as the only character in a paragraph, the plugin dispatches `OPEN_SLASH_MENU_COMMAND`.
+
+## The `InputRule` interface
+
+Every input rule conforms to this interface:
+
+```ts
+interface InputRule {
+  /** The trigger pattern. Must match the full text content of the node. */
+  pattern: RegExp;
+  /** The node type this rule produces. Used for categorization. */
+  type: 'heading' | 'quote' | 'code' | 'divider' | 'custom';
+  /**
+   * Called when the pattern matches. Receives the regex match array and the
+   * current TextNode. The engine clears the trigger text before calling this.
+   *
+   * IMPORTANT: This callback runs inside a Lexical node transform, which is
+   * already within an editor.update() context. Do NOT wrap mutations in
+   * editor.update() here -- that would cause a nested update error.
+   */
+  onMatch: (match: RegExpMatchArray, node: TextNode, editor: LexicalEditor) => void;
+}
+```
+
+## Built-in rules
+
+The following rules are registered by default:
+
+| Trigger | Pattern | Produces |
+|---|---|---|
+| `# ` | `/^# $/` | Heading 1 |
+| `## ` | `/^## $/` | Heading 2 |
+| `### ` | `/^### $/` | Heading 3 |
+| `> ` | `/^> $/` | Blockquote |
+| `- ` or `* ` | `/^[-*] $/` | Unordered list item |
+| `1. ` | `/^1\. $/` | Ordered list item |
+| `[] ` | `/^\[\] $/` | Unchecked task item |
+| `[x] ` | `/^\[x\] $/` | Checked task item |
+| `---` | `/^---$/` | Horizontal divider |
+| ` ``` ` | `/^```$/` | Code block |
+
+All patterns use the `^` anchor to ensure they match from the start of the text node. Most require a trailing space to fire, which prevents premature triggering while the user is still typing.
+
+The `---` (divider) and ` ``` ` (code block) patterns fire without a trailing space because they are unambiguous at 3 characters.
+
+## Adding custom rules
+
+Pass additional rules via the `rules` prop. Custom rules are checked alongside the built-in rules:
+
+```tsx
+import { InputRulePlugin } from '@scribex/core';
+import type { InputRule } from '@scribex/core';
+import { $createParagraphNode, $createTextNode } from 'lexical';
+
+const customRules: InputRule[] = [
+  {
+    pattern: /^::warning $/,
+    type: 'custom',
+    onMatch: (_match, node, editor) => {
+      const parent = node.getParent();
+      if (!parent) return;
+
+      // Insert a callout via command (already inside update context)
+      // We need to defer the command dispatch since we're in a node transform
+      queueMicrotask(() => {
+        editor.dispatchCommand(INSERT_CALLOUT_COMMAND, {
+          emoji: 'warning',
+          colorPreset: 'yellow',
+        });
+      });
+    },
+  },
+];
+
+function Editor() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <InputRulePlugin rules={customRules} />
+    </EditorRoot>
+  );
+}
+```
+
+### Example: custom highlight rule
+
+Convert `== ` into a highlighted text block:
+
+```tsx
+const highlightRule: InputRule = {
+  pattern: /^== $/,
+  type: 'custom',
+  onMatch: (_match, node) => {
+    const parent = node.getParent();
+    if (!parent) return;
+
+    // Create a paragraph with a highlight style
+    const paragraph = $createParagraphNode();
+    paragraph.setFormat('left');
+    parent.replace(paragraph);
+    paragraph.selectEnd();
+  },
+};
+```
+
+### Example: custom divider variant
+
+Convert `***` into a styled divider:
+
+```tsx
+import { $createHorizontalRuleNode } from '@scribex/core';
+
+const styledDividerRule: InputRule = {
+  pattern: /^\*\*\*$/,
+  type: 'divider',
+  onMatch: (_match, node) => {
+    const parent = node.getParent();
+    if (!parent) return;
+
+    const rule = $createHorizontalRuleNode();
+    const trailing = $createParagraphNode();
+    parent.replace(rule);
+    rule.insertAfter(trailing);
+    trailing.selectEnd();
+  },
+};
+```
+
+## How the engine works
+
+The `InputRulePlugin` registers a `TextNode` transform via `editor.registerNodeTransform(TextNode, ...)`. This transform runs every time a `TextNode` is created or modified.
+
+### Performance optimizations
+
+The engine includes several optimizations to minimize overhead:
+
+1. **Length check**: Text content longer than 6 characters is skipped immediately. All built-in patterns match strings of 6 characters or fewer (`### `, `[x] `, ` ``` `, etc.).
+
+2. **First-character index**: On initialization, the engine pre-computes the set of characters that can start a rule match. If the first character of the text does not appear in this set, all regex matching is skipped entirely.
+
+3. **Early exit**: Rules are checked in order. The first match wins, and no further rules are tested.
+
+### Transform flow
+
+When a rule matches:
+
+1. The engine calls `textNode.setTextContent('')` to clear the trigger text.
+2. The rule's `onMatch` callback is invoked with the match array, the (now empty) text node, and the editor instance.
+3. The `onMatch` callback is responsible for replacing or restructuring the parent node.
+
+Because the transform runs inside an `editor.update()` context, all mutations are batched into a single history entry.
+
+## IME safety
+
+The engine checks `editor._compositionKey` before running any transforms. If the editor is in IME composition mode (the user is typing Japanese, Chinese, Korean, or another language that uses an input method editor), all transforms are skipped entirely.
+
+Transforms only run after the `compositionend` event fires, ensuring that composed characters are never prematurely matched against input rule patterns.
+
+```ts
+// Inside the transform callback:
+const editorWithComposition = editor as unknown as {
+  _compositionKey: string | null;
+};
+if (editorWithComposition._compositionKey !== null) return;
+```
+
+This is critical for international users. Without this check, typing CJK characters could trigger false matches (for example, a Japanese character composed using `#` as an intermediate state).
+
+## The slash menu trigger
+
+The `/` character is handled as a special case within the transform. When the text content is exactly `/` and the parent node has only one child (the text node), the engine dispatches `OPEN_SLASH_MENU_COMMAND` via `queueMicrotask` to avoid dispatching a command inside a node transform.
+
+The command dispatch is deferred because Lexical does not allow command dispatches inside node transforms. Using `queueMicrotask` schedules the dispatch for the next microtask, after the transform has completed.
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `rules` | `InputRule[]` | `[]` | Additional rules to register alongside the built-in rules |
+
+## Important constraints
+
+1. **Do not call `editor.update()` inside `onMatch`**: The callback already runs inside an update context (a node transform). Nesting `editor.update()` calls causes unpredictable behavior. See the [Lexical architectural rules](/docs/guides/custom-plugins) for details.
+
+2. **Use `queueMicrotask` for command dispatches**: If your `onMatch` needs to dispatch a Lexical command, wrap it in `queueMicrotask(() => { ... })` to schedule it after the transform completes.
+
+3. **Keep patterns short**: The engine skips text longer than 6 characters for performance. If your custom rule needs a longer pattern, be aware that the engine's fast path will not apply. Consider whether a slash menu item would be more appropriate.
+
+4. **Patterns should be anchored**: Always start your pattern with `^` to ensure it matches from the beginning of the text node. Without anchoring, the pattern could match in the middle of typed text.
+
+## Related
+
+- [Slash Menu](/docs/guides/slash-menu) -- The `/` trigger opens the slash menu
+- [Custom Plugins](/docs/guides/custom-plugins) -- Build your own plugins
+- [API: InputRulePlugin](/docs/api/plugins/input-rule-plugin) -- Full API reference
