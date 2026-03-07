@@ -1,0 +1,264 @@
+---
+title: Text Direction
+description: Support RTL and LTR text with per-block direction control.
+---
+
+Scribex supports both left-to-right (LTR) and right-to-left (RTL) text direction. Direction can be set at the document level via the `EditorRoot` `dir` prop, or per-block using the `DirectionPlugin`. New paragraphs automatically inherit the direction of their preceding sibling, so users writing in Hebrew, Arabic, or other RTL languages get a seamless experience.
+
+## Setup
+
+Add the `DirectionPlugin` as a child of `EditorRoot`:
+
+```tsx title="app/editor/page.tsx"
+import {
+  EditorRoot,
+  DirectionPlugin,
+  FloatingToolbar,
+  SlashMenu,
+} from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor" className="min-h-[400px] p-4 border rounded">
+      <DirectionPlugin />
+      <FloatingToolbar />
+      <SlashMenu />
+    </EditorRoot>
+  );
+}
+```
+
+`DirectionPlugin` takes no props. It registers a command listener for `SET_BLOCK_DIRECTION_COMMAND` and a node transform for automatic direction inheritance.
+
+## Document-level direction
+
+Set a default direction for the entire editor using the `dir` prop on `EditorRoot`:
+
+```tsx
+{/* Default LTR (most common) */}
+<EditorRoot namespace="editor" dir="ltr">
+  <DirectionPlugin />
+</EditorRoot>
+
+{/* Default RTL for Hebrew/Arabic content */}
+<EditorRoot namespace="editor" dir="rtl">
+  <DirectionPlugin />
+</EditorRoot>
+
+{/* Auto-detection (browser default) */}
+<EditorRoot namespace="editor" dir="auto">
+  <DirectionPlugin />
+</EditorRoot>
+
+{/* No explicit direction (default behavior) */}
+<EditorRoot namespace="editor">
+  <DirectionPlugin />
+</EditorRoot>
+```
+
+When `dir` is set to `"ltr"` or `"rtl"`, the `EditorRoot` component renders an internal `SetInitialDirection` plugin that calls `$getRoot().setDirection(dir)` on mount. This sets the direction on the root Lexical node, which child nodes inherit by default.
+
+The `dir` attribute is also set on the editor's wrapper `<div>`, so CSS layout respects the direction.
+
+## Per-block direction
+
+### Using `SET_BLOCK_DIRECTION_COMMAND`
+
+Dispatch the `SET_BLOCK_DIRECTION_COMMAND` to change the direction of the currently selected block(s):
+
+```tsx
+import { SET_BLOCK_DIRECTION_COMMAND } from '@scribex/core';
+
+// Set the current block to RTL
+editor.dispatchCommand(SET_BLOCK_DIRECTION_COMMAND, 'rtl');
+
+// Set the current block to LTR
+editor.dispatchCommand(SET_BLOCK_DIRECTION_COMMAND, 'ltr');
+```
+
+The command handler walks up from the selection's anchor node to find the top-level block element (the nearest child of the root node), then calls `block.setDirection(direction)` on it. If the selection spans multiple blocks, all of them are updated.
+
+```tsx
+// Inside the DirectionPlugin command handler:
+editor.update(() => {
+  const selection = $getSelection();
+  if (!$isRangeSelection(selection)) return;
+
+  const nodes = selection.getNodes();
+  const blockNodes = new Set<ElementNode>();
+
+  for (const node of nodes) {
+    // Walk up to the top-level block
+    let current = $isElementNode(node) ? node : node.getParent();
+    while (current && current.getParent() && !$isRootNode(current.getParent())) {
+      current = current.getParent();
+    }
+    if (current && $isElementNode(current) && !$isRootNode(current)) {
+      blockNodes.add(current);
+    }
+  }
+
+  for (const block of blockNodes) {
+    block.setDirection(direction);
+  }
+});
+```
+
+### Using the FloatingToolbar
+
+When the `FloatingToolbar` is active and the `DirectionPlugin` is included, a direction toggle button appears in the toolbar. The button shows:
+
+- A **right-to-left icon** when the current block is LTR (clicking switches to RTL)
+- A **left-to-right icon** when the current block is RTL (clicking switches to LTR)
+
+The toolbar reads the current block's direction and dispatches `SET_BLOCK_DIRECTION_COMMAND` on click.
+
+### Using the slash menu
+
+The slash menu includes two direction items:
+
+| Item | Description | Keywords |
+|---|---|---|
+| Left to Right | Set paragraph direction to LTR | ltr, direction, english, latin |
+| Right to Left | Set paragraph direction to RTL | rtl, direction, hebrew, arabic |
+
+Type `/ltr` or `/rtl` to quickly find and apply direction changes.
+
+## Auto-detection for new paragraphs
+
+The `DirectionPlugin` registers a `ParagraphNode` transform that automatically inherits direction from the previous sibling. This handles the common case where a user presses Enter while writing RTL text -- the new paragraph should also be RTL.
+
+The inheritance logic:
+
+1. Only act on paragraphs with no explicit direction (`node.getDirection() === null`).
+2. Only act on empty paragraphs (newly created via Enter).
+3. Check the previous sibling:
+   - If it has an explicit direction, inherit it.
+   - If it has no explicit direction but contains RTL text, set `"rtl"`.
+
+### RTL text detection
+
+The plugin uses a regex to detect RTL text content:
+
+```ts
+// Unicode ranges for RTL scripts
+const RTL = '\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC';
+const LTR = 'A-Za-z\u00C0-\u00D6\u00D8-\u00F6...'; // Latin and extended
+
+const RTL_REGEX = new RegExp('^[^' + LTR + ']*[' + RTL + ']');
+```
+
+This regex checks whether the first "directional" character in the previous block's text is from an RTL script. This is the same approach Lexical uses internally for its `dir="auto"` resolution.
+
+### Example flow
+
+1. User types Hebrew text in a paragraph (direction auto-detects to RTL via the browser's `dir="auto"` behavior).
+2. User presses Enter to create a new paragraph.
+3. The new paragraph has `direction: null` and `textContentSize: 0`.
+4. The transform fires:
+   - Previous sibling exists and has no explicit direction.
+   - Previous sibling's text content starts with Hebrew characters.
+   - RTL regex matches.
+   - New paragraph gets `direction: "rtl"`.
+5. The cursor appears on the right side of the new empty paragraph.
+
+## The `dir` prop on `EditorRoot`
+
+| Value | Behavior |
+|---|---|
+| `"ltr"` | Sets root direction to LTR on mount. Adds `dir="ltr"` to wrapper div. |
+| `"rtl"` | Sets root direction to RTL on mount. Adds `dir="rtl"` to wrapper div. |
+| `"auto"` | Adds `dir="auto"` to wrapper div. No explicit Lexical root direction set. |
+| `undefined` | No `dir` attribute on wrapper div. Default browser behavior. |
+
+The direction is set only on mount. Changing the `dir` prop after mount does not retroactively update existing paragraphs -- it would override per-block direction settings that the user has explicitly changed. Use `SET_BLOCK_DIRECTION_COMMAND` for runtime direction changes.
+
+## Bidirectional content
+
+A single document can mix LTR and RTL paragraphs. Each block stores its direction independently:
+
+```tsx
+editor.update(() => {
+  const p1 = $createParagraphNode();
+  p1.setDirection('ltr');
+  p1.append($createTextNode('Hello World'));
+
+  const p2 = $createParagraphNode();
+  p2.setDirection('rtl');
+  p2.append($createTextNode('שלום עולם'));
+
+  const root = $getRoot();
+  root.append(p1, p2);
+});
+```
+
+The resulting JSON state:
+
+```json
+{
+  "root": {
+    "children": [
+      {
+        "type": "paragraph",
+        "direction": "ltr",
+        "children": [{ "type": "text", "text": "Hello World" }]
+      },
+      {
+        "type": "paragraph",
+        "direction": "rtl",
+        "children": [{ "type": "text", "text": "שלום עולם" }]
+      }
+    ]
+  }
+}
+```
+
+## Direction-aware UI components
+
+Several Scribex components adapt to text direction:
+
+### OverlayPortal (drag handle)
+
+The drag handle position respects the block's computed direction. For LTR blocks, the handle appears on the left. For RTL blocks, it appears on the right. The `OverlayPortal` reads the `dir` attribute and computed `direction` CSS property from each block's DOM element.
+
+### TogglePlugin
+
+The toggle disclosure triangle position is direction-aware. On RTL blocks, the triangle appears on the right side of the summary line. The click detection area (28px from inline-start) uses `getComputedStyle(dom).direction` to determine which side is "inline-start".
+
+### FloatingToolbar
+
+The direction toggle button in the floating toolbar updates its icon based on the current block's direction and dispatches the appropriate direction change command.
+
+## Programmatic direction changes
+
+To change direction for a specific block node programmatically:
+
+```tsx
+import { $isElementNode, $getNodeByKey } from 'lexical';
+
+editor.update(() => {
+  const node = $getNodeByKey(nodeKey);
+  if (node && $isElementNode(node)) {
+    node.setDirection('rtl');
+  }
+});
+```
+
+To read the direction of a block:
+
+```tsx
+editor.read(() => {
+  const node = $getNodeByKey(nodeKey);
+  if (node && $isElementNode(node)) {
+    const dir = node.getDirection(); // 'ltr' | 'rtl' | null
+    console.log('Block direction:', dir);
+  }
+});
+```
+
+## Related
+
+- [Multi-Editor](/docs/guides/multi-editor) -- Multiple editors with different default directions
+- [Toggles](/docs/guides/toggles) -- Direction-aware toggle components
+- [API: DirectionPlugin](/docs/api/plugins/direction-plugin) -- Full API reference
+- [API: EditorRoot](/docs/api/components/editor-root) -- The `dir` prop reference
