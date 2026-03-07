@@ -1,0 +1,184 @@
+---
+title: LinkPlugin
+description: Link creation, editing, and preview.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Import
+
+```tsx
+import { LinkPlugin } from '@scribex/core';
+```
+
+## Overview
+
+The `LinkPlugin` provides link creation, inline editing, and hover preview functionality. Links can be created via the `Cmd+K` keyboard shortcut, the floating toolbar link button, or programmatically via the `OPEN_LINK_INPUT_COMMAND`. The plugin renders a hover preview card showing the URL when the user mouses over a link, and supports double-click to open links in a new tab.
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `config` | `LinkPluginConfig` | `{}` | Optional configuration for rendering, validation, and link behavior. |
+
+## The `LinkPluginConfig` interface
+
+```ts
+interface LinkPluginConfig {
+  /**
+   * Custom render function for the link URL input.
+   * Receives the current URL and callbacks for submit and cancel.
+   */
+  renderLinkInput?: (props: {
+    url: string;
+    onSubmit: (url: string) => void;
+    onCancel: () => void;
+    onRemove: () => void;
+  }) => React.ReactNode;
+  /**
+   * Custom render function for the link hover preview card.
+   * Receives the URL and the link text.
+   */
+  renderLinkPreview?: (props: {
+    url: string;
+    text: string;
+  }) => React.ReactNode;
+  /**
+   * Validates the URL before applying it. Return true to accept, false to reject.
+   * Default: accepts any string that starts with http://, https://, or mailto:
+   */
+  validateUrl?: (url: string) => boolean;
+  /**
+   * The target attribute for rendered links.
+   * Default: "_blank"
+   */
+  target?: string;
+  /**
+   * The rel attribute for rendered links.
+   * Default: "noopener noreferrer"
+   */
+  rel?: string;
+}
+```
+
+## Usage
+
+### Basic setup
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, LinkPlugin, FloatingToolbar } from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <FloatingToolbar />
+      <LinkPlugin />
+    </EditorRoot>
+  );
+}
+```
+
+### With custom URL validation
+
+```tsx
+<LinkPlugin
+  config={{
+    validateUrl: (url) => {
+      try {
+        const parsed = new URL(url);
+        return ['http:', 'https:', 'mailto:'].includes(parsed.protocol);
+      } catch {
+        return false;
+      }
+    },
+    target: '_blank',
+    rel: 'noopener noreferrer nofollow',
+  }}
+/>
+```
+
+### With custom link input
+
+```tsx
+<LinkPlugin
+  config={{
+    renderLinkInput: ({ url, onSubmit, onCancel, onRemove }) => (
+      <div className="flex flex-col gap-2 p-3 bg-scribex-background border rounded shadow-lg">
+        <input
+          type="url"
+          defaultValue={url}
+          placeholder="https://example.com"
+          className="px-2 py-1 border rounded text-sm"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSubmit(e.currentTarget.value);
+            if (e.key === 'Escape') onCancel();
+          }}
+          autoFocus
+        />
+        <div className="flex gap-2">
+          <button onClick={() => onSubmit(url)} className="text-sm text-scribex-accent">
+            Apply
+          </button>
+          {url && (
+            <button onClick={onRemove} className="text-sm text-scribex-destructive">
+              Remove link
+            </button>
+          )}
+        </div>
+      </div>
+    ),
+  }}
+/>
+```
+
+## Registered commands
+
+| Command | Payload | Description |
+|---|---|---|
+| `OPEN_LINK_INPUT_COMMAND` | `void` | Opens the link URL input at the current selection. |
+
+## Keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Cmd+K` (Mac) / `Ctrl+K` (Windows) | Open the link input for the current selection. If text is selected, it becomes the link text. If the cursor is inside an existing link, the input opens pre-filled with the current URL. |
+
+## Behavior details
+
+### Creating a link
+
+1. Select text in the editor (or place the cursor inside existing text).
+2. Press `Cmd+K` or click the link button in the floating toolbar.
+3. The link input popover opens, anchored to the selection.
+4. Type or paste a URL and press Enter.
+5. The selected text is wrapped in a Lexical `LinkNode` with the provided URL.
+
+### Editing an existing link
+
+1. Place the cursor inside an existing link or select the link text.
+2. Press `Cmd+K` or click the link button.
+3. The link input opens pre-filled with the current URL.
+4. Modify the URL and press Enter to update, or click "Remove link" to unlink.
+
+### Link hover preview
+
+When the user hovers over a link, a preview card appears showing the URL. The preview renders after a short delay (200ms) to avoid flickering during normal mouse movement. The preview disappears when the mouse leaves the link area.
+
+### Opening links
+
+Double-clicking a link opens it in a new tab using `window.open()` with the configured `target` and `rel` attributes. Single-clicking a link places the cursor inside the link text for editing.
+
+<Callout type="info">
+The `Cmd+K` shortcut is registered at `COMMAND_PRIORITY_EDITOR` level, which means it is automatically scoped to the editor that currently has focus. In multi-editor setups, the shortcut only affects the active editor.
+</Callout>
+
+<Callout type="warn">
+The default `validateUrl` function only accepts URLs starting with `http://`, `https://`, or `mailto:`. If you need to support other protocols (e.g., `tel:`, `ftp:`), provide a custom `validateUrl` function.
+</Callout>
+
+## Related
+
+- [Custom Plugins Guide](/docs/guides/custom-plugins) -- Building your own plugins
+- [API: FloatingToolbar](/docs/api/plugins/input-rule-plugin) -- The toolbar that includes the link button
