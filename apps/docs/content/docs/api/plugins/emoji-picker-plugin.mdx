@@ -1,0 +1,151 @@
+---
+title: EmojiPickerPlugin
+description: Emoji picker triggered by colon or slash menu.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Import
+
+```tsx
+import { EmojiPickerPlugin } from '@scribex/core';
+```
+
+## Overview
+
+The `EmojiPickerPlugin` provides two ways to insert emoji into the editor: a colon-triggered inline search (type `:smile` to search) and a command-based picker triggered via the slash menu or programmatically. The dropdown supports keyboard navigation and fuzzy matching against emoji names.
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `emojis` | `EmojiItem[]` | Built-in emoji set | Custom emoji list. When provided, replaces the built-in set entirely. |
+| `maxResults` | `number` | `8` | Maximum number of results shown in the dropdown at once. |
+| `renderItem` | `(item: EmojiItem) => React.ReactNode` | Default renderer | Custom render function for each dropdown item. |
+| `renderDropdown` | `(props: EmojiDropdownProps) => React.ReactNode` | Default renderer | Custom render function for the entire dropdown container. |
+
+## The `EmojiItem` interface
+
+```ts
+interface EmojiItem {
+  /** The emoji character or custom emoji URL. */
+  emoji: string;
+  /** Searchable name (e.g., "smile", "thumbs_up"). */
+  name: string;
+  /** Optional category for grouping (e.g., "Smileys", "People"). */
+  category?: string;
+  /** Optional aliases for search (e.g., ["happy", "grin"]). */
+  aliases?: string[];
+}
+```
+
+## Usage
+
+### Basic setup
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, EmojiPickerPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <InputRulePlugin />
+      <SlashMenu />
+      <EmojiPickerPlugin />
+    </EditorRoot>
+  );
+}
+```
+
+### With custom emoji set
+
+```tsx
+import { EmojiPickerPlugin } from '@scribex/core';
+
+const customEmojis = [
+  { emoji: '🚀', name: 'rocket', category: 'Travel', aliases: ['launch', 'ship'] },
+  { emoji: '🎉', name: 'party_popper', category: 'Activities', aliases: ['celebrate', 'tada'] },
+  { emoji: '🔥', name: 'fire', category: 'Nature', aliases: ['hot', 'flame'] },
+  { emoji: '💡', name: 'lightbulb', category: 'Objects', aliases: ['idea', 'tip'] },
+  { emoji: '⚠️', name: 'warning', category: 'Symbols', aliases: ['caution', 'alert'] },
+];
+
+<EmojiPickerPlugin
+  emojis={customEmojis}
+  maxResults={5}
+/>
+```
+
+### With custom rendering
+
+```tsx
+<EmojiPickerPlugin
+  renderItem={(item) => (
+    <div className="flex items-center gap-3 px-2 py-1">
+      <span className="text-xl">{item.emoji}</span>
+      <div>
+        <div className="font-medium">{item.name.replace(/_/g, ' ')}</div>
+        {item.category && (
+          <div className="text-xs text-scribex-muted-foreground">{item.category}</div>
+        )}
+      </div>
+    </div>
+  )}
+/>
+```
+
+## Trigger modes
+
+### Colon trigger (`:`)
+
+When the user types `:` followed by at least two characters (e.g., `:sm`), the plugin searches the emoji list and opens a dropdown with matches. The search checks against the `name` field and all `aliases`.
+
+```
+Type :smile --> dropdown shows matching emoji
+  |
+  +--[Enter/Click]--> Insert emoji character, remove trigger text
+  |
+  +--[Escape]--> Dismiss dropdown, leave trigger text
+  |
+  +--[Backspace past :]--> Dismiss dropdown
+```
+
+### Slash menu / command trigger
+
+The plugin registers `OPEN_EMOJI_PICKER_COMMAND`. When dispatched, it opens a full emoji picker popover at the current cursor position without requiring a colon prefix.
+
+```tsx
+import { OPEN_EMOJI_PICKER_COMMAND } from '@scribex/core';
+
+// Open the picker programmatically
+editor.dispatchCommand(OPEN_EMOJI_PICKER_COMMAND, undefined);
+```
+
+When the `EmojiPickerPlugin` is mounted, an "Emoji" item automatically appears in the slash menu that dispatches this command.
+
+## Keyboard navigation
+
+| Key | Action |
+|---|---|
+| Arrow Down | Move selection to next emoji |
+| Arrow Up | Move selection to previous emoji |
+| Enter | Insert the selected emoji |
+| Escape | Dismiss the picker |
+| Continue typing | Refine the search query |
+
+Focus remains in the editor at all times. The dropdown is navigated via keyboard events captured by the editor, not by transferring focus to the popover.
+
+<Callout type="info">
+The colon trigger requires at least 2 characters after `:` before the dropdown appears. This prevents the picker from opening immediately on every colon character, which would interfere with normal writing.
+</Callout>
+
+<Callout type="info">
+When providing a custom `emojis` array, it completely replaces the built-in set. If you want to extend the built-in set, import `DEFAULT_EMOJIS` from `@scribex/core` and spread it into your custom array.
+</Callout>
+
+## Related
+
+- [Slash Menu Guide](/docs/guides/slash-menu) -- Configuring slash menu items
+- [Input Rules Guide](/docs/guides/input-rules) -- How trigger detection works
