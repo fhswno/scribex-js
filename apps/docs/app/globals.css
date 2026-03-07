@@ -1,8 +1,9 @@
-@import 'tailwindcss';
-@import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/preset.css';
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
 
-:root.dark, .dark {
+:root.dark,
+.dark {
   --color-fd-background: hsl(220 20% 6%);
   --color-fd-card: hsl(220 18% 9%);
   --color-fd-popover: hsl(220 18% 9%);

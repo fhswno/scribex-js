@@ -1,9 +1,9 @@
 // FUMADOCS
-import { createFromSource } from 'fumadocs-core/search/server';
-import type { SortedResult } from 'fumadocs-core/search/server';
+import { createFromSource } from "fumadocs-core/search/server";
+import type { SortedResult } from "fumadocs-core/search/server";
 
 // LIB
-import { source } from '@/lib/source';
+import { source } from "@/lib/source";
 
 // API
 const api = createFromSource(source);
@@ -12,18 +12,18 @@ const api = createFromSource(source);
 export async function GET(request: Request): Promise<Response> {
   // URL & Query
   const url: URL = new URL(request.url);
-  const query = url.searchParams.get('query');
+  const query = url.searchParams.get("query");
 
   // Case - No Query
   if (!query) return Response.json([]);
 
   // Optional Filters
-  const tagParam = url.searchParams.get('tag');
-  const localeParam = url.searchParams.get('locale');
+  const tagParam = url.searchParams.get("tag");
+  const localeParam = url.searchParams.get("locale");
 
   // Search
   const results = await api.search(query, {
-    tag: tagParam ? tagParam.split(',') : undefined,
+    tag: tagParam ? tagParam.split(",") : undefined,
     locale: localeParam || undefined,
   });
 
@@ -33,7 +33,7 @@ export async function GET(request: Request): Promise<Response> {
 
   // Start a new group whenever we encounter a page result. This ensures that all content results are grouped under their respective page.
   for (const result of results) {
-    if (result.type === 'page') {
+    if (result.type === "page") {
       if (current.length > 0) groups.push(current);
       current = [result];
     } else {
@@ -52,8 +52,8 @@ export async function GET(request: Request): Promise<Response> {
     const aFirst = a[0];
     const bFirst = b[0];
 
-    const aTitle = aFirst && aFirst.content ? aFirst.content.toLowerCase() : '';
-    const bTitle = bFirst && bFirst.content ? bFirst.content.toLowerCase() : '';
+    const aTitle = aFirst && aFirst.content ? aFirst.content.toLowerCase() : "";
+    const bTitle = bFirst && bFirst.content ? bFirst.content.toLowerCase() : "";
 
     const aMatch = aTitle === q || aTitle.includes(q);
     const bMatch = bTitle === q || bTitle.includes(q);
