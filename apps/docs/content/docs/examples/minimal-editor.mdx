@@ -10,9 +10,9 @@ Scribex is designed to be incrementally adoptable. You can start with a bare-bon
 The smallest possible Scribex editor requires only `EditorRoot`. This gives you a rich text area with undo/redo history and auto-focus -- nothing else.
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot } from '@scribex/core';
+import { EditorRoot } from "@scribex/core";
 
 export default function MinimalEditorPage() {
   return (
@@ -34,9 +34,9 @@ That is it. No configuration objects, no provider wrappers, no theme files. The 
 The `InputRulePlugin` enables markdown-style shortcuts. Type `# ` for a heading, `> ` for a blockquote, `- ` for a list, and so on. It renders `null` -- it is a headless plugin that extends behavior without adding any UI.
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, InputRulePlugin } from '@scribex/core';
+import { EditorRoot, InputRulePlugin } from "@scribex/core";
 
 export default function EditorWithShortcutsPage() {
   return (
@@ -55,27 +55,27 @@ export default function EditorWithShortcutsPage() {
 
 With `InputRulePlugin` included, you get all of these shortcuts out of the box:
 
-| Shortcut | Result |
-|---|---|
-| `# ` | Heading 1 |
-| `## ` | Heading 2 |
-| `### ` | Heading 3 |
-| `> ` | Blockquote |
-| `- ` or `* ` | Bullet list |
-| `1. ` | Numbered list |
-| `[ ] ` | Task list (unchecked) |
-| `[x] ` | Task list (checked) |
-| ` ``` ` | Code block |
-| `---` | Horizontal divider |
+| Shortcut     | Result                |
+| ------------ | --------------------- |
+| `# `         | Heading 1             |
+| `## `        | Heading 2             |
+| `### `       | Heading 3             |
+| `> `         | Blockquote            |
+| `- ` or `* ` | Bullet list           |
+| `1. `        | Numbered list         |
+| `[ ] `       | Task list (unchecked) |
+| `[x] `       | Task list (checked)   |
+| ` ``` `      | Code block            |
+| `---`        | Horizontal divider    |
 
 ## Adding paste sanitization
 
 The `PastePlugin` intercepts paste events and sanitizes incoming HTML. Without it, pasting from Google Docs or Word can inject unwanted styles and broken markup into your editor. With it, pasted content is stripped to clean semantic HTML before entering the AST.
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, InputRulePlugin, PastePlugin } from '@scribex/core';
+import { EditorRoot, InputRulePlugin, PastePlugin } from "@scribex/core";
 
 export default function MinimalEditorPage() {
   return (
@@ -101,16 +101,21 @@ This is the recommended baseline for any Scribex editor. Two plugins, zero confi
 To save and restore editor content, add the `useEditorState` hook. Because hooks must be called inside the `EditorRoot` (which provides the Lexical context), create a small inner component:
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { EditorRoot, InputRulePlugin, PastePlugin, useEditorState } from '@scribex/core';
+import { useState } from "react";
+import {
+  EditorRoot,
+  InputRulePlugin,
+  PastePlugin,
+  useEditorState,
+} from "@scribex/core";
 
 function StatePersistence() {
   const { serializedState } = useEditorState({
     debounceMs: 300,
     onChange: (json) => {
-      localStorage.setItem('minimal-editor-state', json);
+      localStorage.setItem("minimal-editor-state", json);
     },
   });
 
@@ -119,13 +124,15 @@ function StatePersistence() {
 
 export default function MinimalEditorPage() {
   const [initialState] = useState(() => {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('minimal-editor-state');
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("minimal-editor-state");
   });
 
   return (
     <div className="max-w-2xl mx-auto py-12 px-4">
-      <h1 className="text-2xl font-bold mb-6">Minimal Editor with Persistence</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        Minimal Editor with Persistence
+      </h1>
       <EditorRoot
         namespace="minimal-persistent"
         initialState={initialState}
@@ -148,21 +155,21 @@ Reload the page and your content is still there.
 Here is the full example as a single copy-paste file. This is a production-ready minimal editor with markdown shortcuts, paste sanitization, and localStorage persistence:
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import {
   EditorRoot,
   InputRulePlugin,
   PastePlugin,
   useEditorState,
-} from '@scribex/core';
+} from "@scribex/core";
 
 function EditorState() {
   useEditorState({
     debounceMs: 300,
     onChange: (json) => {
-      localStorage.setItem('scribex-minimal', json);
+      localStorage.setItem("scribex-minimal", json);
     },
   });
   return null;
@@ -170,8 +177,8 @@ function EditorState() {
 
 export default function Page() {
   const [initialState] = useState(() => {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem('scribex-minimal');
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("scribex-minimal");
   });
 
   return (
