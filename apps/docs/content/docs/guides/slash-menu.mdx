@@ -1,0 +1,272 @@
+---
+title: Slash Menu
+description: Customize the slash command menu with custom items.
+---
+
+The slash menu is a command palette that opens when the user types `/` at the start of an empty paragraph. It provides quick access to every block type, media insertion, AI, and formatting option -- all searchable by name.
+
+## Setup
+
+Add the `SlashMenu` component as a child of `EditorRoot`:
+
+```tsx title="app/editor/page.tsx"
+import { EditorRoot, SlashMenu, InputRulePlugin } from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor" className="min-h-[400px] p-4 border rounded">
+      <SlashMenu />
+      <InputRulePlugin />
+    </EditorRoot>
+  );
+}
+```
+
+The `InputRulePlugin` is responsible for detecting the `/` trigger character. When the user types `/` at the start of an empty block, the plugin dispatches the `OPEN_SLASH_MENU_COMMAND`, which the `SlashMenu` component listens for.
+
+## The `SlashMenuItem` interface
+
+Every item in the slash menu conforms to this interface:
+
+```ts
+interface SlashMenuItem {
+  /** Unique identifier for the item */
+  id: string;
+  /** Display label shown in the menu */
+  label: string;
+  /** Short description shown alongside the label */
+  description: string;
+  /** Icon component rendered next to the label */
+  icon: React.ComponentType<{ size?: number }>;
+  /** Called when the item is selected */
+  onSelect: () => void;
+  /** Extra search terms for fuzzy matching (e.g., "h1" for "Heading 1") */
+  keywords?: string[];
+}
+```
+
+## Default items
+
+The slash menu ships with a comprehensive set of default items, organized by category:
+
+### AI
+
+| Item | Description | Keywords |
+|---|---|---|
+| Ask AI | Generate content with AI | -- |
+
+### Headings
+
+| Item | Description | Shortcut hint | Keywords |
+|---|---|---|---|
+| Heading 1 | Large heading | `#` | h1 |
+| Heading 2 | Medium heading | `##` | h2 |
+| Heading 3 | Small heading | `###` | h3 |
+
+### Blocks
+
+| Item | Description | Shortcut hint |
+|---|---|---|
+| Quote | Blockquote | `>` |
+| Divider | Horizontal rule | `---` |
+| Code Block | Syntax highlighted code | ` ``` ` |
+| Table | Insert a table | -- |
+| Callout | Highlighted block with icon | -- |
+| Toggle | Collapsible content block | -- |
+
+### Lists
+
+| Item | Description | Shortcut hint | Keywords |
+|---|---|---|---|
+| Bullet List | Unordered list | `-` | -- |
+| Numbered List | Ordered list | `1.` | -- |
+| Checklist | Task list with checkboxes | `[]` | todo, task, checkbox, check |
+
+### Media
+
+| Item | Description | Keywords |
+|---|---|---|
+| Image | Upload an image | -- |
+| Emoji | Insert an emoji | smiley, face, emoticon |
+| Video | Embed or upload a video | youtube, vimeo, loom, embed, movie, clip |
+
+### Format
+
+| Item | Description | Keywords |
+|---|---|---|
+| *Font family* items | Switch to a specific typeface | font, typeface, typography |
+| Left to Right | Set paragraph direction to LTR | ltr, direction, english, latin |
+| Right to Left | Set paragraph direction to RTL | rtl, direction, hebrew, arabic |
+
+## Adding custom items
+
+Pass additional items via the `items` prop. Custom items are appended after the default items:
+
+```tsx
+import { SlashMenu } from '@scribex/core';
+import type { SlashMenuItem } from '@scribex/core';
+import { Wand2 } from 'lucide-react';
+
+const customItems: SlashMenuItem[] = [
+  {
+    id: 'magic-block',
+    label: 'Magic Block',
+    description: 'Insert a custom magic block',
+    icon: ({ size }) => <Wand2 size={size} />,
+    keywords: ['magic', 'custom', 'special'],
+    onSelect: () => {
+      // Your custom logic here
+      console.log('Magic block selected!');
+    },
+  },
+];
+
+function Editor() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <SlashMenu items={customItems} />
+    </EditorRoot>
+  );
+}
+```
+
+### Custom item with editor mutation
+
+Most useful custom items will mutate the editor state. Access the editor instance via `useLexicalComposerContext`:
+
+```tsx
+'use client';
+
+import { useLexicalComposerContext } from '@scribex/core';
+import { $getSelection, $isRangeSelection, $getRoot, $createParagraphNode, $createTextNode } from 'lexical';
+
+function useCustomSlashItems(): SlashMenuItem[] {
+  const [editor] = useLexicalComposerContext();
+
+  return [
+    {
+      id: 'timestamp',
+      label: 'Timestamp',
+      description: 'Insert the current date and time',
+      icon: ({ size }) => <ClockIcon size={size} />,
+      keywords: ['date', 'time', 'now'],
+      onSelect: () => {
+        editor.update(() => {
+          const selection = $getSelection();
+          if (!$isRangeSelection(selection)) return;
+
+          const timestamp = new Date().toLocaleString();
+          const paragraph = $createParagraphNode();
+          paragraph.append($createTextNode(timestamp));
+
+          const anchor = selection.anchor.getNode();
+          // Replace the "/" text node
+          if (anchor instanceof TextNode) {
+            anchor.remove();
+          }
+          // Insert the new node
+          const root = $getRoot();
+          root.append(paragraph);
+          paragraph.selectEnd();
+        });
+      },
+    },
+  ];
+}
+```
+
+## Fuzzy search
+
+As the user types after `/`, the menu filters items by matching the query against three fields:
+
+1. `label` -- the display name (e.g., "Heading 1")
+2. `description` -- the short description (e.g., "Large heading")
+3. `keywords` -- additional search terms (e.g., ["h1"])
+
+The search is case-insensitive and uses substring matching. For example, typing `/head` matches "Heading 1", "Heading 2", and "Heading 3". Typing `/h1` matches "Heading 1" via its keyword.
+
+When no items match the query, the menu displays "No matching commands".
+
+## Keyboard navigation
+
+The slash menu supports full keyboard navigation:
+
+| Key | Action |
+|---|---|
+| ArrowDown | Move selection to the next item |
+| ArrowUp | Move selection to the previous item |
+| Enter | Select the highlighted item |
+| Escape | Close the menu without selecting |
+
+The selected item is highlighted with the `--scribex-accent` color and auto-scrolls into view when navigating with arrow keys.
+
+## Category grouping
+
+When no search query is active, items are displayed in categorized sections with uppercase headers:
+
+- **AI** -- AI-powered features
+- **Headings** -- Heading levels
+- **Blocks** -- Structural block types (quotes, code, tables, callouts, toggles, dividers)
+- **Lists** -- List types (bullet, numbered, checklist)
+- **Media** -- Images, emoji, video
+- **Format** -- Font families, text direction
+- **Other** -- Any items that do not fit the above categories
+
+When the user is filtering with a search query, category headers are hidden to maximize space.
+
+Each category has a distinct icon color scheme for visual differentiation.
+
+## Opening the slash menu programmatically
+
+You can open the slash menu from your own code by dispatching the command:
+
+```tsx
+import { OPEN_SLASH_MENU_COMMAND } from '@scribex/core';
+
+editor.dispatchCommand(OPEN_SLASH_MENU_COMMAND, undefined);
+```
+
+The menu positions itself at the current DOM selection's caret position.
+
+## Markdown shortcut hints
+
+Several items display a markdown shortcut hint on the right side of the row. These hints show the equivalent markdown shortcut that can be typed directly (via `InputRulePlugin`) without opening the slash menu:
+
+| Item | Shortcut hint |
+|---|---|
+| Heading 1 | `#` |
+| Heading 2 | `##` |
+| Heading 3 | `###` |
+| Quote | `>` |
+| Bullet List | `-` |
+| Numbered List | `1.` |
+| Checklist | `[]` |
+| Divider | `---` |
+| Code Block | ` ``` ` |
+
+## Styling
+
+The slash menu renders in a React Portal attached to `document.body`. It uses inline styles with CSS custom properties from the Scribex theme:
+
+- `--scribex-popover-bg` -- Background color
+- `--scribex-popover-border` -- Border color
+- `--scribex-popover-shadow` -- Box shadow
+- `--scribex-accent` -- Selected item background
+- `--scribex-accent-foreground` -- Selected item text color
+- `--scribex-text-tertiary` -- Category headers and shortcut hints
+- `--scribex-separator` -- Divider between sections
+- `--scribex-muted` -- Icon tile background
+
+The menu has a frosted glass effect via `backdrop-filter: blur(24px) saturate(190%)` and a subtle entrance animation.
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `items` | `SlashMenuItem[]` | `undefined` | Additional items appended after the defaults |
+
+## Related
+
+- [Input Rules](/docs/guides/input-rules) -- Markdown shortcuts that work without the slash menu
+- [AI Integration](/docs/guides/ai-integration) -- The `/ai` slash menu item
+- [API: SlashMenu](/docs/api/components/slash-menu) -- Full API reference
