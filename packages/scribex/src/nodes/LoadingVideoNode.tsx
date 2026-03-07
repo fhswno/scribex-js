@@ -112,7 +112,7 @@ function LoadingVideoComponent({
         width: "100%",
         aspectRatio: "16 / 9",
         maxHeight: "400px",
-        backgroundColor: "var(--scribex-muted, #f1f5f9)",
+        backgroundColor: "var(--scribex-muted)",
         borderRadius: "var(--scribex-radius, 0.5rem)",
         overflow: "hidden",
         opacity: 0.6,
@@ -126,7 +126,7 @@ function LoadingVideoComponent({
           left: "12px",
           right: "12px",
           fontSize: "13px",
-          color: "var(--scribex-muted-foreground, #64748b)",
+          color: "var(--scribex-muted-foreground)",
           fontFamily: "var(--scribex-font-sans, system-ui, sans-serif)",
           overflow: "hidden",
           textOverflow: "ellipsis",
@@ -151,8 +151,8 @@ function LoadingVideoComponent({
           style={{
             width: "32px",
             height: "32px",
-            border: "3px solid var(--scribex-muted, #e2e8f0)",
-            borderTopColor: "var(--scribex-accent, #3b82f6)",
+            border: "3px solid var(--scribex-muted)",
+            borderTopColor: "var(--scribex-accent)",
             borderRadius: "50%",
             animation: "scribex-spin 0.8s linear infinite",
           }}
