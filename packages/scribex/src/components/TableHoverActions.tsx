@@ -21,8 +21,6 @@ import {
   $deleteTableColumnAtSelection,
 } from "@lexical/table";
 
-// ─── Types ──────────────────────────────────────────────────────────────────
-
 type MenuType = "row" | "column";
 
 interface MenuState {
@@ -32,8 +30,6 @@ interface MenuState {
   /** Row or column index the menu targets */
   index: number;
 }
-
-// ─── Component ──────────────────────────────────────────────────────────────
 
 export function TableHoverActions() {
   const [editor] = useLexicalComposerContext();
@@ -72,8 +68,6 @@ export function TableHoverActions() {
     setPortalContainer(document.body);
   }, []);
 
-  // ─── Hide all overlays ──────────────────────────────────────────────────
-
   const hideAll = useCallback(() => {
     const els = [
       rowHandlesRef.current,
@@ -88,8 +82,6 @@ export function TableHoverActions() {
     }
   }, []);
 
-  // ─── Get column widths from table DOM ───────────────────────────────────
-
   const getColumnWidths = useCallback((table: HTMLTableElement): number[] => {
     const firstRow = table.rows[0];
     if (!firstRow) return [];
@@ -99,8 +91,6 @@ export function TableHoverActions() {
     }
     return widths;
   }, []);
-
-  // ─── Select a specific cell in the active table ───────────────────────
 
   const selectCell = useCallback(
     (rowIndex: number, colIndex: number) => {
@@ -121,8 +111,6 @@ export function TableHoverActions() {
     },
     [editor],
   );
-
-  // ─── Insert row at index ────────────────────────────────────────────────
 
   const insertRowAt = useCallback(
     (rowIndex: number, after: boolean) => {
@@ -148,8 +136,6 @@ export function TableHoverActions() {
     [editor],
   );
 
-  // ─── Insert column at index ─────────────────────────────────────────────
-
   const insertColAt = useCallback(
     (colIndex: number, after: boolean) => {
       const key = activeTableKeyRef.current;
@@ -173,8 +159,6 @@ export function TableHoverActions() {
     },
     [editor],
   );
-
-  // ─── Delete row at index ──────────────────────────────────────────────
 
   const deleteRowAt = useCallback(
     (rowIndex: number) => {
@@ -203,8 +187,6 @@ export function TableHoverActions() {
     [editor],
   );
 
-  // ─── Delete column at index ───────────────────────────────────────────
-
   const deleteColAt = useCallback(
     (colIndex: number) => {
       const key = activeTableKeyRef.current;
@@ -232,8 +214,6 @@ export function TableHoverActions() {
     [editor],
   );
 
-  // ─── Select table (NodeSelection) ──────────────────────────────────────
-
   const selectTable = useCallback(() => {
     const key = activeTableKeyRef.current;
     if (!key) return;
@@ -245,8 +225,6 @@ export function TableHoverActions() {
     });
     editor.focus();
   }, [editor]);
-
-  // ─── Build row/column handle elements ─────────────────────────────────
 
   const buildRowHandles = useCallback(
     (tableEl: HTMLTableElement, tableRect: DOMRect) => {
@@ -379,8 +357,6 @@ export function TableHoverActions() {
     },
     [],
   );
-
-  // ─── Mousemove: detect hovered table & position overlays ────────────────
 
   useEffect(() => {
     if (isTouchRef.current) return;
@@ -539,8 +515,6 @@ export function TableHoverActions() {
     };
   }, [editor, hideAll, buildRowHandles, buildColHandles]);
 
-  // ─── Column resize drag lifecycle ───────────────────────────────────────
-
   useEffect(() => {
     if (isTouchRef.current) return;
 
@@ -642,8 +616,6 @@ export function TableHoverActions() {
     };
   }, [editor, getColumnWidths, portalContainer, buildColHandles]);
 
-  // ─── Close menu on outside click or Escape ────────────────────────────
-
   useEffect(() => {
     if (!menu) return;
 
@@ -666,11 +638,7 @@ export function TableHoverActions() {
     };
   }, [menu]);
 
-  // ─── Don't render on touch or without portal ────────────────────────────
-
   if (!portalContainer || isTouchRef.current) return null;
-
-  // ─── Menu action handler ──────────────────────────────────────────────
 
   const handleMenuAction = (action: string) => {
     if (!menu) return;
@@ -698,8 +666,6 @@ export function TableHoverActions() {
         break;
     }
   };
-
-  // ─── Shared styles ──────────────────────────────────────────────────────
 
   const edgeButtonBase: React.CSSProperties = {
     position: "fixed",
