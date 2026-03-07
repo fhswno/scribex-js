@@ -1,0 +1,135 @@
+---
+title: CodeBlockNode
+description: Syntax-highlighted code block with language selection.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+`CodeBlockNode` is a `DecoratorNode` that renders a full code editor block with a language selector dropdown, copy-to-clipboard button, and optional Shiki-powered syntax highlighting. Code is edited as plain text via a `<textarea>` with debounced AST updates.
+
+## Import
+
+```tsx
+import { CodeBlockNode, $createCodeBlockNode, $isCodeBlockNode } from '@scribex/core';
+import type { CodeBlockPayload } from '@scribex/core';
+```
+
+## CodeBlockPayload
+
+```ts
+interface CodeBlockPayload {
+  code: string;
+  language: string;
+  key?: NodeKey;
+  autoFocus?: boolean;
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `code` | `string` | Yes | The code content. |
+| `language` | `string` | Yes | The programming language identifier. Must be one of `SUPPORTED_LANGUAGES`. |
+| `key` | `NodeKey` | No | Explicit Lexical node key. |
+| `autoFocus` | `boolean` | No | When `true`, the textarea auto-focuses on mount. The flag is cleared after the first focus. |
+
+## Supported languages
+
+The following language identifiers are supported:
+
+```ts
+const SUPPORTED_LANGUAGES = [
+  'javascript', 'typescript', 'python', 'css', 'html',
+  'json', 'bash', 'go', 'rust', 'java', 'c', 'cpp',
+  'sql', 'markdown', 'yaml', 'text',
+] as const;
+```
+
+Use `'text'` for plain text with no syntax highlighting.
+
+## Functions
+
+### `$createCodeBlockNode(payload: CodeBlockPayload): CodeBlockNode`
+
+Creates a new `CodeBlockNode`. Must be called inside `editor.update()`.
+
+```ts
+editor.update(() => {
+  const codeBlock = $createCodeBlockNode({
+    code: 'console.log("Hello, world!");',
+    language: 'javascript',
+    autoFocus: true,
+  });
+  const root = $getRoot();
+  root.append(codeBlock);
+});
+```
+
+### `$isCodeBlockNode(node: LexicalNode | null | undefined): node is CodeBlockNode`
+
+Type guard that returns `true` if the given node is a `CodeBlockNode`.
+
+## Instance methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `getCode()` | `string` | Returns the current code content. |
+| `getLanguage()` | `string` | Returns the current language identifier. |
+
+## Serialized format
+
+```ts
+type SerializedCodeBlockNode = {
+  type: 'code-block';
+  version: 1;
+  code: string;
+  language: string;
+};
+```
+
+## DOM behavior
+
+- **exportDOM**: Produces a `<pre><code>` element. If the language is not `"text"`, the `<code>` element gets a `class="language-{lang}"` attribute for compatibility with Prism/Shiki-based renderers.
+- **importDOM**: Converts pasted `<pre>` elements back into `CodeBlockNode` instances. Detects the language from a `language-*` CSS class on the inner `<code>` element if present.
+
+## Editing behavior
+
+The code block uses a `<textarea>` for editing, not Lexical's contenteditable. This ensures:
+
+- No Lexical formatting (bold, italic, etc.) is applied inside code blocks.
+- Tab characters, indentation, and whitespace are preserved exactly.
+- The textarea auto-resizes to fit the content.
+
+Code changes are debounced by **300ms** before being committed to the Lexical AST via `editor.update()`. This prevents flooding the history stack with an entry for every keystroke.
+
+## Syntax highlighting
+
+The `CodeBlockNode` component fetches syntax highlighting from a server endpoint:
+
+1. When the code or language changes (debounced by 500ms), the component sends a `POST` request to `/api/editor/highlight` with `{ code, language }`.
+2. If the response is successful, the highlighted HTML is rendered via `dangerouslySetInnerHTML`.
+3. If the request fails, the raw code is displayed in a monospace font as a fallback.
+4. Clicking on the highlighted output switches back to the editable textarea.
+
+<Callout type="info">
+The highlighting endpoint must be implemented in your application. The playground app provides a reference implementation at `apps/playground/app/api/editor/highlight/route.ts` using Shiki. The component works without the endpoint -- it simply shows unstyled code.
+</Callout>
+
+## Copy behavior
+
+The copy button writes both `text/plain` (raw code) and `text/html` (wrapped in `<pre><code>`) to the clipboard. This means pasting into another Scribex editor recreates the code block, while pasting into a plain text field gives the raw code.
+
+The textarea's native copy/cut operations are also intercepted to include HTML alongside plain text.
+
+## Selection behavior
+
+Clicking on the code block container (outside the textarea and controls) selects the node. When selected, pressing `Backspace` or `Delete` removes the entire code block from the AST (unless the user is actively editing the textarea).
+
+## Input rule trigger
+
+Typing three backticks (` ``` `) triggers the input rule engine to convert the current paragraph into a `CodeBlockNode` with `language: 'text'` and `autoFocus: true`.
+
+## Related
+
+- [Code Blocks guide](/docs/guides/code-blocks) -- Full tutorial with Shiki setup
+- [InputRulePlugin](/docs/api/plugins/input-rule-plugin) -- The ` ``` ` trigger
+- [Slash Menu guide](/docs/guides/slash-menu) -- "Code Block" slash menu item
