@@ -10,7 +10,7 @@ Scribex supports multiple independent editor instances on the same page. Each ed
 Each `EditorRoot` wraps its own `LexicalComposer` with a unique `namespace`. The namespace is a required prop that ensures complete isolation between editors:
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
 import {
   EditorRoot,
@@ -19,18 +19,18 @@ import {
   OverlayPortal,
   InputRulePlugin,
   useEditorState,
-} from '@scribex/core';
+} from "@scribex/core";
 
 function TitleEditor() {
   const { serializedState } = useEditorState({
-    onChange: (json) => console.log('Title:', json),
+    onChange: (json) => console.log("Title:", json),
   });
   return null;
 }
 
 function BodyEditor() {
   const { serializedState } = useEditorState({
-    onChange: (json) => console.log('Body:', json),
+    onChange: (json) => console.log("Body:", json),
   });
   return null;
 }
@@ -176,12 +176,16 @@ return (
 Because every feature is a composable React child, you can give each editor a different set of capabilities:
 
 ```tsx
-{/* Title editor: plain text only, no formatting */}
+{
+  /* Title editor: plain text only, no formatting */
+}
 <EditorRoot namespace="title-editor">
   {/* No FloatingToolbar, no SlashMenu, no InputRulePlugin */}
-</EditorRoot>
+</EditorRoot>;
 
-{/* Body editor: full-featured */}
+{
+  /* Body editor: full-featured */
+}
 <EditorRoot namespace="body-editor">
   <FloatingToolbar />
   <SlashMenu />
@@ -191,13 +195,15 @@ Because every feature is a composable React child, you can give each editor a di
   <PastePlugin />
   <MentionPlugin providers={mentionProviders} />
   <AIPlugin provider={aiProvider} />
-</EditorRoot>
+</EditorRoot>;
 
-{/* Sidebar notes: limited features */}
+{
+  /* Sidebar notes: limited features */
+}
 <EditorRoot namespace="sidebar-notes">
   <FloatingToolbar />
   <InputRulePlugin />
-</EditorRoot>
+</EditorRoot>;
 ```
 
 ## Namespace requirements
@@ -211,15 +217,17 @@ The `namespace` prop must be:
 If you are rendering editors dynamically (e.g., a list of comments), use a unique identifier in the namespace:
 
 ```tsx
-{comments.map((comment) => (
-  <EditorRoot
-    key={comment.id}
-    namespace={`comment-${comment.id}`}
-    initialState={comment.content}
-  >
-    <FloatingToolbar />
-  </EditorRoot>
-))}
+{
+  comments.map((comment) => (
+    <EditorRoot
+      key={comment.id}
+      namespace={`comment-${comment.id}`}
+      initialState={comment.content}
+    >
+      <FloatingToolbar />
+    </EditorRoot>
+  ));
+}
 ```
 
 ## Performance considerations
@@ -236,8 +244,8 @@ If you need many editors on a single page (10+), consider:
 <EditorRoot
   namespace={`comment-${id}`}
   initialState={content}
-  editable={false}   // No editing overhead
-  autoFocus={false}   // No auto-focus
+  editable={false} // No editing overhead
+  autoFocus={false} // No auto-focus
 >
   {/* No plugins needed for read-only display */}
 </EditorRoot>
