@@ -1,0 +1,135 @@
+---
+title: BlockSelectionPlugin
+description: Multi-block selection with marquee drag.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Import
+
+```tsx
+import { BlockSelectionPlugin } from '@scribex/core';
+```
+
+## Overview
+
+The `BlockSelectionPlugin` enables multi-block selection via marquee (lasso) drag. When the user clicks and drags outside of text content (e.g., in the editor margin or gutter area), a selection rectangle is drawn. All blocks that intersect the rectangle are visually highlighted and can be acted upon as a group (delete, copy, drag). This is the same interaction pattern used in Notion.
+
+The plugin is composed of three internal hooks: `useBlockHighlight` (manages the visual highlight state), `useMarqueeSelect` (handles the click-drag rectangle), and `useBlockSelectionActions` (provides keyboard and context menu actions for selected blocks).
+
+## Props
+
+The `BlockSelectionPlugin` accepts no props. All behavior is automatic once the plugin is mounted.
+
+## Usage
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, BlockSelectionPlugin } from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <BlockSelectionPlugin />
+    </EditorRoot>
+  );
+}
+```
+
+## How it works
+
+### Marquee selection
+
+1. The user clicks and holds in the editor gutter (the area outside the text content but inside the editor container).
+2. As they drag, a semi-transparent rectangle (the marquee) is drawn from the click origin to the current mouse position.
+3. All top-level block nodes whose bounding rectangles intersect the marquee are added to the selection set.
+4. Releasing the mouse button finalizes the selection.
+
+The marquee rectangle is rendered via a React portal (not as a Lexical node) to avoid polluting the AST.
+
+### Visual highlighting
+
+Selected blocks receive a visual highlight:
+- A colored overlay background using the `--scribex-accent` token at 10% opacity.
+- A left border accent using the `--scribex-accent` token.
+- The highlight is applied via CSS classes on the DOM elements, not via AST mutations.
+
+### Keyboard actions on selected blocks
+
+| Key | Action |
+|---|---|
+| Delete / Backspace | Remove all selected blocks from the AST. Creates a single undo history entry. |
+| Escape | Clear the block selection. |
+| `Cmd+C` / `Ctrl+C` | Copy the selected blocks as both HTML and plain text to the clipboard. |
+| `Cmd+X` / `Ctrl+X` | Cut the selected blocks (copy + delete). |
+| Arrow Up | Extend or shrink the selection upward. |
+| Arrow Down | Extend or shrink the selection downward. |
+
+### Click behavior
+
+| Click type | Action |
+|---|---|
+| Click on a block | Select that single block. Clears any existing block selection. |
+| Shift+Click | Extend the selection from the last selected block to the clicked block. |
+| Click on text | Clears block selection and enters normal text editing mode. |
+
+## Internal hooks
+
+While these hooks are used internally by `BlockSelectionPlugin`, they are not exported as public API. The plugin encapsulates all behavior.
+
+### `useBlockHighlight`
+
+Manages the set of selected block keys and applies/removes CSS highlight classes on the corresponding DOM elements. Uses `editor.getElementByKey()` to map Lexical node keys to DOM elements.
+
+### `useMarqueeSelect`
+
+Handles `mousedown`, `mousemove`, and `mouseup` events on the editor container. Calculates intersection between the marquee rectangle and each block's `getBoundingClientRect()`. Updates the highlight set on each `mousemove` frame using `requestAnimationFrame` for smooth performance.
+
+### `useBlockSelectionActions`
+
+Registers keyboard event handlers and context menu actions for the current block selection. All AST mutations (delete, cut) are performed in a single `editor.update()` call to produce one undo history entry.
+
+## Interaction with other plugins
+
+- **OverlayPortal**: The block selection is independent of the drag handle system. The OverlayPortal handles single-block drag-and-drop; `BlockSelectionPlugin` handles multi-block selection and batch operations.
+- **FloatingToolbar**: The floating format toolbar is hidden while a block selection is active, since formatting commands apply to text selections, not block selections.
+- **Text selection**: Initiating a block selection (clicking in the gutter) clears any active text selection. Conversely, clicking on text content clears any active block selection.
+
+## Example: combining with drag-and-drop
+
+```tsx
+import {
+  EditorRoot,
+  BlockSelectionPlugin,
+  OverlayPortal,
+  FloatingToolbar,
+} from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <FloatingToolbar />
+      <OverlayPortal />
+      <BlockSelectionPlugin />
+    </EditorRoot>
+  );
+}
+```
+
+<Callout type="info">
+The marquee selection is only active when the initial click lands in the gutter area (outside the text content). Clicking and dragging within text content performs a normal text selection, as expected.
+</Callout>
+
+<Callout type="info">
+On touch devices (`pointer: coarse`), the marquee selection is disabled. Multi-block selection on mobile is not supported in the current version.
+</Callout>
+
+<Callout type="warn">
+Block selection operates on top-level block nodes only. Nested content (such as list items inside a list or paragraphs inside a toggle) cannot be individually selected via the marquee. The entire parent block is selected.
+</Callout>
+
+## Related
+
+- [Multi-Editor Guide](/docs/guides/multi-editor) -- Isolation between editor instances
+- [Mobile Support Guide](/docs/guides/mobile-support) -- Touch device behavior
