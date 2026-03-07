@@ -1,0 +1,175 @@
+---
+title: VideoPlugin
+description: Video embedding and file upload.
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+## Import
+
+```tsx
+import { VideoPlugin } from '@scribex/core';
+```
+
+## Overview
+
+The `VideoPlugin` supports both video file uploads and URL-based video embeds. For file uploads, it follows the same optimistic UI pattern as the `ImagePlugin`: a `LoadingVideoNode` with a spinner is shown immediately while the upload runs in the background. For URL embeds, the plugin recognizes YouTube, Vimeo, and Loom URLs and renders the appropriate embed iframe.
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `uploadHandler` | `UploadHandler` | -- | Optional function that uploads a `File` and returns a `Promise<string>` resolving to the remote URL. If not provided, file uploads are disabled; only URL embeds are supported. |
+| `maxFileSize` | `number` | `52428800` (50 MB) | Maximum file size in bytes for uploaded videos. |
+| `allowedFormats` | `string[]` | `['video/mp4', 'video/webm', 'video/quicktime']` | Allowed MIME types for uploaded video files. |
+| `onFileRejected` | `(file: File, reason: 'size' \| 'format') => void` | -- | Called when a dropped/pasted video file fails validation. |
+
+## Usage
+
+### Embed-only setup (no file upload)
+
+```tsx title="app/editor/page.tsx"
+'use client';
+
+import { EditorRoot, VideoPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <InputRulePlugin />
+      <SlashMenu />
+      <VideoPlugin />
+    </EditorRoot>
+  );
+}
+```
+
+### With file upload support
+
+```tsx
+import { EditorRoot, VideoPlugin } from '@scribex/core';
+
+const videoUploadHandler = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('video', file);
+
+  const response = await fetch('/api/upload/video', {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) throw new Error('Video upload failed');
+
+  const { url } = await response.json();
+  return url;
+};
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <VideoPlugin
+        uploadHandler={videoUploadHandler}
+        maxFileSize={100 * 1024 * 1024} // 100 MB
+        onFileRejected={(file, reason) => {
+          if (reason === 'size') toast.error(`${file.name} exceeds the size limit.`);
+          if (reason === 'format') toast.error(`${file.name} is not a supported video format.`);
+        }}
+      />
+    </EditorRoot>
+  );
+}
+```
+
+## Registered commands
+
+| Command | Payload | Description |
+|---|---|---|
+| `INSERT_VIDEO_COMMAND` | `File \| string` | Insert a video from a file (triggers upload) or a URL (creates embed). |
+| `OPEN_VIDEO_INPUT_COMMAND` | `void` | Opens a URL input popover for pasting a video embed link. |
+
+### Dispatching programmatically
+
+```tsx
+import { INSERT_VIDEO_COMMAND, OPEN_VIDEO_INPUT_COMMAND } from '@scribex/core';
+
+// Insert via URL
+editor.dispatchCommand(INSERT_VIDEO_COMMAND, 'https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+
+// Insert via file
+editor.dispatchCommand(INSERT_VIDEO_COMMAND, videoFile);
+
+// Open the URL input
+editor.dispatchCommand(OPEN_VIDEO_INPUT_COMMAND, undefined);
+```
+
+## Supported embed providers
+
+The plugin automatically detects and converts URLs from these providers into responsive embed iframes:
+
+| Provider | URL patterns |
+|---|---|
+| YouTube | `youtube.com/watch?v=...`, `youtu.be/...`, `youtube.com/embed/...` |
+| Vimeo | `vimeo.com/...`, `player.vimeo.com/video/...` |
+| Loom | `loom.com/share/...`, `loom.com/embed/...` |
+
+Unrecognized URLs are rendered as a `<video>` element with the URL as the `src` attribute, allowing direct video file URLs to work as embeds.
+
+## Upload flow
+
+When an `uploadHandler` is provided, file uploads follow the same pattern as `ImagePlugin`:
+
+```
+Drop/Paste video file
+  |
+  v
+Validate against maxFileSize and allowedFormats
+  |
+  +--[rejected]--> Call onFileRejected(), stop
+  |
+  v
+URL.createObjectURL(file) --> local preview
+  |
+  v
+Insert LoadingVideoNode (spinner overlay) -- single editor.update()
+  |
+  v
+Call uploadHandler(file)
+  |
+  +--[resolves]--> Replace with VideoNode(remoteURL) -- single editor.update()
+  |                + URL.revokeObjectURL()
+  |
+  +--[rejects]---> Remove LoadingVideoNode -- single editor.update()
+                   + URL.revokeObjectURL()
+```
+
+## Slash menu integration
+
+When `VideoPlugin` is mounted, a "Video" item appears in the slash menu. Selecting it opens a popover with two options:
+
+1. **Embed URL** -- Paste a YouTube, Vimeo, or Loom link.
+2. **Upload file** -- Opens a native file picker (only available when `uploadHandler` is provided).
+
+## Video node in JSON
+
+```json
+{
+  "type": "video",
+  "src": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  "provider": "youtube",
+  "width": 640,
+  "height": 360
+}
+```
+
+<Callout type="info">
+When `uploadHandler` is not provided, the "Upload file" option is hidden from the slash menu and file drop/paste events for video files are ignored. The plugin operates in embed-only mode.
+</Callout>
+
+<Callout type="warn">
+Video embeds use iframes. The plugin sets `sandbox="allow-scripts allow-same-origin"` and `loading="lazy"` on all embed iframes for security and performance. Custom embed providers are not supported in the current version.
+</Callout>
+
+## Related
+
+- [Video Embeds Guide](/docs/guides/video-embeds) -- Extended guide with provider details
+- [API: ImagePlugin](/docs/api/plugins/image-plugin) -- Image upload follows the same pattern
