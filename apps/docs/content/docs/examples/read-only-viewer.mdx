@@ -10,9 +10,9 @@ A common pattern is to save editor content in one place and display it in anothe
 Pass `editable={false}` and `autoFocus={false}` to render saved content without any editing capabilities. No plugins are needed for viewing.
 
 ```tsx title="app/posts/[slug]/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot } from '@scribex/core';
+import { EditorRoot } from "@scribex/core";
 
 interface ContentViewerProps {
   content: string; // Serialized Lexical JSON from your database
@@ -45,7 +45,7 @@ When `editable` is `false`:
 Here is a complete page that fetches content from an API route and renders it read-only:
 
 ```tsx title="app/posts/[slug]/page.tsx"
-import { ContentViewer } from './content-viewer';
+import { ContentViewer } from "./content-viewer";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -78,9 +78,9 @@ export default async function PostPage({ params }: PageProps) {
 ```
 
 ```tsx title="app/posts/[slug]/content-viewer.tsx"
-'use client';
+"use client";
 
-import { EditorRoot } from '@scribex/core';
+import { EditorRoot } from "@scribex/core";
 
 export function ContentViewer({ content }: { content: string }) {
   return (
@@ -102,17 +102,17 @@ The server component fetches the data. The client component renders the Lexical 
 For offline-first applications or prototypes, load saved state from localStorage:
 
 ```tsx title="app/viewer/page.tsx"
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { EditorRoot } from '@scribex/core';
+import { useState, useEffect } from "react";
+import { EditorRoot } from "@scribex/core";
 
 export default function LocalViewerPage() {
   const [content, setContent] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('scribex-editor-state');
+    const saved = localStorage.getItem("scribex-editor-state");
     setContent(saved);
     setIsLoaded(true);
   }, []);
@@ -153,9 +153,9 @@ export default function LocalViewerPage() {
 A useful pattern is showing an editable editor alongside a live read-only preview. Because Scribex supports multiple editor instances on the same page (each with a unique `namespace`), this works out of the box:
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import {
   EditorRoot,
   FloatingToolbar,
@@ -163,9 +163,13 @@ import {
   InputRulePlugin,
   PastePlugin,
   useEditorState,
-} from '@scribex/core';
+} from "@scribex/core";
 
-function EditorStateCapture({ onUpdate }: { onUpdate: (json: string) => void }) {
+function EditorStateCapture({
+  onUpdate,
+}: {
+  onUpdate: (json: string) => void;
+}) {
   useEditorState({
     debounceMs: 200,
     onChange: onUpdate,

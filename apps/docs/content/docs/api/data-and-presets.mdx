@@ -13,7 +13,7 @@ import {
   DEFAULT_FONT_FAMILIES,
   DEFAULT_CALLOUT_PRESETS,
   DEFAULT_EMOJIS,
-} from '@scribex/core';
+} from "@scribex/core";
 
 import type {
   ColorPalette,
@@ -21,7 +21,7 @@ import type {
   FontFamilyEntry,
   CalloutPreset,
   EmojiItem,
-} from '@scribex/core';
+} from "@scribex/core";
 ```
 
 ---
@@ -39,41 +39,41 @@ interface ColorPalette {
 }
 
 interface ColorEntry {
-  label: string;   // Human-readable label
-  value: string;   // CSS value (var() reference) or empty string for default
-  swatch: string;  // Raw color for rendering the picker dot
+  label: string; // Human-readable label
+  value: string; // CSS value (var() reference) or empty string for default
+  swatch: string; // Raw color for rendering the picker dot
 }
 ```
 
 ### Text colors
 
-| Label | CSS Variable | Swatch |
-|---|---|---|
+| Label   | CSS Variable                    | Swatch         |
+| ------- | ------------------------------- | -------------- |
 | Default | `""` (empty, resets to default) | `currentColor` |
-| Gray | `var(--scribex-text-gray)` | `#9b9a97` |
-| Brown | `var(--scribex-text-brown)` | `#64473a` |
-| Orange | `var(--scribex-text-orange)` | `#d9730d` |
-| Yellow | `var(--scribex-text-yellow)` | `#dfab01` |
-| Green | `var(--scribex-text-green)` | `#0f7b6c` |
-| Blue | `var(--scribex-text-blue)` | `#0b6e99` |
-| Purple | `var(--scribex-text-purple)` | `#6940a5` |
-| Pink | `var(--scribex-text-pink)` | `#ad1a72` |
-| Red | `var(--scribex-text-red)` | `#e03e3e` |
+| Gray    | `var(--scribex-text-gray)`      | `#9b9a97`      |
+| Brown   | `var(--scribex-text-brown)`     | `#64473a`      |
+| Orange  | `var(--scribex-text-orange)`    | `#d9730d`      |
+| Yellow  | `var(--scribex-text-yellow)`    | `#dfab01`      |
+| Green   | `var(--scribex-text-green)`     | `#0f7b6c`      |
+| Blue    | `var(--scribex-text-blue)`      | `#0b6e99`      |
+| Purple  | `var(--scribex-text-purple)`    | `#6940a5`      |
+| Pink    | `var(--scribex-text-pink)`      | `#ad1a72`      |
+| Red     | `var(--scribex-text-red)`       | `#e03e3e`      |
 
 ### Highlight colors
 
-| Label | CSS Variable | Swatch |
-|---|---|---|
-| Default | `""` (empty, removes highlight) | `transparent` |
-| Gray | `var(--scribex-highlight-gray)` | `#ebeced` |
-| Brown | `var(--scribex-highlight-brown)` | `#e9e5e3` |
-| Orange | `var(--scribex-highlight-orange)` | `#faebdd` |
-| Yellow | `var(--scribex-highlight-yellow)` | `#fbf3db` |
-| Green | `var(--scribex-highlight-green)` | `#ddedea` |
-| Blue | `var(--scribex-highlight-blue)` | `#ddebf1` |
-| Purple | `var(--scribex-highlight-purple)` | `#eae4f2` |
-| Pink | `var(--scribex-highlight-pink)` | `#f4dfeb` |
-| Red | `var(--scribex-highlight-red)` | `#fbe4e4` |
+| Label   | CSS Variable                      | Swatch        |
+| ------- | --------------------------------- | ------------- |
+| Default | `""` (empty, removes highlight)   | `transparent` |
+| Gray    | `var(--scribex-highlight-gray)`   | `#ebeced`     |
+| Brown   | `var(--scribex-highlight-brown)`  | `#e9e5e3`     |
+| Orange  | `var(--scribex-highlight-orange)` | `#faebdd`     |
+| Yellow  | `var(--scribex-highlight-yellow)` | `#fbf3db`     |
+| Green   | `var(--scribex-highlight-green)`  | `#ddedea`     |
+| Blue    | `var(--scribex-highlight-blue)`   | `#ddebf1`     |
+| Purple  | `var(--scribex-highlight-purple)` | `#eae4f2`     |
+| Pink    | `var(--scribex-highlight-pink)`   | `#f4dfeb`     |
+| Red     | `var(--scribex-highlight-red)`    | `#fbe4e4`     |
 
 ### Customizing
 
@@ -89,21 +89,21 @@ Override the palette by defining the CSS variables in your `tokens.css` file:
 Or provide a completely custom palette to the `ColorPicker` component:
 
 ```tsx
-import { ColorPicker } from '@scribex/core';
-import type { ColorPalette } from '@scribex/core';
+import { ColorPicker } from "@scribex/core";
+import type { ColorPalette } from "@scribex/core";
 
 const customPalette: ColorPalette = {
   text: [
-    { label: 'Default', value: '', swatch: 'currentColor' },
-    { label: 'Brand', value: 'var(--brand-color)', swatch: '#ff6600' },
+    { label: "Default", value: "", swatch: "currentColor" },
+    { label: "Brand", value: "var(--brand-color)", swatch: "#ff6600" },
   ],
   highlight: [
-    { label: 'Default', value: '', swatch: 'transparent' },
-    { label: 'Brand Light', value: 'var(--brand-bg)', swatch: '#fff3e6' },
+    { label: "Default", value: "", swatch: "transparent" },
+    { label: "Brand Light", value: "var(--brand-bg)", swatch: "#fff3e6" },
   ],
 };
 
-<ColorPicker palette={customPalette} />
+<ColorPicker palette={customPalette} />;
 ```
 
 ---
@@ -116,20 +116,20 @@ The default font families available in the `FontPicker` dropdown. Contains four 
 
 ```ts
 interface FontFamilyEntry {
-  label: string;   // Human-readable label
-  value: string;   // CSS font-family value or empty string for default
-  preview: string;  // Font stack for rendering the preview text
+  label: string; // Human-readable label
+  value: string; // CSS font-family value or empty string for default
+  preview: string; // Font stack for rendering the preview text
 }
 ```
 
 ### Entries
 
-| Label | CSS Value | Preview Font |
-|---|---|---|
-| Default | `""` (empty, resets to default) | `var(--scribex-font-sans)` |
-| Serif | `var(--scribex-font-serif)` | `var(--scribex-font-serif)` |
-| Mono | `var(--scribex-font-mono)` | `var(--scribex-font-mono)` |
-| Hand | `var(--scribex-font-hand)` | `var(--scribex-font-hand)` |
+| Label   | CSS Value                       | Preview Font                |
+| ------- | ------------------------------- | --------------------------- |
+| Default | `""` (empty, resets to default) | `var(--scribex-font-sans)`  |
+| Serif   | `var(--scribex-font-serif)`     | `var(--scribex-font-serif)` |
+| Mono    | `var(--scribex-font-mono)`      | `var(--scribex-font-mono)`  |
+| Hand    | `var(--scribex-font-hand)`      | `var(--scribex-font-hand)`  |
 
 ### Customizing
 
@@ -137,24 +137,28 @@ Define the font CSS variables in your `tokens.css`:
 
 ```css
 :root {
-  --scribex-font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --scribex-font-serif: 'Merriweather', ui-serif, Georgia, serif;
-  --scribex-font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --scribex-font-hand: 'Caveat', cursive;
+  --scribex-font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --scribex-font-serif: "Merriweather", ui-serif, Georgia, serif;
+  --scribex-font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --scribex-font-hand: "Caveat", cursive;
 }
 ```
 
 Or provide a custom list to the `FontPicker`:
 
 ```tsx
-import { FontPicker, DEFAULT_FONT_FAMILIES } from '@scribex/core';
+import { FontPicker, DEFAULT_FONT_FAMILIES } from "@scribex/core";
 
 const fonts = [
   ...DEFAULT_FONT_FAMILIES,
-  { label: 'Comic', value: '"Comic Sans MS", cursive', preview: '"Comic Sans MS", cursive' },
+  {
+    label: "Comic",
+    value: '"Comic Sans MS", cursive',
+    preview: '"Comic Sans MS", cursive',
+  },
 ];
 
-<FontPicker fonts={fonts} />
+<FontPicker fonts={fonts} />;
 ```
 
 ---
@@ -167,24 +171,24 @@ The default callout color presets used by the `CalloutPlugin`. Contains six pres
 
 ```ts
 interface CalloutPreset {
-  id: string;          // Unique ID for CSS classes and serialization
-  label: string;       // Human-readable label
-  emoji: string;       // Default emoji
-  bgSwatch: string;    // Background color for the picker dot
+  id: string; // Unique ID for CSS classes and serialization
+  label: string; // Human-readable label
+  emoji: string; // Default emoji
+  bgSwatch: string; // Background color for the picker dot
   borderSwatch: string; // Border color for the picker dot
 }
 ```
 
 ### Presets
 
-| ID | Label | Emoji | Background | Border |
-|---|---|---|---|---|
-| `default` | Default | `💡` | `#f1f1ef` | `#d4d4d4` |
-| `info` | Info | `ℹ️` | `#ddebf1` | `#0b6e99` |
-| `warning` | Warning | `⚠️` | `#fbf3db` | `#dfab01` |
-| `error` | Error | `🚫` | `#fbe4e4` | `#e03e3e` |
-| `success` | Success | `✅` | `#ddedea` | `#0f7b6c` |
-| `purple` | Note | `📝` | `#eae4f2` | `#6940a5` |
+| ID        | Label   | Emoji | Background | Border    |
+| --------- | ------- | ----- | ---------- | --------- |
+| `default` | Default | `💡`  | `#f1f1ef`  | `#d4d4d4` |
+| `info`    | Info    | `ℹ️`  | `#ddebf1`  | `#0b6e99` |
+| `warning` | Warning | `⚠️`  | `#fbf3db`  | `#dfab01` |
+| `error`   | Error   | `🚫`  | `#fbe4e4`  | `#e03e3e` |
+| `success` | Success | `✅`  | `#ddedea`  | `#0f7b6c` |
+| `purple`  | Note    | `📝`  | `#eae4f2`  | `#6940a5` |
 
 ### CSS variables
 
@@ -213,21 +217,21 @@ For example:
 Override presets via the `presets` prop on `CalloutPlugin`:
 
 ```tsx
-import { CalloutPlugin, DEFAULT_CALLOUT_PRESETS } from '@scribex/core';
-import type { CalloutPreset } from '@scribex/core';
+import { CalloutPlugin, DEFAULT_CALLOUT_PRESETS } from "@scribex/core";
+import type { CalloutPreset } from "@scribex/core";
 
 const customPresets: CalloutPreset[] = [
   ...DEFAULT_CALLOUT_PRESETS,
   {
-    id: 'brand',
-    label: 'Brand',
-    emoji: '\u{1F680}',
-    bgSwatch: '#fff3e6',
-    borderSwatch: '#ff6600',
+    id: "brand",
+    label: "Brand",
+    emoji: "\u{1F680}",
+    bgSwatch: "#fff3e6",
+    borderSwatch: "#ff6600",
   },
 ];
 
-<CalloutPlugin presets={customPresets} />
+<CalloutPlugin presets={customPresets} />;
 ```
 
 ---
@@ -240,9 +244,9 @@ The default emoji list used by the `EmojiPickerPlugin`. Contains 100+ emojis wit
 
 ```ts
 interface EmojiItem {
-  emoji: string;       // The emoji character
-  name: string;        // Machine-readable name (e.g., "grinning_face")
-  keywords: string[];  // Search terms for filtering
+  emoji: string; // The emoji character
+  name: string; // Machine-readable name (e.g., "grinning_face")
+  keywords: string[]; // Search terms for filtering
 }
 ```
 
@@ -250,13 +254,29 @@ interface EmojiItem {
 
 ```ts
 [
-  { emoji: '😀', name: 'grinning_face', keywords: ['happy', 'smile', 'joy', 'grin'] },
-  { emoji: '😂', name: 'face_with_tears_of_joy', keywords: ['laugh', 'cry', 'happy', 'tears', 'lol', 'funny'] },
-  { emoji: '🤔', name: 'thinking_face', keywords: ['think', 'hmm', 'ponder', 'consider', 'wondering'] },
-  { emoji: '❤️', name: 'red_heart', keywords: ['love', 'heart', 'like', 'romance'] },
-  { emoji: '🔥', name: 'fire', keywords: ['hot', 'flame', 'lit', 'trending'] },
+  {
+    emoji: "😀",
+    name: "grinning_face",
+    keywords: ["happy", "smile", "joy", "grin"],
+  },
+  {
+    emoji: "😂",
+    name: "face_with_tears_of_joy",
+    keywords: ["laugh", "cry", "happy", "tears", "lol", "funny"],
+  },
+  {
+    emoji: "🤔",
+    name: "thinking_face",
+    keywords: ["think", "hmm", "ponder", "consider", "wondering"],
+  },
+  {
+    emoji: "❤️",
+    name: "red_heart",
+    keywords: ["love", "heart", "like", "romance"],
+  },
+  { emoji: "🔥", name: "fire", keywords: ["hot", "flame", "lit", "trending"] },
   // ... 100+ more entries
-]
+];
 ```
 
 The list covers the most commonly used emojis across categories: faces, gestures, hearts, nature, food, activities, travel, objects, symbols, and flags.
@@ -266,29 +286,33 @@ The list covers the most commonly used emojis across categories: faces, gestures
 Override the emoji list via the `emojis` prop on `EmojiPickerPlugin`:
 
 ```tsx
-import { EmojiPickerPlugin, DEFAULT_EMOJIS } from '@scribex/core';
-import type { EmojiItem } from '@scribex/core';
+import { EmojiPickerPlugin, DEFAULT_EMOJIS } from "@scribex/core";
+import type { EmojiItem } from "@scribex/core";
 
 // Add custom emojis
 const customEmojis: EmojiItem[] = [
   ...DEFAULT_EMOJIS,
-  { emoji: '🦄', name: 'unicorn', keywords: ['magic', 'fantasy', 'horse', 'mythical'] },
+  {
+    emoji: "🦄",
+    name: "unicorn",
+    keywords: ["magic", "fantasy", "horse", "mythical"],
+  },
 ];
 
-<EmojiPickerPlugin emojis={customEmojis} maxResults={12} />
+<EmojiPickerPlugin emojis={customEmojis} maxResults={12} />;
 ```
 
 Or provide a completely custom set:
 
 ```tsx
 const brandEmojis: EmojiItem[] = [
-  { emoji: '🚀', name: 'rocket', keywords: ['launch', 'ship', 'deploy'] },
-  { emoji: '✅', name: 'check', keywords: ['done', 'complete', 'success'] },
-  { emoji: '⚠️', name: 'warning', keywords: ['alert', 'caution', 'danger'] },
-  { emoji: '🐛', name: 'bug', keywords: ['bug', 'issue', 'error'] },
+  { emoji: "🚀", name: "rocket", keywords: ["launch", "ship", "deploy"] },
+  { emoji: "✅", name: "check", keywords: ["done", "complete", "success"] },
+  { emoji: "⚠️", name: "warning", keywords: ["alert", "caution", "danger"] },
+  { emoji: "🐛", name: "bug", keywords: ["bug", "issue", "error"] },
 ];
 
-<EmojiPickerPlugin emojis={brandEmojis} />
+<EmojiPickerPlugin emojis={brandEmojis} />;
 ```
 
 ### Search behavior
