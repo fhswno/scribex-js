@@ -3,12 +3,12 @@ title: PastePlugin
 description: HTML paste sanitization pipeline.
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+import { Callout } from "fumadocs-ui/components/callout";
 
 ## Import
 
 ```tsx
-import { PastePlugin } from '@scribex/core';
+import { PastePlugin } from "@scribex/core";
 ```
 
 ## Overview
@@ -22,9 +22,9 @@ The `PastePlugin` accepts no props. It is a zero-configuration plugin that handl
 ## Usage
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, PastePlugin } from '@scribex/core';
+import { EditorRoot, PastePlugin } from "@scribex/core";
 
 export default function EditorPage() {
   return (
@@ -80,16 +80,18 @@ The sanitization function applies the following transformations in order:
 
 Only these HTML elements survive sanitization. Everything else is stripped to its text content:
 
-| Category | Elements |
-|---|---|
-| Block | `p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `blockquote`, `pre`, `hr` |
-| Inline | `strong`, `em`, `u`, `s`, `code`, `br` |
-| Lists | `ul`, `ol`, `li` |
-| Links & media | `a`, `img` |
-| Tables | `table`, `thead`, `tbody`, `tr`, `th`, `td` |
+| Category      | Elements                                                           |
+| ------------- | ------------------------------------------------------------------ |
+| Block         | `p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `blockquote`, `pre`, `hr` |
+| Inline        | `strong`, `em`, `u`, `s`, `code`, `br`                             |
+| Lists         | `ul`, `ol`, `li`                                                   |
+| Links & media | `a`, `img`                                                         |
+| Tables        | `table`, `thead`, `tbody`, `tr`, `th`, `td`                        |
 
 <Callout type="info">
-The allowlist is intentionally strict. It is easier to add an element to the allowlist than to recover from an XSS vulnerability caused by a denylist approach missing a dangerous element.
+  The allowlist is intentionally strict. It is easier to add an element to the
+  allowlist than to recover from an XSS vulnerability caused by a denylist
+  approach missing a dangerous element.
 </Callout>
 
 ## Examples
@@ -97,6 +99,7 @@ The allowlist is intentionally strict. It is easier to add an element to the all
 ### Pasting from Google Docs
 
 **Input HTML (simplified):**
+
 ```html
 <span style="font-size:26pt;font-family:Arial;">My Heading</span>
 <p style="line-height:1.38;margin-top:0pt;">
@@ -106,6 +109,7 @@ The allowlist is intentionally strict. It is easier to add an element to the all
 ```
 
 **Sanitized output:**
+
 ```html
 <h1>My Heading</h1>
 <p><strong>Bold text</strong>and regular text</p>
@@ -114,12 +118,20 @@ The allowlist is intentionally strict. It is easier to add an element to the all
 ### Pasting HTML with scripts
 
 **Input:**
+
 ```html
-<p>Hello <script>alert('xss')</script>world</p>
+<p>
+  Hello
+  <script>
+    alert("xss");
+  </script>
+  world
+</p>
 <div onclick="stealCookies()">Click me</div>
 ```
 
 **Sanitized output:**
+
 ```html
 <p>Hello world</p>
 <p>Click me</p>

@@ -3,12 +3,12 @@ title: EmojiPickerPlugin
 description: Emoji picker triggered by colon or slash menu.
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+import { Callout } from "fumadocs-ui/components/callout";
 
 ## Import
 
 ```tsx
-import { EmojiPickerPlugin } from '@scribex/core';
+import { EmojiPickerPlugin } from "@scribex/core";
 ```
 
 ## Overview
@@ -17,12 +17,12 @@ The `EmojiPickerPlugin` provides two ways to insert emoji into the editor: a col
 
 ## Props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `emojis` | `EmojiItem[]` | Built-in emoji set | Custom emoji list. When provided, replaces the built-in set entirely. |
-| `maxResults` | `number` | `8` | Maximum number of results shown in the dropdown at once. |
-| `renderItem` | `(item: EmojiItem) => React.ReactNode` | Default renderer | Custom render function for each dropdown item. |
-| `renderDropdown` | `(props: EmojiDropdownProps) => React.ReactNode` | Default renderer | Custom render function for the entire dropdown container. |
+| Prop             | Type                                             | Default            | Description                                                           |
+| ---------------- | ------------------------------------------------ | ------------------ | --------------------------------------------------------------------- |
+| `emojis`         | `EmojiItem[]`                                    | Built-in emoji set | Custom emoji list. When provided, replaces the built-in set entirely. |
+| `maxResults`     | `number`                                         | `8`                | Maximum number of results shown in the dropdown at once.              |
+| `renderItem`     | `(item: EmojiItem) => React.ReactNode`           | Default renderer   | Custom render function for each dropdown item.                        |
+| `renderDropdown` | `(props: EmojiDropdownProps) => React.ReactNode` | Default renderer   | Custom render function for the entire dropdown container.             |
 
 ## The `EmojiItem` interface
 
@@ -44,9 +44,14 @@ interface EmojiItem {
 ### Basic setup
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
-import { EditorRoot, EmojiPickerPlugin, InputRulePlugin, SlashMenu } from '@scribex/core';
+import {
+  EditorRoot,
+  EmojiPickerPlugin,
+  InputRulePlugin,
+  SlashMenu,
+} from "@scribex/core";
 
 export default function EditorPage() {
   return (
@@ -62,20 +67,37 @@ export default function EditorPage() {
 ### With custom emoji set
 
 ```tsx
-import { EmojiPickerPlugin } from '@scribex/core';
+import { EmojiPickerPlugin } from "@scribex/core";
 
 const customEmojis = [
-  { emoji: '🚀', name: 'rocket', category: 'Travel', aliases: ['launch', 'ship'] },
-  { emoji: '🎉', name: 'party_popper', category: 'Activities', aliases: ['celebrate', 'tada'] },
-  { emoji: '🔥', name: 'fire', category: 'Nature', aliases: ['hot', 'flame'] },
-  { emoji: '💡', name: 'lightbulb', category: 'Objects', aliases: ['idea', 'tip'] },
-  { emoji: '⚠️', name: 'warning', category: 'Symbols', aliases: ['caution', 'alert'] },
+  {
+    emoji: "🚀",
+    name: "rocket",
+    category: "Travel",
+    aliases: ["launch", "ship"],
+  },
+  {
+    emoji: "🎉",
+    name: "party_popper",
+    category: "Activities",
+    aliases: ["celebrate", "tada"],
+  },
+  { emoji: "🔥", name: "fire", category: "Nature", aliases: ["hot", "flame"] },
+  {
+    emoji: "💡",
+    name: "lightbulb",
+    category: "Objects",
+    aliases: ["idea", "tip"],
+  },
+  {
+    emoji: "⚠️",
+    name: "warning",
+    category: "Symbols",
+    aliases: ["caution", "alert"],
+  },
 ];
 
-<EmojiPickerPlugin
-  emojis={customEmojis}
-  maxResults={5}
-/>
+<EmojiPickerPlugin emojis={customEmojis} maxResults={5} />;
 ```
 
 ### With custom rendering
@@ -86,9 +108,11 @@ const customEmojis = [
     <div className="flex items-center gap-3 px-2 py-1">
       <span className="text-xl">{item.emoji}</span>
       <div>
-        <div className="font-medium">{item.name.replace(/_/g, ' ')}</div>
+        <div className="font-medium">{item.name.replace(/_/g, " ")}</div>
         {item.category && (
-          <div className="text-xs text-scribex-muted-foreground">{item.category}</div>
+          <div className="text-xs text-scribex-muted-foreground">
+            {item.category}
+          </div>
         )}
       </div>
     </div>
@@ -117,7 +141,7 @@ Type :smile --> dropdown shows matching emoji
 The plugin registers `OPEN_EMOJI_PICKER_COMMAND`. When dispatched, it opens a full emoji picker popover at the current cursor position without requiring a colon prefix.
 
 ```tsx
-import { OPEN_EMOJI_PICKER_COMMAND } from '@scribex/core';
+import { OPEN_EMOJI_PICKER_COMMAND } from "@scribex/core";
 
 // Open the picker programmatically
 editor.dispatchCommand(OPEN_EMOJI_PICKER_COMMAND, undefined);
@@ -127,22 +151,26 @@ When the `EmojiPickerPlugin` is mounted, an "Emoji" item automatically appears i
 
 ## Keyboard navigation
 
-| Key | Action |
-|---|---|
-| Arrow Down | Move selection to next emoji |
-| Arrow Up | Move selection to previous emoji |
-| Enter | Insert the selected emoji |
-| Escape | Dismiss the picker |
-| Continue typing | Refine the search query |
+| Key             | Action                           |
+| --------------- | -------------------------------- |
+| Arrow Down      | Move selection to next emoji     |
+| Arrow Up        | Move selection to previous emoji |
+| Enter           | Insert the selected emoji        |
+| Escape          | Dismiss the picker               |
+| Continue typing | Refine the search query          |
 
 Focus remains in the editor at all times. The dropdown is navigated via keyboard events captured by the editor, not by transferring focus to the popover.
 
 <Callout type="info">
-The colon trigger requires at least 2 characters after `:` before the dropdown appears. This prevents the picker from opening immediately on every colon character, which would interfere with normal writing.
+  The colon trigger requires at least 2 characters after `:` before the dropdown
+  appears. This prevents the picker from opening immediately on every colon
+  character, which would interfere with normal writing.
 </Callout>
 
 <Callout type="info">
-When providing a custom `emojis` array, it completely replaces the built-in set. If you want to extend the built-in set, import `DEFAULT_EMOJIS` from `@scribex/core` and spread it into your custom array.
+  When providing a custom `emojis` array, it completely replaces the built-in
+  set. If you want to extend the built-in set, import `DEFAULT_EMOJIS` from
+  `@scribex/core` and spread it into your custom array.
 </Callout>
 
 ## Related
