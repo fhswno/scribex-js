@@ -8,14 +8,14 @@ Scribex includes a `CalloutPlugin` that provides Notion-style callout blocks. Ea
 ## Basic setup
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
 import {
   EditorRoot,
   CalloutPlugin,
   InputRulePlugin,
   SlashMenu,
-} from '@scribex/core';
+} from "@scribex/core";
 
 export default function EditorPage() {
   return (
@@ -30,11 +30,11 @@ export default function EditorPage() {
 
 ## `CalloutPlugin` props
 
-| Prop | Type | Default | Description |
-|---|---|---|---|
-| `presets` | `CalloutPreset[]` | `DEFAULT_CALLOUT_PRESETS` | Override the available color presets |
-| `defaultEmoji` | `string` | `"💡"` | Default emoji for newly created callouts |
-| `defaultPreset` | `string` | `"default"` | Default color preset ID for new callouts |
+| Prop            | Type              | Default                   | Description                              |
+| --------------- | ----------------- | ------------------------- | ---------------------------------------- |
+| `presets`       | `CalloutPreset[]` | `DEFAULT_CALLOUT_PRESETS` | Override the available color presets     |
+| `defaultEmoji`  | `string`          | `"💡"`                    | Default emoji for newly created callouts |
+| `defaultPreset` | `string`          | `"default"`               | Default color preset ID for new callouts |
 
 ## The `CalloutPreset` interface
 
@@ -56,6 +56,7 @@ interface CalloutPreset {
 ```
 
 The preset's `id` maps to CSS custom properties in `tokens.css`:
+
 - `--scribex-callout-{id}-bg` -- the callout's background color
 - `--scribex-callout-{id}-border` -- the callout's left border accent color
 
@@ -63,19 +64,19 @@ The preset's `id` maps to CSS custom properties in `tokens.css`:
 
 Scribex ships with six built-in presets:
 
-| Preset | ID | Emoji | Background | Border |
-|---|---|---|---|---|
-| Default | `default` | 💡 | `#f1f1ef` | `#d4d4d4` |
-| Info | `info` | ℹ️ | `#ddebf1` | `#0b6e99` |
-| Warning | `warning` | ⚠️ | `#fbf3db` | `#dfab01` |
-| Error | `error` | 🚫 | `#fbe4e4` | `#e03e3e` |
-| Success | `success` | ✅ | `#ddedea` | `#0f7b6c` |
-| Note | `purple` | 📝 | `#eae4f2` | `#6940a5` |
+| Preset  | ID        | Emoji | Background | Border    |
+| ------- | --------- | ----- | ---------- | --------- |
+| Default | `default` | 💡    | `#f1f1ef`  | `#d4d4d4` |
+| Info    | `info`    | ℹ️    | `#ddebf1`  | `#0b6e99` |
+| Warning | `warning` | ⚠️    | `#fbf3db`  | `#dfab01` |
+| Error   | `error`   | 🚫    | `#fbe4e4`  | `#e03e3e` |
+| Success | `success` | ✅    | `#ddedea`  | `#0f7b6c` |
+| Note    | `purple`  | 📝    | `#eae4f2`  | `#6940a5` |
 
 Access these presets programmatically:
 
 ```tsx
-import { DEFAULT_CALLOUT_PRESETS } from '@scribex/core';
+import { DEFAULT_CALLOUT_PRESETS } from "@scribex/core";
 
 console.log(DEFAULT_CALLOUT_PRESETS);
 // [{ id: 'default', label: 'Default', emoji: '💡', ... }, ...]
@@ -86,33 +87,33 @@ console.log(DEFAULT_CALLOUT_PRESETS);
 Override the default presets by passing your own array:
 
 ```tsx
-import type { CalloutPreset } from '@scribex/core';
+import type { CalloutPreset } from "@scribex/core";
 
 const customPresets: CalloutPreset[] = [
   {
-    id: 'tip',
-    label: 'Tip',
-    emoji: '💡',
-    bgSwatch: '#e8f5e9',
-    borderSwatch: '#4caf50',
+    id: "tip",
+    label: "Tip",
+    emoji: "💡",
+    bgSwatch: "#e8f5e9",
+    borderSwatch: "#4caf50",
   },
   {
-    id: 'danger',
-    label: 'Danger',
-    emoji: '🔥',
-    bgSwatch: '#ffebee',
-    borderSwatch: '#f44336',
+    id: "danger",
+    label: "Danger",
+    emoji: "🔥",
+    bgSwatch: "#ffebee",
+    borderSwatch: "#f44336",
   },
   {
-    id: 'note',
-    label: 'Note',
-    emoji: '📌',
-    bgSwatch: '#e3f2fd',
-    borderSwatch: '#2196f3',
+    id: "note",
+    label: "Note",
+    emoji: "📌",
+    bgSwatch: "#e3f2fd",
+    borderSwatch: "#2196f3",
   },
 ];
 
-<CalloutPlugin presets={customPresets} defaultPreset="tip" />
+<CalloutPlugin presets={customPresets} defaultPreset="tip" />;
 ```
 
 When using custom presets, add corresponding CSS custom properties to your theme:
@@ -137,11 +138,11 @@ Type `/callout` in the editor. The slash menu shows a "Callout" item. Selecting 
 ### Via a command
 
 ```tsx
-import { INSERT_CALLOUT_COMMAND } from '@scribex/core';
+import { INSERT_CALLOUT_COMMAND } from "@scribex/core";
 
 editor.dispatchCommand(INSERT_CALLOUT_COMMAND, {
-  emoji: '⚠️',
-  colorPreset: 'warning',
+  emoji: "⚠️",
+  colorPreset: "warning",
 });
 ```
 
@@ -150,13 +151,13 @@ Both `emoji` and `colorPreset` are optional. If omitted, the `defaultEmoji` and 
 ### Programmatically
 
 ```tsx
-import { $createCalloutNode } from '@scribex/core';
-import { $createParagraphNode, $getRoot } from 'lexical';
+import { $createCalloutNode } from "@scribex/core";
+import { $createParagraphNode, $getRoot } from "lexical";
 
 editor.update(() => {
   const callout = $createCalloutNode({
-    emoji: '💡',
-    colorPreset: 'default',
+    emoji: "💡",
+    colorPreset: "default",
   });
 
   // A callout needs at least one child paragraph
@@ -205,14 +206,14 @@ If the callout is selected as a NodeSelection (e.g., via programmatic selection)
 ## Type guards
 
 ```tsx
-import { $isCalloutNode } from '@scribex/core';
+import { $isCalloutNode } from "@scribex/core";
 
 editor.read(() => {
   const root = $getRoot();
   root.getChildren().forEach((child) => {
     if ($isCalloutNode(child)) {
-      console.log('Emoji:', child.getEmoji());
-      console.log('Preset:', child.getColorPreset());
+      console.log("Emoji:", child.getEmoji());
+      console.log("Preset:", child.getColorPreset());
     }
   });
 });
