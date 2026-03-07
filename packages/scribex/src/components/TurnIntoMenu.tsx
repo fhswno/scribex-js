@@ -404,7 +404,7 @@ export function TurnIntoMenu({
               color: "var(--scribex-foreground, #0f172a)",
               fontSize: "13px",
               fontFamily: "inherit",
-              textAlign: "left",
+              textAlign: "start",
               transition: "background-color 0.1s",
             }}
             onMouseEnter={(e) => {
