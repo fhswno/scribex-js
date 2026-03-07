@@ -3,15 +3,19 @@ title: AIPreviewNode
 description: Ephemeral node for AI-generated content streaming.
 ---
 
-import { Callout } from 'fumadocs-ui/components/callout';
+import { Callout } from "fumadocs-ui/components/callout";
 
 `AIPreviewNode` is a `DecoratorNode` that renders an ephemeral preview of AI-generated content inside the editor. Its React component manages the streaming response entirely in local React state -- it never calls `editor.update()` during streaming. This design guarantees zero undo-history pollution while the AI is generating.
 
 ## Import
 
 ```tsx
-import { AIPreviewNode, $createAIPreviewNode, $isAIPreviewNode } from '@scribex/core';
-import type { AIPreviewPayload } from '@scribex/core';
+import {
+  AIPreviewNode,
+  $createAIPreviewNode,
+  $isAIPreviewNode,
+} from "@scribex/core";
+import type { AIPreviewPayload } from "@scribex/core";
 ```
 
 ## AIPreviewPayload
@@ -24,11 +28,11 @@ interface AIPreviewPayload {
 }
 ```
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `prompt` | `string` | Yes | The user's prompt text. |
-| `context` | `string` | Yes | Surrounding editor content serialized as Markdown. |
-| `key` | `NodeKey` | No | Explicit Lexical node key. Omit to let Lexical auto-generate one. |
+| Field     | Type      | Required | Description                                                       |
+| --------- | --------- | -------- | ----------------------------------------------------------------- |
+| `prompt`  | `string`  | Yes      | The user's prompt text.                                           |
+| `context` | `string`  | Yes      | Surrounding editor content serialized as Markdown.                |
+| `key`     | `NodeKey` | No       | Explicit Lexical node key. Omit to let Lexical auto-generate one. |
 
 ## Functions
 
@@ -39,7 +43,7 @@ Creates a new `AIPreviewNode`. Must be called inside `editor.update()`. Typicall
 ```ts
 editor.update(() => {
   const node = $createAIPreviewNode({
-    prompt: 'Summarize the above in three bullet points',
+    prompt: "Summarize the above in three bullet points",
     context: markdownContext,
   });
   // Insert below the current cursor position
@@ -83,11 +87,11 @@ Stream starts
 
 The component tracks three internal states:
 
-| State | Visual | Buttons |
-|---|---|---|
-| `streaming` | Content appears progressively with a pulsing cursor. | None (wait for stream to complete). |
-| `complete` | Full content displayed. | **Accept** and **Discard**. |
-| `error` | Error message displayed in destructive color. | **Retry** (if retries remain) and **Dismiss**. |
+| State       | Visual                                               | Buttons                                        |
+| ----------- | ---------------------------------------------------- | ---------------------------------------------- |
+| `streaming` | Content appears progressively with a pulsing cursor. | None (wait for stream to complete).            |
+| `complete`  | Full content displayed.                              | **Accept** and **Discard**.                    |
+| `error`     | Error message displayed in destructive color.        | **Retry** (if retries remain) and **Dismiss**. |
 
 ## Styling
 
@@ -119,12 +123,12 @@ All button labels and status text can be customized via `AIPluginConfig.labels`:
 
 ```ts
 interface AIPreviewLabels {
-  header?: string;       // default: "AI"
-  streaming?: string;    // default: "generating..."
-  accept?: string;       // default: "Accept"
-  discard?: string;      // default: "Discard"
-  retry?: string;        // default: "Retry"
-  dismiss?: string;      // default: "Dismiss"
+  header?: string; // default: "AI"
+  streaming?: string; // default: "generating..."
+  accept?: string; // default: "Accept"
+  discard?: string; // default: "Discard"
+  retry?: string; // default: "Retry"
+  dismiss?: string; // default: "Dismiss"
   defaultError?: string; // default: "An error occurred"
 }
 ```
@@ -133,7 +137,7 @@ interface AIPreviewLabels {
 
 ```ts
 type SerializedAIPreviewNode = {
-  type: 'ai-preview';
+  type: "ai-preview";
   version: 1;
   prompt: string;
   context: string;
@@ -141,7 +145,10 @@ type SerializedAIPreviewNode = {
 ```
 
 <Callout type="warn">
-`AIPreviewNode` is ephemeral. While it implements `exportJSON`/`importJSON` for Lexical compatibility, it should not be persisted to a database. If the editor state is saved while an AI preview is active, it will appear as a static, non-functional block when restored.
+  `AIPreviewNode` is ephemeral. While it implements `exportJSON`/`importJSON`
+  for Lexical compatibility, it should not be persisted to a database. If the
+  editor state is saved while an AI preview is active, it will appear as a
+  static, non-functional block when restored.
 </Callout>
 
 ## Undo stack integrity

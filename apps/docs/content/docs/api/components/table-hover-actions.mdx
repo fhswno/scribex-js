@@ -8,7 +8,7 @@ description: Visual row/column handles and resize controls for tables.
 ## Import
 
 ```tsx
-import { TableHoverActions } from '@scribex/core';
+import { TableHoverActions } from "@scribex/core";
 ```
 
 ## Props
@@ -20,7 +20,7 @@ import { TableHoverActions } from '@scribex/core';
 Add `TableHoverActions` alongside `TablePlugin` and `TableActionMenu` as children of `EditorRoot`:
 
 ```tsx title="app/editor/page.tsx"
-'use client';
+"use client";
 
 import {
   EditorRoot,
@@ -29,11 +29,14 @@ import {
   TableHoverActions,
   SlashMenu,
   InputRulePlugin,
-} from '@scribex/core';
+} from "@scribex/core";
 
 export default function EditorPage() {
   return (
-    <EditorRoot namespace="my-editor" className="min-h-[400px] p-4 border rounded">
+    <EditorRoot
+      namespace="my-editor"
+      className="min-h-[400px] p-4 border rounded"
+    >
       <SlashMenu />
       <InputRulePlugin />
       <TablePlugin />
@@ -50,11 +53,11 @@ export default function EditorPage() {
 
 Small handles appear to the left of each table row. Clicking a row handle opens a context menu with:
 
-| Action | Description |
-|---|---|
-| **Insert row above** | Adds a new row above the target row |
-| **Insert row below** | Adds a new row below the target row |
-| **Delete row** | Removes the target row (disabled if it is the only remaining row) |
+| Action               | Description                                                       |
+| -------------------- | ----------------------------------------------------------------- |
+| **Insert row above** | Adds a new row above the target row                               |
+| **Insert row below** | Adds a new row below the target row                               |
+| **Delete row**       | Removes the target row (disabled if it is the only remaining row) |
 
 The handles display a horizontal bar icon that highlights on hover.
 
@@ -62,11 +65,11 @@ The handles display a horizontal bar icon that highlights on hover.
 
 Handles appear above each column. Clicking a column handle opens a context menu with:
 
-| Action | Description |
-|---|---|
-| **Insert column left** | Adds a new column to the left of the target column |
-| **Insert column right** | Adds a new column to the right of the target column |
-| **Delete column** | Removes the target column (disabled if it is the only remaining column) |
+| Action                  | Description                                                             |
+| ----------------------- | ----------------------------------------------------------------------- |
+| **Insert column left**  | Adds a new column to the left of the target column                      |
+| **Insert column right** | Adds a new column to the right of the target column                     |
+| **Delete column**       | Removes the target column (disabled if it is the only remaining column) |
 
 The handles display a vertical bar icon that highlights on hover.
 
@@ -102,7 +105,7 @@ The tooltip reads "Click to select table, then press Delete to remove".
 The component checks for touch devices on mount:
 
 ```ts
-window.matchMedia('(pointer: coarse)').matches
+window.matchMedia("(pointer: coarse)").matches;
 ```
 
 If the device is a touch device, the component renders nothing (`null`). All table hover interactions are desktop-only.
