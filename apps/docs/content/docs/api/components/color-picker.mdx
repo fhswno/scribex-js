@@ -8,8 +8,8 @@ description: Text and highlight color picker component.
 ## Import
 
 ```tsx
-import { ColorPicker } from "@scribex/core";
-import type { ColorPalette, ColorEntry } from "@scribex/core";
+import { ColorPicker } from "@blokhaus/core";
+import type { ColorPalette, ColorEntry } from "@blokhaus/core";
 ```
 
 ## Props
@@ -29,7 +29,7 @@ The `ColorPicker` is typically used inside the `FloatingToolbar` and does not ne
 "use client";
 
 import { useState } from "react";
-import { ColorPicker } from "@scribex/core";
+import { ColorPicker } from "@blokhaus/core";
 
 function CustomColorControl() {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,37 +81,37 @@ The default palette includes 10 text colors and 10 highlight colors:
 | Color   | CSS Variable                 | Swatch       |
 | ------- | ---------------------------- | ------------ |
 | Default | (removes color)              | currentColor |
-| Gray    | `var(--scribex-text-gray)`   | #9b9a97      |
-| Brown   | `var(--scribex-text-brown)`  | #64473a      |
-| Orange  | `var(--scribex-text-orange)` | #d9730d      |
-| Yellow  | `var(--scribex-text-yellow)` | #dfab01      |
-| Green   | `var(--scribex-text-green)`  | #0f7b6c      |
-| Blue    | `var(--scribex-text-blue)`   | #0b6e99      |
-| Purple  | `var(--scribex-text-purple)` | #6940a5      |
-| Pink    | `var(--scribex-text-pink)`   | #ad1a72      |
-| Red     | `var(--scribex-text-red)`    | #e03e3e      |
+| Gray    | `var(--blokhaus-text-gray)`   | #9b9a97      |
+| Brown   | `var(--blokhaus-text-brown)`  | #64473a      |
+| Orange  | `var(--blokhaus-text-orange)` | #d9730d      |
+| Yellow  | `var(--blokhaus-text-yellow)` | #dfab01      |
+| Green   | `var(--blokhaus-text-green)`  | #0f7b6c      |
+| Blue    | `var(--blokhaus-text-blue)`   | #0b6e99      |
+| Purple  | `var(--blokhaus-text-purple)` | #6940a5      |
+| Pink    | `var(--blokhaus-text-pink)`   | #ad1a72      |
+| Red     | `var(--blokhaus-text-red)`    | #e03e3e      |
 
 ### Highlight colors
 
 | Color   | CSS Variable                      | Swatch      |
 | ------- | --------------------------------- | ----------- |
 | Default | (removes highlight)               | transparent |
-| Gray    | `var(--scribex-highlight-gray)`   | #ebeced     |
-| Brown   | `var(--scribex-highlight-brown)`  | #e9e5e3     |
-| Orange  | `var(--scribex-highlight-orange)` | #faebdd     |
-| Yellow  | `var(--scribex-highlight-yellow)` | #fbf3db     |
-| Green   | `var(--scribex-highlight-green)`  | #ddedea     |
-| Blue    | `var(--scribex-highlight-blue)`   | #ddebf1     |
-| Purple  | `var(--scribex-highlight-purple)` | #eae4f2     |
-| Pink    | `var(--scribex-highlight-pink)`   | #f4dfeb     |
-| Red     | `var(--scribex-highlight-red)`    | #fbe4e4     |
+| Gray    | `var(--blokhaus-highlight-gray)`   | #ebeced     |
+| Brown   | `var(--blokhaus-highlight-brown)`  | #e9e5e3     |
+| Orange  | `var(--blokhaus-highlight-orange)` | #faebdd     |
+| Yellow  | `var(--blokhaus-highlight-yellow)` | #fbf3db     |
+| Green   | `var(--blokhaus-highlight-green)`  | #ddedea     |
+| Blue    | `var(--blokhaus-highlight-blue)`   | #ddebf1     |
+| Purple  | `var(--blokhaus-highlight-purple)` | #eae4f2     |
+| Pink    | `var(--blokhaus-highlight-pink)`   | #f4dfeb     |
+| Red     | `var(--blokhaus-highlight-red)`    | #fbe4e4     |
 
 ## Custom palette
 
 Override the default palette by passing a custom `ColorPalette`:
 
 ```tsx
-import type { ColorPalette } from "@scribex/core";
+import type { ColorPalette } from "@blokhaus/core";
 
 const brandPalette: ColorPalette = {
   text: [
@@ -158,7 +158,7 @@ After dispatching the command, the picker calls `editor.focus()` to return focus
 - `ColorPicker` is a client component (`'use client'`).
 - It must be rendered within a `LexicalComposer` context (i.e., inside `EditorRoot`).
 - The component uses `onMouseDown` with `e.preventDefault()` to prevent the editor from losing focus when clicking color swatches.
-- Color values use CSS variable references (e.g., `var(--scribex-text-red)`) so that colors can be customized via the theme's `tokens.css` without modifying the picker.
+- Color values use CSS variable references (e.g., `var(--blokhaus-text-red)`) so that colors can be customized via the theme's `tokens.css` without modifying the picker.
 
 ## Related
 
