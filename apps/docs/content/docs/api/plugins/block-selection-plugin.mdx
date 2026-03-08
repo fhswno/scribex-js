@@ -8,7 +8,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 ## Import
 
 ```tsx
-import { BlockSelectionPlugin } from "@scribex/core";
+import { BlockSelectionPlugin } from "@blokhaus/core";
 ```
 
 ## Overview
@@ -26,7 +26,7 @@ The `BlockSelectionPlugin` accepts no props. All behavior is automatic once the 
 ```tsx title="app/editor/page.tsx"
 "use client";
 
-import { EditorRoot, BlockSelectionPlugin } from "@scribex/core";
+import { EditorRoot, BlockSelectionPlugin } from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -52,8 +52,8 @@ The marquee rectangle is rendered via a React portal (not as a Lexical node) to 
 
 Selected blocks receive a visual highlight:
 
-- A colored overlay background using the `--scribex-accent` token at 10% opacity.
-- A left border accent using the `--scribex-accent` token.
+- A colored overlay background using the `--blokhaus-accent` token at 10% opacity.
+- A left border accent using the `--blokhaus-accent` token.
 - The highlight is applied via CSS classes on the DOM elements, not via AST mutations.
 
 ### Keyboard actions on selected blocks
@@ -105,7 +105,7 @@ import {
   BlockSelectionPlugin,
   OverlayPortal,
   FloatingToolbar,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
