@@ -8,7 +8,7 @@ description: Visual row/column handles and resize controls for tables.
 ## Import
 
 ```tsx
-import { TableHoverActions } from "@scribex/core";
+import { TableHoverActions } from "@blokhaus/core";
 ```
 
 ## Props
@@ -29,7 +29,7 @@ import {
   TableHoverActions,
   SlashMenu,
   InputRulePlugin,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -126,14 +126,14 @@ The handles and buttons remain visible as long as the mouse is within a 40px mar
 
 ## Context menu styling
 
-The row and column context menus use the same popover styling as other Scribex menus:
+The row and column context menus use the same popover styling as other Blokhaus menus:
 
-- `--scribex-popover-bg` -- menu background
-- `--scribex-popover-border` -- menu border
-- `--scribex-popover-shadow` -- menu shadow
-- `--scribex-foreground` -- item text color
-- `--scribex-destructive` -- destructive action text color
-- `--scribex-hover-bg` -- item hover background
+- `--blokhaus-popover-bg` -- menu background
+- `--blokhaus-popover-border` -- menu border
+- `--blokhaus-popover-shadow` -- menu shadow
+- `--blokhaus-foreground` -- item text color
+- `--blokhaus-destructive` -- destructive action text color
+- `--blokhaus-hover-bg` -- item hover background
 
 Menus close on outside click or Escape key press.
 
