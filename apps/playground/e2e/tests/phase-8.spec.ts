@@ -231,19 +231,19 @@ test.describe('Phase 8: Paste Sanitisation', () => {
   });
 });
 
-// ─── sanitizePastedHTML Unit Tests (run in browser via window.__scribex_sanitize) ─
+// ─── sanitizePastedHTML Unit Tests (run in browser via window.__blokhaus_sanitize) ─
 
 test.describe('Phase 8: sanitizePastedHTML unit tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     // Wait for the sanitizer to be exposed on window
-    await page.waitForFunction(() => '__scribex_sanitize' in window);
+    await page.waitForFunction(() => '__blokhaus_sanitize' in window);
   });
 
   const sanitize = (page: import('@playwright/test').Page, html: string) =>
     page.evaluate((h) => {
-      const fn = (window as unknown as Record<string, ((html: string) => string) | undefined>).__scribex_sanitize;
-      if (!fn) throw new Error('__scribex_sanitize not found on window');
+      const fn = (window as unknown as Record<string, ((html: string) => string) | undefined>).__blokhaus_sanitize;
+      if (!fn) throw new Error('__blokhaus_sanitize not found on window');
       return fn(h);
     }, html);
 
