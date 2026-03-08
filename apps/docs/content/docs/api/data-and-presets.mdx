@@ -3,7 +3,7 @@ title: Data & Presets
 description: Default data constants for colors, fonts, callouts, and emojis.
 ---
 
-Scribex ships with sensible defaults for colors, fonts, callouts, and emojis. All defaults can be overridden via props on their respective plugins and components.
+Blokhaus ships with sensible defaults for colors, fonts, callouts, and emojis. All defaults can be overridden via props on their respective plugins and components.
 
 ## Import
 
@@ -13,7 +13,7 @@ import {
   DEFAULT_FONT_FAMILIES,
   DEFAULT_CALLOUT_PRESETS,
   DEFAULT_EMOJIS,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 import type {
   ColorPalette,
@@ -21,7 +21,7 @@ import type {
   FontFamilyEntry,
   CalloutPreset,
   EmojiItem,
-} from "@scribex/core";
+} from "@blokhaus/core";
 ```
 
 ---
@@ -50,30 +50,30 @@ interface ColorEntry {
 | Label   | CSS Variable                    | Swatch         |
 | ------- | ------------------------------- | -------------- |
 | Default | `""` (empty, resets to default) | `currentColor` |
-| Gray    | `var(--scribex-text-gray)`      | `#9b9a97`      |
-| Brown   | `var(--scribex-text-brown)`     | `#64473a`      |
-| Orange  | `var(--scribex-text-orange)`    | `#d9730d`      |
-| Yellow  | `var(--scribex-text-yellow)`    | `#dfab01`      |
-| Green   | `var(--scribex-text-green)`     | `#0f7b6c`      |
-| Blue    | `var(--scribex-text-blue)`      | `#0b6e99`      |
-| Purple  | `var(--scribex-text-purple)`    | `#6940a5`      |
-| Pink    | `var(--scribex-text-pink)`      | `#ad1a72`      |
-| Red     | `var(--scribex-text-red)`       | `#e03e3e`      |
+| Gray    | `var(--blokhaus-text-gray)`      | `#9b9a97`      |
+| Brown   | `var(--blokhaus-text-brown)`     | `#64473a`      |
+| Orange  | `var(--blokhaus-text-orange)`    | `#d9730d`      |
+| Yellow  | `var(--blokhaus-text-yellow)`    | `#dfab01`      |
+| Green   | `var(--blokhaus-text-green)`     | `#0f7b6c`      |
+| Blue    | `var(--blokhaus-text-blue)`      | `#0b6e99`      |
+| Purple  | `var(--blokhaus-text-purple)`    | `#6940a5`      |
+| Pink    | `var(--blokhaus-text-pink)`      | `#ad1a72`      |
+| Red     | `var(--blokhaus-text-red)`       | `#e03e3e`      |
 
 ### Highlight colors
 
 | Label   | CSS Variable                      | Swatch        |
 | ------- | --------------------------------- | ------------- |
 | Default | `""` (empty, removes highlight)   | `transparent` |
-| Gray    | `var(--scribex-highlight-gray)`   | `#ebeced`     |
-| Brown   | `var(--scribex-highlight-brown)`  | `#e9e5e3`     |
-| Orange  | `var(--scribex-highlight-orange)` | `#faebdd`     |
-| Yellow  | `var(--scribex-highlight-yellow)` | `#fbf3db`     |
-| Green   | `var(--scribex-highlight-green)`  | `#ddedea`     |
-| Blue    | `var(--scribex-highlight-blue)`   | `#ddebf1`     |
-| Purple  | `var(--scribex-highlight-purple)` | `#eae4f2`     |
-| Pink    | `var(--scribex-highlight-pink)`   | `#f4dfeb`     |
-| Red     | `var(--scribex-highlight-red)`    | `#fbe4e4`     |
+| Gray    | `var(--blokhaus-highlight-gray)`   | `#ebeced`     |
+| Brown   | `var(--blokhaus-highlight-brown)`  | `#e9e5e3`     |
+| Orange  | `var(--blokhaus-highlight-orange)` | `#faebdd`     |
+| Yellow  | `var(--blokhaus-highlight-yellow)` | `#fbf3db`     |
+| Green   | `var(--blokhaus-highlight-green)`  | `#ddedea`     |
+| Blue    | `var(--blokhaus-highlight-blue)`   | `#ddebf1`     |
+| Purple  | `var(--blokhaus-highlight-purple)` | `#eae4f2`     |
+| Pink    | `var(--blokhaus-highlight-pink)`   | `#f4dfeb`     |
+| Red     | `var(--blokhaus-highlight-red)`    | `#fbe4e4`     |
 
 ### Customizing
 
@@ -81,16 +81,16 @@ Override the palette by defining the CSS variables in your `tokens.css` file:
 
 ```css
 :root {
-  --scribex-text-red: hsl(0 70% 50%);
-  --scribex-highlight-red: hsl(0 70% 95%);
+  --blokhaus-text-red: hsl(0 70% 50%);
+  --blokhaus-highlight-red: hsl(0 70% 95%);
 }
 ```
 
 Or provide a completely custom palette to the `ColorPicker` component:
 
 ```tsx
-import { ColorPicker } from "@scribex/core";
-import type { ColorPalette } from "@scribex/core";
+import { ColorPicker } from "@blokhaus/core";
+import type { ColorPalette } from "@blokhaus/core";
 
 const customPalette: ColorPalette = {
   text: [
@@ -126,10 +126,10 @@ interface FontFamilyEntry {
 
 | Label   | CSS Value                       | Preview Font                |
 | ------- | ------------------------------- | --------------------------- |
-| Default | `""` (empty, resets to default) | `var(--scribex-font-sans)`  |
-| Serif   | `var(--scribex-font-serif)`     | `var(--scribex-font-serif)` |
-| Mono    | `var(--scribex-font-mono)`      | `var(--scribex-font-mono)`  |
-| Hand    | `var(--scribex-font-hand)`      | `var(--scribex-font-hand)`  |
+| Default | `""` (empty, resets to default) | `var(--blokhaus-font-sans)`  |
+| Serif   | `var(--blokhaus-font-serif)`     | `var(--blokhaus-font-serif)` |
+| Mono    | `var(--blokhaus-font-mono)`      | `var(--blokhaus-font-mono)`  |
+| Hand    | `var(--blokhaus-font-hand)`      | `var(--blokhaus-font-hand)`  |
 
 ### Customizing
 
@@ -137,17 +137,17 @@ Define the font CSS variables in your `tokens.css`:
 
 ```css
 :root {
-  --scribex-font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --scribex-font-serif: "Merriweather", ui-serif, Georgia, serif;
-  --scribex-font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --scribex-font-hand: "Caveat", cursive;
+  --blokhaus-font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --blokhaus-font-serif: "Merriweather", ui-serif, Georgia, serif;
+  --blokhaus-font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --blokhaus-font-hand: "Caveat", cursive;
 }
 ```
 
 Or provide a custom list to the `FontPicker`:
 
 ```tsx
-import { FontPicker, DEFAULT_FONT_FAMILIES } from "@scribex/core";
+import { FontPicker, DEFAULT_FONT_FAMILIES } from "@blokhaus/core";
 
 const fonts = [
   ...DEFAULT_FONT_FAMILIES,
@@ -196,8 +196,8 @@ Each preset maps to CSS variables in `tokens.css` following the pattern:
 
 ```css
 :root {
-  --scribex-callout-{id}-bg: {background};
-  --scribex-callout-{id}-border: {border};
+  --blokhaus-callout-{id}-bg: {background};
+  --blokhaus-callout-{id}-border: {border};
 }
 ```
 
@@ -205,10 +205,10 @@ For example:
 
 ```css
 :root {
-  --scribex-callout-info-bg: #ddebf1;
-  --scribex-callout-info-border: #0b6e99;
-  --scribex-callout-warning-bg: #fbf3db;
-  --scribex-callout-warning-border: #dfab01;
+  --blokhaus-callout-info-bg: #ddebf1;
+  --blokhaus-callout-info-border: #0b6e99;
+  --blokhaus-callout-warning-bg: #fbf3db;
+  --blokhaus-callout-warning-border: #dfab01;
 }
 ```
 
@@ -217,8 +217,8 @@ For example:
 Override presets via the `presets` prop on `CalloutPlugin`:
 
 ```tsx
-import { CalloutPlugin, DEFAULT_CALLOUT_PRESETS } from "@scribex/core";
-import type { CalloutPreset } from "@scribex/core";
+import { CalloutPlugin, DEFAULT_CALLOUT_PRESETS } from "@blokhaus/core";
+import type { CalloutPreset } from "@blokhaus/core";
 
 const customPresets: CalloutPreset[] = [
   ...DEFAULT_CALLOUT_PRESETS,
@@ -286,8 +286,8 @@ The list covers the most commonly used emojis across categories: faces, gestures
 Override the emoji list via the `emojis` prop on `EmojiPickerPlugin`:
 
 ```tsx
-import { EmojiPickerPlugin, DEFAULT_EMOJIS } from "@scribex/core";
-import type { EmojiItem } from "@scribex/core";
+import { EmojiPickerPlugin, DEFAULT_EMOJIS } from "@blokhaus/core";
+import type { EmojiItem } from "@blokhaus/core";
 
 // Add custom emojis
 const customEmojis: EmojiItem[] = [
