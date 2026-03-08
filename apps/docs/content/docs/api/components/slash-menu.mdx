@@ -8,8 +8,8 @@ description: Command palette triggered by typing "/" at the start of an empty bl
 ## Import
 
 ```tsx
-import { SlashMenu } from "@scribex/core";
-import type { SlashMenuItem } from "@scribex/core";
+import { SlashMenu } from "@blokhaus/core";
+import type { SlashMenuItem } from "@blokhaus/core";
 ```
 
 ## Props
@@ -23,7 +23,7 @@ import type { SlashMenuItem } from "@scribex/core";
 Add `SlashMenu` as a child of `EditorRoot` alongside `InputRulePlugin` (which detects the `/` trigger):
 
 ```tsx title="app/editor/page.tsx"
-import { EditorRoot, SlashMenu, InputRulePlugin } from "@scribex/core";
+import { EditorRoot, SlashMenu, InputRulePlugin } from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -119,8 +119,8 @@ The slash menu ships with a comprehensive set of default items, organized by cat
 Pass additional items via the `items` prop. Custom items are appended after the default items:
 
 ```tsx
-import { SlashMenu } from "@scribex/core";
-import type { SlashMenuItem } from "@scribex/core";
+import { SlashMenu } from "@blokhaus/core";
+import type { SlashMenuItem } from "@blokhaus/core";
 import { Wand2 } from "lucide-react";
 
 const customItems: SlashMenuItem[] = [
@@ -162,7 +162,7 @@ import {
   $getRoot,
   TextNode,
 } from "lexical";
-import type { SlashMenuItem } from "@scribex/core";
+import type { SlashMenuItem } from "@blokhaus/core";
 
 function useCustomSlashItems(): SlashMenuItem[] {
   const [editor] = useLexicalComposerContext();
@@ -219,7 +219,7 @@ When no items match the query, the menu displays "No matching commands".
 | Enter     | Select the highlighted item         |
 | Escape    | Close the menu without selecting    |
 
-The selected item is highlighted with the `--scribex-accent` color and auto-scrolls into view when navigating with arrow keys.
+The selected item is highlighted with the `--blokhaus-accent` color and auto-scrolls into view when navigating with arrow keys.
 
 ## Category grouping
 
@@ -256,7 +256,7 @@ Several items display a markdown shortcut hint on the right side of the row. The
 You can open the slash menu from your own code by dispatching the command:
 
 ```tsx
-import { OPEN_SLASH_MENU_COMMAND } from "@scribex/core";
+import { OPEN_SLASH_MENU_COMMAND } from "@blokhaus/core";
 
 editor.dispatchCommand(OPEN_SLASH_MENU_COMMAND, undefined);
 ```
@@ -265,16 +265,16 @@ The menu positions itself at the current DOM selection's caret position.
 
 ## Styling
 
-The slash menu renders in a React Portal attached to `document.body`. It uses inline styles with CSS custom properties from the Scribex theme:
+The slash menu renders in a React Portal attached to `document.body`. It uses inline styles with CSS custom properties from the Blokhaus theme:
 
-- `--scribex-popover-bg` -- background color
-- `--scribex-popover-border` -- border color
-- `--scribex-popover-shadow` -- box shadow
-- `--scribex-accent` -- selected item background
-- `--scribex-accent-foreground` -- selected item text color
-- `--scribex-text-tertiary` -- category headers and shortcut hints
-- `--scribex-separator` -- divider between sections
-- `--scribex-muted` -- icon tile background
+- `--blokhaus-popover-bg` -- background color
+- `--blokhaus-popover-border` -- border color
+- `--blokhaus-popover-shadow` -- box shadow
+- `--blokhaus-accent` -- selected item background
+- `--blokhaus-accent-foreground` -- selected item text color
+- `--blokhaus-text-tertiary` -- category headers and shortcut hints
+- `--blokhaus-separator` -- divider between sections
+- `--blokhaus-muted` -- icon tile background
 
 The menu includes a frosted glass effect via `backdrop-filter: blur(24px) saturate(190%)` and a subtle entrance animation.
 
