@@ -3,7 +3,7 @@ title: Custom AI Provider
 description: Build a custom AIProvider for any LLM backend.
 ---
 
-Scribex's AI system is provider-agnostic. You implement the `AIProvider` interface, which returns a `ReadableStream<string>`, and Scribex handles everything else -- the streaming preview UI, the accept/discard flow, and the undo history management.
+Blokhaus's AI system is provider-agnostic. You implement the `AIProvider` interface, which returns a `ReadableStream<string>`, and Blokhaus handles everything else -- the streaming preview UI, the accept/discard flow, and the undo history management.
 
 This page shows complete, working implementations for three popular LLM backends: OpenAI, Ollama (local), and Anthropic Claude.
 
@@ -39,7 +39,7 @@ interface AIGenerateConfig {
 }
 ```
 
-The key contract: `generate` must return a `ReadableStream<string>` that yields text chunks. Scribex consumes this stream inside the `AIPreviewNode`'s local React state -- no `editor.update()` calls are made during streaming, which keeps the undo stack clean.
+The key contract: `generate` must return a `ReadableStream<string>` that yields text chunks. Blokhaus consumes this stream inside the `AIPreviewNode`'s local React state -- no `editor.update()` calls are made during streaming, which keeps the undo stack clean.
 
 ---
 
@@ -50,7 +50,7 @@ This is the most common pattern. The client calls a Next.js API route, which pro
 ### Client-side provider
 
 ```tsx title="lib/ai/openai-provider.ts"
-import type { AIProvider } from "@scribex/core";
+import type { AIProvider } from "@blokhaus/core";
 
 export const openaiProvider: AIProvider = {
   name: "OpenAI",
@@ -165,7 +165,7 @@ import {
   AIPlugin,
   InputRulePlugin,
   SlashMenu,
-} from "@scribex/core";
+} from "@blokhaus/core";
 import { openaiProvider } from "@/lib/ai/openai-provider";
 
 export default function EditorPage() {
@@ -203,7 +203,7 @@ Ollama's streaming API returns newline-delimited JSON objects, each containing a
 ### Client-side provider
 
 ```tsx title="lib/ai/ollama-provider.ts"
-import type { AIProvider } from "@scribex/core";
+import type { AIProvider } from "@blokhaus/core";
 
 export const ollamaProvider: AIProvider = {
   name: "Ollama",
@@ -290,7 +290,7 @@ import {
   AIPlugin,
   InputRulePlugin,
   SlashMenu,
-} from "@scribex/core";
+} from "@blokhaus/core";
 import { ollamaProvider } from "@/lib/ai/ollama-provider";
 
 export default function EditorPage() {
@@ -327,7 +327,7 @@ This example connects to the Anthropic Messages API via a server-side route. Cla
 ### Client-side provider
 
 ```tsx title="lib/ai/claude-provider.ts"
-import type { AIProvider } from "@scribex/core";
+import type { AIProvider } from "@blokhaus/core";
 
 export const claudeProvider: AIProvider = {
   name: "Claude",
@@ -439,7 +439,7 @@ import {
   AIPlugin,
   InputRulePlugin,
   SlashMenu,
-} from "@scribex/core";
+} from "@blokhaus/core";
 import { claudeProvider } from "@/lib/ai/claude-provider";
 
 export default function EditorPage() {
@@ -474,11 +474,11 @@ export default function EditorPage() {
 
 All three providers follow the same error handling pattern:
 
-1. **Network errors** -- If `fetch` fails (server down, DNS error, CORS issue), the promise rejects and Scribex shows an error state in the `AIPreviewNode` with a "Dismiss" button.
+1. **Network errors** -- If `fetch` fails (server down, DNS error, CORS issue), the promise rejects and Blokhaus shows an error state in the `AIPreviewNode` with a "Dismiss" button.
 
-2. **HTTP errors** -- If the response status is not 2xx, the provider throws an `Error` with the status code and response body. Scribex catches this and displays the error message.
+2. **HTTP errors** -- If the response status is not 2xx, the provider throws an `Error` with the status code and response body. Blokhaus catches this and displays the error message.
 
-3. **Stream errors** -- If the stream encounters an error mid-generation, the `ReadableStream` should call `controller.error(new Error(...))`. Scribex will show the partial content with an error indicator.
+3. **Stream errors** -- If the stream encounters an error mid-generation, the `ReadableStream` should call `controller.error(new Error(...))`. Blokhaus will show the partial content with an error indicator.
 
 You can handle errors globally via the `onError` callback on `AIPlugin`:
 
@@ -510,8 +510,8 @@ import {
   AIPlugin,
   InputRulePlugin,
   SlashMenu,
-} from "@scribex/core";
-import type { AIProvider } from "@scribex/core";
+} from "@blokhaus/core";
+import type { AIProvider } from "@blokhaus/core";
 import { openaiProvider } from "@/lib/ai/openai-provider";
 import { claudeProvider } from "@/lib/ai/claude-provider";
 import { ollamaProvider } from "@/lib/ai/ollama-provider";

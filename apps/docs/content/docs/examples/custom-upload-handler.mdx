@@ -3,7 +3,7 @@ title: Custom Upload Handler
 description: Implement UploadHandler for different storage providers.
 ---
 
-Scribex does not include a default upload implementation. You provide your own `UploadHandler` function that receives a `File` and returns the public URL. This keeps the library decoupled from any specific storage backend.
+Blokhaus does not include a default upload implementation. You provide your own `UploadHandler` function that receives a `File` and returns the public URL. This keeps the library decoupled from any specific storage backend.
 
 ## The `UploadHandler` type
 
@@ -20,7 +20,7 @@ Pass your handler to `ImagePlugin` and optionally to `VideoPlugin`:
 <VideoPlugin uploadHandler={myHandler} />
 ```
 
-When a file is dropped or pasted, Scribex immediately creates a local preview via `URL.createObjectURL(file)`, inserts a `LoadingImageNode` with a spinner overlay, and calls your handler. On success, the loading node is replaced with a permanent node using the remote URL. On failure, the loading node is removed and `URL.revokeObjectURL()` is called.
+When a file is dropped or pasted, Blokhaus immediately creates a local preview via `URL.createObjectURL(file)`, inserts a `LoadingImageNode` with a spinner overlay, and calls your handler. On success, the loading node is replaced with a permanent node using the remote URL. On failure, the loading node is removed and `URL.revokeObjectURL()` is called.
 
 ---
 
@@ -31,7 +31,7 @@ The most common production pattern: your backend generates a presigned upload UR
 ### Upload handler
 
 ```ts title="lib/upload/s3-handler.ts"
-import type { UploadHandler } from "@scribex/core";
+import type { UploadHandler } from "@blokhaus/core";
 
 export const s3UploadHandler: UploadHandler = async (
   file: File,
@@ -135,7 +135,7 @@ Cloudflare R2 is S3-compatible, so the pattern is nearly identical. The key diff
 ### Upload handler
 
 ```ts title="lib/upload/r2-handler.ts"
-import type { UploadHandler } from "@scribex/core";
+import type { UploadHandler } from "@blokhaus/core";
 
 export const r2UploadHandler: UploadHandler = async (
   file: File,
@@ -223,7 +223,7 @@ Supabase Storage provides a simpler API with built-in authentication. The upload
 ### Upload handler (via API route)
 
 ```ts title="lib/upload/supabase-handler.ts"
-import type { UploadHandler } from "@scribex/core";
+import type { UploadHandler } from "@blokhaus/core";
 
 export const supabaseUploadHandler: UploadHandler = async (
   file: File,
@@ -309,7 +309,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 During development, you often do not want to set up a real storage backend. This mock handler simulates an upload with a short delay and returns a placeholder URL:
 
 ```ts title="lib/upload/mock-handler.ts"
-import type { UploadHandler } from "@scribex/core";
+import type { UploadHandler } from "@blokhaus/core";
 
 export const mockUploadHandler: UploadHandler = async (
   file: File,
@@ -346,7 +346,7 @@ import {
   VideoPlugin,
   InputRulePlugin,
   SlashMenu,
-} from "@scribex/core";
+} from "@blokhaus/core";
 import { mockUploadHandler } from "@/lib/upload/mock-handler";
 
 export default function EditorPage() {
@@ -379,7 +379,7 @@ The `UploadHandler` type is intentionally simple: `(file: File) => Promise<strin
 If you need progress feedback for large files (such as video uploads), you can wrap the handler and track progress externally using `XMLHttpRequest` or a custom `fetch` wrapper:
 
 ```ts title="lib/upload/with-progress.ts"
-import type { UploadHandler } from "@scribex/core";
+import type { UploadHandler } from "@blokhaus/core";
 
 type ProgressCallback = (percent: number) => void;
 
@@ -432,7 +432,7 @@ export function withProgress(
 "use client";
 
 import { useState } from "react";
-import { EditorRoot, ImagePlugin } from "@scribex/core";
+import { EditorRoot, ImagePlugin } from "@blokhaus/core";
 import { withProgress } from "@/lib/upload/with-progress";
 
 export default function EditorPage() {
@@ -469,7 +469,7 @@ export default function EditorPage() {
 ## Important rules
 
 - **No base64 encoding.** Never encode images as base64 strings in the editor state. Base64 bloats the JSON, hits database column size limits, and makes the serialized state unreadable.
-- **Always revoke object URLs.** Scribex calls `URL.revokeObjectURL()` automatically after the upload resolves or rejects. If you are building custom upload flows, ensure you do the same.
+- **Always revoke object URLs.** Blokhaus calls `URL.revokeObjectURL()` automatically after the upload resolves or rejects. If you are building custom upload flows, ensure you do the same.
 - **Each upload step is a single `editor.update()`.** The `LoadingImageNode` insertion, the `ImageNode` replacement, and the cleanup on failure are each one atomic update, keeping the undo history clean.
 
 ## Next steps
