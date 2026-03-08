@@ -8,7 +8,7 @@ description: Fixed-position formatting toolbar for touch devices.
 ## Import
 
 ```tsx
-import { MobileToolbar } from "@scribex/core";
+import { MobileToolbar } from "@blokhaus/core";
 ```
 
 ## Props
@@ -27,7 +27,7 @@ import {
   FloatingToolbar,
   MobileToolbar,
   InputRulePlugin,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -99,9 +99,9 @@ Buttons support both `onMouseDown` and `onTouchStart` handlers, with `e.preventD
 
 The toolbar uses inline styles with CSS custom properties:
 
-- `--scribex-popover-bg` -- background color
-- `--scribex-popover-border` -- top border color
-- `--scribex-icon-secondary` -- button icon color
+- `--blokhaus-popover-bg` -- background color
+- `--blokhaus-popover-border` -- top border color
+- `--blokhaus-icon-secondary` -- button icon color
 
 A frosted glass effect is applied via `backdrop-filter: blur(20px) saturate(180%)`.
 
