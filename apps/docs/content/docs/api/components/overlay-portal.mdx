@@ -8,7 +8,7 @@ description: Block drag handles and drop indicators for desktop drag-and-drop.
 ## Import
 
 ```tsx
-import { OverlayPortal } from "@scribex/core";
+import { OverlayPortal } from "@blokhaus/core";
 ```
 
 ## Props
@@ -22,7 +22,7 @@ import { OverlayPortal } from "@scribex/core";
 ```tsx title="app/editor/page.tsx"
 "use client";
 
-import { EditorRoot, OverlayPortal, InputRulePlugin } from "@scribex/core";
+import { EditorRoot, OverlayPortal, InputRulePlugin } from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -70,7 +70,7 @@ If the user clicks the drag handle without dragging (no mouse movement beyond 5p
 
 ### Drop indicator
 
-A 2px blue line (`--scribex-accent` color) appears during drag to show the drop position:
+A 2px blue line (`--blokhaus-accent` color) appears during drag to show the drop position:
 
 - Above the target block when the cursor is in the top half
 - Below the target block when the cursor is in the bottom half
@@ -101,7 +101,7 @@ Each `OverlayPortal` instance:
 
 - Renders into `document.body` via a React Portal
 - Tags its drag handle with `data-namespace={namespace}` for identification
-- Only tracks mouse events relative to its own editor's root element (found via `[data-scribex-root]`)
+- Only tracks mouse events relative to its own editor's root element (found via `[data-blokhaus-root]`)
 - Will not show handles for blocks belonging to a different editor instance
 
 ## Example: Multi-editor setup
@@ -125,7 +125,7 @@ Each `OverlayPortal` instance:
 - `OverlayPortal` is a client component (`'use client'`).
 - The drag handle and drop indicator are always in the DOM (for performance), but are hidden via `visibility: hidden` when not active.
 - The handle uses `pointer-events: auto` only on the grip icon itself, preventing interference with text selection.
-- Native text selection across block boundaries is unaffected by the overlay. Scribex does not wrap blocks in custom container elements -- it uses the "Block Illusion" approach described in the architecture documentation.
+- Native text selection across block boundaries is unaffected by the overlay. Blokhaus does not wrap blocks in custom container elements -- it uses the "Block Illusion" approach described in the architecture documentation.
 - The drag ghost image is kept simple by using native drag behavior rather than capturing the entire editor.
 - Block movement is performed via Lexical's own `node.insertBefore()` and `node.insertAfter()` APIs inside a single `editor.update()` call, ensuring a clean undo history.
 
