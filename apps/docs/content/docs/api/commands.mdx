@@ -1,11 +1,11 @@
 ---
 title: Commands
-description: All Lexical commands exported by Scribex.
+description: All Lexical commands exported by Blokhaus.
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-Scribex exports 15 custom Lexical commands created via `createCommand()`. Commands are the primary mechanism for inter-plugin communication. Any plugin can dispatch a command, and any plugin can listen for it.
+Blokhaus exports 15 custom Lexical commands created via `createCommand()`. Commands are the primary mechanism for inter-plugin communication. Any plugin can dispatch a command, and any plugin can listen for it.
 
 ## Import
 
@@ -19,14 +19,14 @@ import {
   OPEN_LINK_INPUT_COMMAND,
   SET_TEXT_COLOR_COMMAND,
   SET_HIGHLIGHT_COLOR_COMMAND,
-  INSERT_TABLE_COMMAND_SCRIBEX,
+  INSERT_TABLE_COMMAND_BLOKHAUS,
   INSERT_CALLOUT_COMMAND,
   INSERT_VIDEO_COMMAND,
   OPEN_VIDEO_INPUT_COMMAND,
   INSERT_TOGGLE_COMMAND,
   SET_FONT_FAMILY_COMMAND,
   SET_BLOCK_DIRECTION_COMMAND,
-} from "@scribex/core";
+} from "@blokhaus/core";
 ```
 
 ## Command reference
@@ -39,9 +39,9 @@ import {
 | `INSERT_AI_PREVIEW_COMMAND`    | `{ prompt: string }`                       | Inserts an `AIPreviewNode` below the current cursor with the given prompt. The `AIPlugin` handles context extraction and node creation.                                |
 | `OPEN_EMOJI_PICKER_COMMAND`    | `void`                                     | Opens the emoji picker dropdown. Dispatched by the slash menu's "Emoji" item or by typing `:` followed by text.                                                        |
 | `OPEN_LINK_INPUT_COMMAND`      | `void`                                     | Opens the link input popover for adding or editing a hyperlink on the current selection. Dispatched by the floating toolbar's link button.                             |
-| `SET_TEXT_COLOR_COMMAND`       | `string`                                   | Sets the text color on the current selection. The payload is a CSS value (e.g., `"var(--scribex-text-red)"`) or an empty string to reset to default.                   |
+| `SET_TEXT_COLOR_COMMAND`       | `string`                                   | Sets the text color on the current selection. The payload is a CSS value (e.g., `"var(--blokhaus-text-red)"`) or an empty string to reset to default.                   |
 | `SET_HIGHLIGHT_COLOR_COMMAND`  | `string`                                   | Sets the background highlight color on the current selection. The payload is a CSS value or an empty string to reset.                                                  |
-| `INSERT_TABLE_COMMAND_SCRIBEX` | `{ rows: number; columns: number }`        | Inserts a table at the current cursor position with the specified dimensions. Named with a `_SCRIBEX` suffix to avoid collision with Lexical's built-in table command. |
+| `INSERT_TABLE_COMMAND_BLOKHAUS` | `{ rows: number; columns: number }`        | Inserts a table at the current cursor position with the specified dimensions. Named with a `_BLOKHAUS` suffix to avoid collision with Lexical's built-in table command. |
 | `INSERT_CALLOUT_COMMAND`       | `{ emoji?: string; colorPreset?: string }` | Inserts a callout block at the current cursor position with optional emoji and color preset.                                                                           |
 | `INSERT_VIDEO_COMMAND`         | `{ file: File } \| { url: string }`        | Inserts a video node. If the payload contains a `file`, it triggers the video upload flow. If it contains a `url`, it parses the URL for embed info.                   |
 | `OPEN_VIDEO_INPUT_COMMAND`     | `void`                                     | Opens the video URL input popover. Dispatched by the slash menu's "Video" item.                                                                                        |
@@ -56,8 +56,8 @@ Use `editor.dispatchCommand()` to fire a command. The editor instance is availab
 ```tsx
 "use client";
 
-import { useLexicalComposerContext } from "@scribex/core";
-import { INSERT_CALLOUT_COMMAND } from "@scribex/core";
+import { useLexicalComposerContext } from "@blokhaus/core";
+import { INSERT_CALLOUT_COMMAND } from "@blokhaus/core";
 
 function InsertCalloutButton() {
   const [editor] = useLexicalComposerContext();
@@ -114,24 +114,24 @@ Lexical commands propagate through registered listeners from highest to lowest p
 | 4 (highest) | `COMMAND_PRIORITY_CRITICAL` | Framework-level overrides. Rarely used.                                                     |
 | 3           | `COMMAND_PRIORITY_HIGH`     | Intercepting commands before plugins handle them.                                           |
 | 2           | `COMMAND_PRIORITY_NORMAL`   | General plugin handlers.                                                                    |
-| 1           | `COMMAND_PRIORITY_LOW`      | Default for most Scribex plugins.                                                           |
+| 1           | `COMMAND_PRIORITY_LOW`      | Default for most Blokhaus plugins.                                                           |
 | 0 (lowest)  | `COMMAND_PRIORITY_EDITOR`   | Editor-scoped handlers. Automatically limited to the focused editor in multi-editor setups. |
 
 <Callout type="info">
-  Scribex plugins typically register at `COMMAND_PRIORITY_LOW`. If you need to
-  intercept a command before a Scribex plugin handles it, register at
+  Blokhaus plugins typically register at `COMMAND_PRIORITY_LOW`. If you need to
+  intercept a command before a Blokhaus plugin handles it, register at
   `COMMAND_PRIORITY_NORMAL` or higher and return `true` to prevent the default
   behavior.
 </Callout>
 
 ## Type safety
 
-All Scribex commands are created with `createCommand<PayloadType>()`, which provides full TypeScript type checking for both dispatch and listen calls:
+All Blokhaus commands are created with `createCommand<PayloadType>()`, which provides full TypeScript type checking for both dispatch and listen calls:
 
 ```ts
 // TypeScript will enforce the correct payload type:
-editor.dispatchCommand(INSERT_TABLE_COMMAND_SCRIBEX, { rows: 3, columns: 4 }); // OK
-editor.dispatchCommand(INSERT_TABLE_COMMAND_SCRIBEX, { rows: 3 }); // Type error: missing 'columns'
+editor.dispatchCommand(INSERT_TABLE_COMMAND_BLOKHAUS, { rows: 3, columns: 4 }); // OK
+editor.dispatchCommand(INSERT_TABLE_COMMAND_BLOKHAUS, { rows: 3 }); // Type error: missing 'columns'
 editor.dispatchCommand(OPEN_SLASH_MENU_COMMAND, undefined); // OK (void payload)
 ```
 
