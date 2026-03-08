@@ -32,8 +32,8 @@ const caveat = Caveat({
 
 // METADATA
 export const metadata: Metadata = {
-  title: "Scribex Playground",
-  description: "Reference implementation of the Scribex editor",
+  title: "Blokhaus Playground",
+  description: "Reference implementation of the Blokhaus editor",
 };
 
 export default function RootLayout({

@@ -188,7 +188,7 @@ test.describe('Phase 4: Image Upload Pipeline', () => {
     // Override the mock upload handler to reject
     await page.evaluate(() => {
       // Access the window to inject a failing handler
-      (window as unknown as { __scribexTestFailUpload: boolean }).__scribexTestFailUpload = true;
+      (window as unknown as { __blokhausTestFailUpload: boolean }).__blokhausTestFailUpload = true;
     });
 
     // We need to override the upload handler in the component.
