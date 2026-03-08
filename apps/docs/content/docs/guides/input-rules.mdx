@@ -10,7 +10,7 @@ The Input Rule Engine converts markdown-style shortcuts into rich content as you
 Add the `InputRulePlugin` as a child of `EditorRoot`:
 
 ```tsx title="app/editor/page.tsx"
-import { EditorRoot, InputRulePlugin, SlashMenu } from "@scribex/core";
+import { EditorRoot, InputRulePlugin, SlashMenu } from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -79,8 +79,8 @@ The `---` (divider) and ` ``` ` (code block) patterns fire without a trailing sp
 Pass additional rules via the `rules` prop. Custom rules are checked alongside the built-in rules:
 
 ```tsx
-import { InputRulePlugin } from "@scribex/core";
-import type { InputRule } from "@scribex/core";
+import { InputRulePlugin } from "@blokhaus/core";
+import type { InputRule } from "@blokhaus/core";
 import { $createParagraphNode, $createTextNode } from "lexical";
 
 const customRules: InputRule[] = [
@@ -138,7 +138,7 @@ const highlightRule: InputRule = {
 Convert `***` into a styled divider:
 
 ```tsx
-import { $createHorizontalRuleNode } from "@scribex/core";
+import { $createHorizontalRuleNode } from "@blokhaus/core";
 
 const styledDividerRule: InputRule = {
   pattern: /^\*\*\*$/,

@@ -1,13 +1,13 @@
 ---
 title: Mobile Support
-description: How Scribex adapts to touch devices.
+description: How Blokhaus adapts to touch devices.
 ---
 
-Scribex automatically adapts its UI for touch devices. Desktop-only features like drag handles are disabled, and a mobile-optimized formatting toolbar appears at the bottom of the screen. This happens transparently -- no configuration is needed.
+Blokhaus automatically adapts its UI for touch devices. Desktop-only features like drag handles are disabled, and a mobile-optimized formatting toolbar appears at the bottom of the screen. This happens transparently -- no configuration is needed.
 
 ## Touch detection
 
-Scribex detects touch devices on mount using multiple signals for reliability:
+Blokhaus detects touch devices on mount using multiple signals for reliability:
 
 ```ts
 const isTouch =
@@ -49,7 +49,7 @@ Table hover actions (the row/column add buttons that appear when hovering over t
 Add the `MobileToolbar` as a child of `EditorRoot`:
 
 ```tsx title="app/editor/page.tsx"
-import { EditorRoot, MobileToolbar, FloatingToolbar } from "@scribex/core";
+import { EditorRoot, MobileToolbar, FloatingToolbar } from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -121,11 +121,11 @@ This ensures the toolbar buttons are not obscured by the device's home indicator
 
 ### Styling
 
-The toolbar uses the same frosted glass aesthetic as other Scribex popovers:
+The toolbar uses the same frosted glass aesthetic as other Blokhaus popovers:
 
 - `backdrop-filter: blur(20px) saturate(180%)`
-- Background: `var(--scribex-popover-bg)`
-- Border: `var(--scribex-popover-border)` (top border only)
+- Background: `var(--blokhaus-popover-bg)`
+- Border: `var(--blokhaus-popover-border)` (top border only)
 - Button size: 44x44px (Apple's recommended minimum touch target)
 - z-index: 50
 
@@ -158,7 +158,7 @@ test("mobile toolbar appears on text selection", async ({ page }) => {
   await page.goto("/editor");
 
   // Type some text
-  const editor = page.locator("[data-scribex-root]");
+  const editor = page.locator("[data-blokhaus-root]");
   await editor.click();
   await page.keyboard.type("Hello World");
 
@@ -176,7 +176,7 @@ test("mobile toolbar appears on text selection", async ({ page }) => {
 test("drag handle is not rendered on mobile", async ({ page }) => {
   await page.goto("/editor");
 
-  const editor = page.locator("[data-scribex-root]");
+  const editor = page.locator("[data-blokhaus-root]");
   await editor.click();
   await page.keyboard.type("Some text");
 
