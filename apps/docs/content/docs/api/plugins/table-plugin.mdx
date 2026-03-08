@@ -8,12 +8,12 @@ import { Callout } from "fumadocs-ui/components/callout";
 ## Import
 
 ```tsx
-import { TablePlugin } from "@scribex/core";
+import { TablePlugin } from "@blokhaus/core";
 ```
 
 ## Overview
 
-The `TablePlugin` provides table creation, cell editing, row/column management, and optional cell merging. It wraps Lexical's `@lexical/table` module and registers the `INSERT_TABLE_COMMAND_SCRIBEX` command for creating tables with a specified number of rows and columns. The plugin handles keyboard navigation between cells using Tab and arrow keys.
+The `TablePlugin` provides table creation, cell editing, row/column management, and optional cell merging. It wraps Lexical's `@lexical/table` module and registers the `INSERT_TABLE_COMMAND_BLOKHAUS` command for creating tables with a specified number of rows and columns. The plugin handles keyboard navigation between cells using Tab and arrow keys.
 
 ## Props
 
@@ -34,7 +34,7 @@ import {
   TablePlugin,
   InputRulePlugin,
   SlashMenu,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -57,15 +57,15 @@ export default function EditorPage() {
 
 | Command                        | Payload                             | Description                                                                       |
 | ------------------------------ | ----------------------------------- | --------------------------------------------------------------------------------- |
-| `INSERT_TABLE_COMMAND_SCRIBEX` | `{ rows: number; columns: number }` | Inserts a new table at the current cursor position with the specified dimensions. |
+| `INSERT_TABLE_COMMAND_BLOKHAUS` | `{ rows: number; columns: number }` | Inserts a new table at the current cursor position with the specified dimensions. |
 
 ### Creating a table programmatically
 
 ```tsx
-import { INSERT_TABLE_COMMAND_SCRIBEX } from "@scribex/core";
+import { INSERT_TABLE_COMMAND_BLOKHAUS } from "@blokhaus/core";
 
 // Insert a 3x4 table (3 rows, 4 columns)
-editor.dispatchCommand(INSERT_TABLE_COMMAND_SCRIBEX, {
+editor.dispatchCommand(INSERT_TABLE_COMMAND_BLOKHAUS, {
   rows: 3,
   columns: 4,
 });
@@ -90,7 +90,7 @@ When `hasCellMerge` is `true`, cells can be merged and unmerged:
 import {
   TABLE_MERGE_CELLS_COMMAND,
   TABLE_UNMERGE_CELL_COMMAND,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 // Merge selected cells
 editor.dispatchCommand(TABLE_MERGE_CELLS_COMMAND, undefined);

@@ -8,7 +8,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 ## Import
 
 ```tsx
-import { MentionPlugin } from "@scribex/core";
+import { MentionPlugin } from "@blokhaus/core";
 ```
 
 ## Overview
@@ -67,8 +67,8 @@ interface MentionItem {
 ```tsx title="app/editor/page.tsx"
 "use client";
 
-import { EditorRoot, MentionPlugin } from "@scribex/core";
-import { $createMentionNode } from "@scribex/core";
+import { EditorRoot, MentionPlugin } from "@blokhaus/core";
+import { $createMentionNode } from "@blokhaus/core";
 
 const userProvider = {
   trigger: "@",
@@ -129,7 +129,7 @@ const tagProvider = {
   },
   renderItem: (item) => (
     <div className="flex items-center gap-2">
-      <span className="text-scribex-muted-foreground">#</span>
+      <span className="text-blokhaus-muted-foreground">#</span>
       <span>{item.label}</span>
     </div>
   ),
@@ -169,7 +169,7 @@ The `MentionNode` is a Lexical `DecoratorNode` that stores `{ id, label, trigger
 ### Creating a MentionNode programmatically
 
 ```tsx
-import { $createMentionNode, $isMentionNode } from "@scribex/core";
+import { $createMentionNode, $isMentionNode } from "@blokhaus/core";
 
 editor.update(() => {
   const mention = $createMentionNode({
@@ -188,7 +188,7 @@ editor.update(() => {
 ### Type guard
 
 ```tsx
-import { $isMentionNode } from "@scribex/core";
+import { $isMentionNode } from "@blokhaus/core";
 
 if ($isMentionNode(node)) {
   console.log("Mention:", node.getTrigger(), node.getLabel());
