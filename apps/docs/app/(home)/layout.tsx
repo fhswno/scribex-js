@@ -8,13 +8,13 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <HomeLayout
       nav={{
-        title: <span className="font-medium tracking-tight">scribex</span>,
+        title: <span className="font-medium tracking-tight">blokhaus</span>,
       }}
       links={[
         { text: "Docs", url: "/docs" },
         {
           text: "GitHub",
-          url: "https://github.com/scribex/scribex-js",
+          url: "https://github.com/fhswno/blokhaus-js",
           external: true,
           icon: (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
