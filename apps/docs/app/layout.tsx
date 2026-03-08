@@ -21,8 +21,8 @@ import "./globals.css";
 // METADATA
 export const metadata = {
   title: {
-    template: "%s | Scribex",
-    default: "Scribex — The shadcn of rich text editors",
+    template: "%s | Blokhaus",
+    default: "Blokhaus — The shadcn of rich text editors",
   },
   description:
     "A fully open-source, block-based Notion-style editor library built for Next.js.",
