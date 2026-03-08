@@ -1,7 +1,7 @@
 {
   "files": [],
   "references": [
-    { "path": "./packages/scribex" },
+    { "path": "./packages/blokhaus" },
     { "path": "./apps/playground" },
     { "path": "./apps/docs" }
   ]
