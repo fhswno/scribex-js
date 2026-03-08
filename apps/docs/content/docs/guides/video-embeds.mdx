@@ -3,14 +3,14 @@ title: Video Embeds
 description: Embed videos from YouTube, Vimeo, Loom, or upload video files.
 ---
 
-Scribex supports both video embeds (from URLs) and direct video file uploads. The `VideoPlugin` handles URL parsing for known providers, file upload with optimistic UI, and renders videos as responsive players in the editor.
+Blokhaus supports both video embeds (from URLs) and direct video file uploads. The `VideoPlugin` handles URL parsing for known providers, file upload with optimistic UI, and renders videos as responsive players in the editor.
 
 ## Basic setup
 
 ```tsx title="app/editor/page.tsx"
 "use client";
 
-import { EditorRoot, VideoPlugin } from "@scribex/core";
+import { EditorRoot, VideoPlugin } from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -69,7 +69,7 @@ When the user provides a video URL (via the `/video` slash menu item or programm
 3. The node renders as a responsive iframe with the provider's embed URL.
 
 ```ts
-import { parseVideoEmbed } from "@scribex/core";
+import { parseVideoEmbed } from "@blokhaus/core";
 
 const result = parseVideoEmbed("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
 // {
@@ -104,7 +104,7 @@ When `VideoPlugin` is included, a "Video" item appears in the slash menu. Select
 Use Lexical commands to insert videos programmatically:
 
 ```tsx
-import { INSERT_VIDEO_COMMAND, OPEN_VIDEO_INPUT_COMMAND } from "@scribex/core";
+import { INSERT_VIDEO_COMMAND, OPEN_VIDEO_INPUT_COMMAND } from "@blokhaus/core";
 
 // Insert a video embed by URL
 editor.dispatchCommand(INSERT_VIDEO_COMMAND, {
@@ -134,7 +134,7 @@ interface VideoPayload {
 ### Creating a video node programmatically
 
 ```tsx
-import { $createVideoNode } from "@scribex/core";
+import { $createVideoNode } from "@blokhaus/core";
 
 editor.update(() => {
   const videoNode = $createVideoNode({
@@ -152,7 +152,7 @@ editor.update(() => {
 ### Type guard
 
 ```tsx
-import { $isVideoNode } from "@scribex/core";
+import { $isVideoNode } from "@blokhaus/core";
 
 if ($isVideoNode(node)) {
   console.log("Video provider:", node.getProvider());
@@ -161,11 +161,11 @@ if ($isVideoNode(node)) {
 
 ## The `parseVideoEmbed` utility
 
-The `parseVideoEmbed` function is a pure utility (no React, no side effects) exported from `@scribex/core`:
+The `parseVideoEmbed` function is a pure utility (no React, no side effects) exported from `@blokhaus/core`:
 
 ```ts
-import { parseVideoEmbed } from "@scribex/core";
-import type { VideoEmbedInfo } from "@scribex/core";
+import { parseVideoEmbed } from "@blokhaus/core";
+import type { VideoEmbedInfo } from "@blokhaus/core";
 
 const info: VideoEmbedInfo | null = parseVideoEmbed(userInput);
 
@@ -188,7 +188,7 @@ import {
   VideoPlugin,
   InputRulePlugin,
   SlashMenu,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 const videoUpload = async (file: File): Promise<string> => {
   const formData = new FormData();

@@ -3,7 +3,7 @@ title: Tables
 description: Create and edit tables with cell merging, resize, and contextual menus.
 ---
 
-Scribex includes a full-featured table system built on Lexical's `@lexical/table` module. It provides cell merging, column resize, contextual right-click menus, and hover actions for adding rows and columns.
+Blokhaus includes a full-featured table system built on Lexical's `@lexical/table` module. It provides cell merging, column resize, contextual right-click menus, and hover actions for adding rows and columns.
 
 ## Basic setup
 
@@ -19,7 +19,7 @@ import {
   TableHoverActions,
   InputRulePlugin,
   SlashMenu,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -63,12 +63,12 @@ Type `/table` in the editor. The slash menu shows a "Table" item. Selecting it i
 
 ### Via a command
 
-Use the `INSERT_TABLE_COMMAND_SCRIBEX` command to insert a table programmatically:
+Use the `INSERT_TABLE_COMMAND_BLOKHAUS` command to insert a table programmatically:
 
 ```tsx
-import { INSERT_TABLE_COMMAND_SCRIBEX } from "@scribex/core";
+import { INSERT_TABLE_COMMAND_BLOKHAUS } from "@blokhaus/core";
 
-editor.dispatchCommand(INSERT_TABLE_COMMAND_SCRIBEX, {
+editor.dispatchCommand(INSERT_TABLE_COMMAND_BLOKHAUS, {
   rows: 4,
   columns: 3,
 });
@@ -100,15 +100,15 @@ The cell background picker uses tokens from `tokens.css`:
 | Color           | Token                      |
 | --------------- | -------------------------- |
 | Default (clear) | --                         |
-| Gray            | `--scribex-cell-bg-gray`   |
-| Brown           | `--scribex-cell-bg-brown`  |
-| Orange          | `--scribex-cell-bg-orange` |
-| Yellow          | `--scribex-cell-bg-yellow` |
-| Green           | `--scribex-cell-bg-green`  |
-| Blue            | `--scribex-cell-bg-blue`   |
-| Purple          | `--scribex-cell-bg-purple` |
-| Pink            | `--scribex-cell-bg-pink`   |
-| Red             | `--scribex-cell-bg-red`    |
+| Gray            | `--blokhaus-cell-bg-gray`   |
+| Brown           | `--blokhaus-cell-bg-brown`  |
+| Orange          | `--blokhaus-cell-bg-orange` |
+| Yellow          | `--blokhaus-cell-bg-yellow` |
+| Green           | `--blokhaus-cell-bg-green`  |
+| Blue            | `--blokhaus-cell-bg-blue`   |
+| Purple          | `--blokhaus-cell-bg-purple` |
+| Pink            | `--blokhaus-cell-bg-pink`   |
+| Red             | `--blokhaus-cell-bg-red`    |
 
 ## `TableHoverActions` -- visual handles
 
@@ -136,7 +136,7 @@ A small grip icon appears at the top-left corner of the table. Clicking it selec
 
 ## Table selection
 
-Lexical's table module provides a built-in cell selection system. Click and drag across cells to select a range. The selected cells are highlighted with the `--scribex-table-selection` overlay color.
+Lexical's table module provides a built-in cell selection system. Click and drag across cells to select a range. The selected cells are highlighted with the `--blokhaus-table-selection` overlay color.
 
 When multiple cells are selected:
 
@@ -158,10 +158,10 @@ The table appearance is controlled by CSS custom properties:
 
 ```css
 :root {
-  --scribex-table-border: hsl(214.3 31.8% 91.4%);
-  --scribex-table-header-bg: hsl(210 40% 96.1%);
-  --scribex-table-selection: hsla(221.2 83.2% 53.3% / 0.1);
-  --scribex-table-resize-handle: hsl(221.2 83.2% 53.3%);
+  --blokhaus-table-border: hsl(214.3 31.8% 91.4%);
+  --blokhaus-table-header-bg: hsl(210 40% 96.1%);
+  --blokhaus-table-selection: hsla(221.2 83.2% 53.3% / 0.1);
+  --blokhaus-table-resize-handle: hsl(221.2 83.2% 53.3%);
 }
 ```
 
