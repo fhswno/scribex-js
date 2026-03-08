@@ -14,8 +14,8 @@ import {
   AIPreviewNode,
   $createAIPreviewNode,
   $isAIPreviewNode,
-} from "@scribex/core";
-import type { AIPreviewPayload } from "@scribex/core";
+} from "@blokhaus/core";
+import type { AIPreviewPayload } from "@blokhaus/core";
 ```
 
 ## AIPreviewPayload
@@ -95,12 +95,12 @@ The component tracks three internal states:
 
 ## Styling
 
-The node uses the `--scribex-ai-stream` CSS variable for its accent color (left border, header text, accept button background) and `--scribex-ai-stream-bg` for its background. Override these tokens in your `tokens.css` to match your brand:
+The node uses the `--blokhaus-ai-stream` CSS variable for its accent color (left border, header text, accept button background) and `--blokhaus-ai-stream-bg` for its background. Override these tokens in your `tokens.css` to match your brand:
 
 ```css
 :root {
-  --scribex-ai-stream: hsl(262 83% 58%);
-  --scribex-ai-stream-bg: rgba(51, 102, 204, 0.05);
+  --blokhaus-ai-stream: hsl(262 83% 58%);
+  --blokhaus-ai-stream-bg: rgba(51, 102, 204, 0.05);
 }
 ```
 
