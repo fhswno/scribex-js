@@ -3,7 +3,7 @@ title: Callouts
 description: Add styled callout blocks with customizable emoji and color presets.
 ---
 
-Scribex includes a `CalloutPlugin` that provides Notion-style callout blocks. Each callout has a customizable emoji icon and a color preset that controls its background and border accent. A floating toolbar appears when the cursor is inside a callout, allowing quick changes to the emoji and color.
+Blokhaus includes a `CalloutPlugin` that provides Notion-style callout blocks. Each callout has a customizable emoji icon and a color preset that controls its background and border accent. A floating toolbar appears when the cursor is inside a callout, allowing quick changes to the emoji and color.
 
 ## Basic setup
 
@@ -15,7 +15,7 @@ import {
   CalloutPlugin,
   InputRulePlugin,
   SlashMenu,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -57,12 +57,12 @@ interface CalloutPreset {
 
 The preset's `id` maps to CSS custom properties in `tokens.css`:
 
-- `--scribex-callout-{id}-bg` -- the callout's background color
-- `--scribex-callout-{id}-border` -- the callout's left border accent color
+- `--blokhaus-callout-{id}-bg` -- the callout's background color
+- `--blokhaus-callout-{id}-border` -- the callout's left border accent color
 
 ## Default presets
 
-Scribex ships with six built-in presets:
+Blokhaus ships with six built-in presets:
 
 | Preset  | ID        | Emoji | Background | Border    |
 | ------- | --------- | ----- | ---------- | --------- |
@@ -76,7 +76,7 @@ Scribex ships with six built-in presets:
 Access these presets programmatically:
 
 ```tsx
-import { DEFAULT_CALLOUT_PRESETS } from "@scribex/core";
+import { DEFAULT_CALLOUT_PRESETS } from "@blokhaus/core";
 
 console.log(DEFAULT_CALLOUT_PRESETS);
 // [{ id: 'default', label: 'Default', emoji: '💡', ... }, ...]
@@ -87,7 +87,7 @@ console.log(DEFAULT_CALLOUT_PRESETS);
 Override the default presets by passing your own array:
 
 ```tsx
-import type { CalloutPreset } from "@scribex/core";
+import type { CalloutPreset } from "@blokhaus/core";
 
 const customPresets: CalloutPreset[] = [
   {
@@ -118,14 +118,14 @@ const customPresets: CalloutPreset[] = [
 
 When using custom presets, add corresponding CSS custom properties to your theme:
 
-```css title="styles/scribex-tokens.css"
+```css title="styles/blokhaus-tokens.css"
 :root {
-  --scribex-callout-tip-bg: #e8f5e9;
-  --scribex-callout-tip-border: #4caf50;
-  --scribex-callout-danger-bg: #ffebee;
-  --scribex-callout-danger-border: #f44336;
-  --scribex-callout-note-bg: #e3f2fd;
-  --scribex-callout-note-border: #2196f3;
+  --blokhaus-callout-tip-bg: #e8f5e9;
+  --blokhaus-callout-tip-border: #4caf50;
+  --blokhaus-callout-danger-bg: #ffebee;
+  --blokhaus-callout-danger-border: #f44336;
+  --blokhaus-callout-note-bg: #e3f2fd;
+  --blokhaus-callout-note-border: #2196f3;
 }
 ```
 
@@ -138,7 +138,7 @@ Type `/callout` in the editor. The slash menu shows a "Callout" item. Selecting 
 ### Via a command
 
 ```tsx
-import { INSERT_CALLOUT_COMMAND } from "@scribex/core";
+import { INSERT_CALLOUT_COMMAND } from "@blokhaus/core";
 
 editor.dispatchCommand(INSERT_CALLOUT_COMMAND, {
   emoji: "⚠️",
@@ -151,7 +151,7 @@ Both `emoji` and `colorPreset` are optional. If omitted, the `defaultEmoji` and 
 ### Programmatically
 
 ```tsx
-import { $createCalloutNode } from "@scribex/core";
+import { $createCalloutNode } from "@blokhaus/core";
 import { $createParagraphNode, $getRoot } from "lexical";
 
 editor.update(() => {
@@ -206,7 +206,7 @@ If the callout is selected as a NodeSelection (e.g., via programmatic selection)
 ## Type guards
 
 ```tsx
-import { $isCalloutNode } from "@scribex/core";
+import { $isCalloutNode } from "@blokhaus/core";
 
 editor.read(() => {
   const root = $getRoot();
@@ -226,28 +226,28 @@ The callout appearance is controlled by CSS custom properties defined in `tokens
 ```css
 :root {
   /* Default preset */
-  --scribex-callout-default-bg: #f1f1ef;
-  --scribex-callout-default-border: #d4d4d4;
+  --blokhaus-callout-default-bg: #f1f1ef;
+  --blokhaus-callout-default-border: #d4d4d4;
 
   /* Info preset */
-  --scribex-callout-info-bg: #ddebf1;
-  --scribex-callout-info-border: #0b6e99;
+  --blokhaus-callout-info-bg: #ddebf1;
+  --blokhaus-callout-info-border: #0b6e99;
 
   /* Warning preset */
-  --scribex-callout-warning-bg: #fbf3db;
-  --scribex-callout-warning-border: #dfab01;
+  --blokhaus-callout-warning-bg: #fbf3db;
+  --blokhaus-callout-warning-border: #dfab01;
 
   /* Error preset */
-  --scribex-callout-error-bg: #fbe4e4;
-  --scribex-callout-error-border: #e03e3e;
+  --blokhaus-callout-error-bg: #fbe4e4;
+  --blokhaus-callout-error-border: #e03e3e;
 
   /* Success preset */
-  --scribex-callout-success-bg: #ddedea;
-  --scribex-callout-success-border: #0f7b6c;
+  --blokhaus-callout-success-bg: #ddedea;
+  --blokhaus-callout-success-border: #0f7b6c;
 
   /* Purple / Note preset */
-  --scribex-callout-purple-bg: #eae4f2;
-  --scribex-callout-purple-border: #6940a5;
+  --blokhaus-callout-purple-bg: #eae4f2;
+  --blokhaus-callout-purple-border: #6940a5;
 }
 ```
 

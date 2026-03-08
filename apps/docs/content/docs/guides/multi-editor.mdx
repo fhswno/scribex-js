@@ -3,7 +3,7 @@ title: Multi-Editor
 description: Run multiple independent editor instances on the same page.
 ---
 
-Scribex supports multiple independent editor instances on the same page. Each editor has its own state, history, keyboard shortcuts, and overlay portals. This is useful for common patterns like separate title and body fields, side-by-side editing, or multi-section forms.
+Blokhaus supports multiple independent editor instances on the same page. Each editor has its own state, history, keyboard shortcuts, and overlay portals. This is useful for common patterns like separate title and body fields, side-by-side editing, or multi-section forms.
 
 ## Basic setup
 
@@ -19,7 +19,7 @@ import {
   OverlayPortal,
   InputRulePlugin,
   useEditorState,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 function TitleEditor() {
   const { serializedState } = useEditorState({
@@ -107,7 +107,7 @@ This ensures that the drag handle for "body-editor" only renders for nodes insid
 
 ### No global singletons
 
-Scribex never uses module-level mutable state or global singletons to track "the active editor." All state is scoped through React context provided by `LexicalComposer`. This is a strict architectural rule -- see the [project architecture](/docs/project-structure) for details.
+Blokhaus never uses module-level mutable state or global singletons to track "the active editor." All state is scoped through React context provided by `LexicalComposer`. This is a strict architectural rule -- see the [project architecture](/docs/project-structure) for details.
 
 ## Using `useEditorState` in multi-editor setups
 
