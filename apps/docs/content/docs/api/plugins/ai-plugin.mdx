@@ -8,12 +8,12 @@ import { Callout } from "fumadocs-ui/components/callout";
 ## Import
 
 ```tsx
-import { AIPlugin } from "@scribex/core";
+import { AIPlugin } from "@blokhaus/core";
 ```
 
 ## Overview
 
-The `AIPlugin` provides AI-powered content generation with an isolated streaming preview. When the user triggers an AI prompt (via the `/ai` slash menu item or programmatically), an `AIPreviewNode` is inserted into the AST. The streamed response is rendered in a visually distinct block using the `--scribex-ai-stream` CSS token. The preview uses local React state during streaming -- it never calls `editor.update()` until the user explicitly accepts or discards the result.
+The `AIPlugin` provides AI-powered content generation with an isolated streaming preview. When the user triggers an AI prompt (via the `/ai` slash menu item or programmatically), an `AIPreviewNode` is inserted into the AST. The streamed response is rendered in a visually distinct block using the `--blokhaus-ai-stream` CSS token. The preview uses local React state during streaming -- it never calls `editor.update()` until the user explicitly accepts or discards the result.
 
 This architecture guarantees zero undo history entries during streaming, and exactly one history entry when the user accepts.
 
@@ -98,7 +98,7 @@ import {
   AIPlugin,
   InputRulePlugin,
   SlashMenu,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -165,7 +165,7 @@ export default function EditorPage() {
 ### Dispatching programmatically
 
 ```tsx
-import { OPEN_AI_PROMPT_COMMAND } from "@scribex/core";
+import { OPEN_AI_PROMPT_COMMAND } from "@blokhaus/core";
 
 // Open the AI prompt from a custom button
 editor.dispatchCommand(OPEN_AI_PROMPT_COMMAND, undefined);
