@@ -3,7 +3,7 @@ title: Mentions
 description: Add @mentions, #tags, and custom trigger-based mentions.
 ---
 
-Scribex includes a fully extensible mention system. Out of the box it supports `@` for user mentions and `#` for tags, but you can register any trigger character. The system provides async search, keyboard-navigable dropdown, and a persistent `MentionNode` in the AST.
+Blokhaus includes a fully extensible mention system. Out of the box it supports `@` for user mentions and `#` for tags, but you can register any trigger character. The system provides async search, keyboard-navigable dropdown, and a persistent `MentionNode` in the AST.
 
 ## Core concepts
 
@@ -51,8 +51,8 @@ interface MentionItem {
 ```tsx title="app/editor/page.tsx"
 "use client";
 
-import { EditorRoot, MentionPlugin, $createMentionNode } from "@scribex/core";
-import type { MentionProvider } from "@scribex/core";
+import { EditorRoot, MentionPlugin, $createMentionNode } from "@blokhaus/core";
+import type { MentionProvider } from "@blokhaus/core";
 
 const userProvider: MentionProvider = {
   trigger: "@",
@@ -192,14 +192,14 @@ When the user selects an item, the trigger text and query are replaced with a `M
 
 ### Styling
 
-`@` mentions use the `--scribex-ai-stream` accent color by default. `#` tags use the `--scribex-accent` color. Both render with a subtle tinted background and the trigger character slightly dimmed.
+`@` mentions use the `--blokhaus-ai-stream` accent color by default. `#` tags use the `--blokhaus-accent` color. Both render with a subtle tinted background and the trigger character slightly dimmed.
 
 ### Using `$createMentionNode`
 
 The `$createMentionNode` helper creates a `MentionNode` instance:
 
 ```tsx
-import { $createMentionNode } from "@scribex/core";
+import { $createMentionNode } from "@blokhaus/core";
 
 const node = $createMentionNode({
   id: "user-123",
@@ -215,7 +215,7 @@ This function must be called inside an `editor.update()` context or inside the `
 Use `$isMentionNode` to check if a node is a `MentionNode`:
 
 ```tsx
-import { $isMentionNode } from "@scribex/core";
+import { $isMentionNode } from "@blokhaus/core";
 
 editor.read(() => {
   const root = $getRoot();
