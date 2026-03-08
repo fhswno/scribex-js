@@ -1,4 +1,4 @@
-# Scribex
+# Blokhaus
 
 A block-based rich text editor for Next.js. Copy-paste components, own every line of code.
 
@@ -8,7 +8,7 @@ Built on [Lexical](https://lexical.dev), [Radix UI](https://radix-ui.com), and [
 
 ## What is this?
 
-Scribex is a Notion-style editor library designed for Next.js App Router. Instead of installing a black-box package, you copy components into your project and customize them directly — the same approach as [shadcn/ui](https://ui.shadcn.com).
+Blokhaus is a Notion-style editor library designed for Next.js App Router. Instead of installing a black-box package, you copy components into your project and customize them directly — the same approach as [shadcn/ui](https://ui.shadcn.com).
 
 Every feature is an independent, composable plugin passed as a React child:
 
@@ -47,8 +47,8 @@ No prop explosion. No feature flags. Add what you need, remove what you don't.
 
 ```bash
 # Clone
-git clone https://github.com/fhswno/scribex-js.git
-cd scribex-js
+git clone https://github.com/fhswno/blokhaus-js.git
+cd blokhaus-js
 
 # Install
 bun install
@@ -62,9 +62,9 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Project Structure
 
 ```
-scribex-js/
+blokhaus-js/
 ├── packages/
-│   └── scribex/              # @scribex/core — the library
+│   └── blokhaus/              # @blokhaus/core — the library
 │       └── src/
 │           ├── components/   # EditorRoot, FloatingToolbar, SlashMenu, etc.
 │           ├── plugins/      # InputRulePlugin, ImagePlugin, AIPlugin, etc.
@@ -79,7 +79,7 @@ scribex-js/
     └── docs/                 # Documentation site (scaffold)
 ```
 
-The library (`packages/scribex`) has zero imports from `apps/`. It is fully self-contained.
+The library (`packages/blokhaus`) has zero imports from `apps/`. It is fully self-contained.
 
 ## Tech Stack
 
@@ -97,16 +97,16 @@ The library (`packages/scribex`) has zero imports from `apps/`. It is fully self
 
 ## Theming
 
-All visual tokens are CSS custom properties prefixed with `--scribex-`. Override them to match your design system:
+All visual tokens are CSS custom properties prefixed with `--blokhaus-`. Override them to match your design system:
 
 ```css
 :root {
-  --scribex-accent: hsl(221 83% 53%);
-  --scribex-background: hsl(0 0% 100%);
-  --scribex-foreground: hsl(222 84% 5%);
-  --scribex-border: hsl(214 32% 91%);
-  --scribex-radius: 0.5rem;
-  /* ... see packages/scribex/src/styles/tokens.css for the full list */
+  --blokhaus-accent: hsl(221 83% 53%);
+  --blokhaus-background: hsl(0 0% 100%);
+  --blokhaus-foreground: hsl(222 84% 5%);
+  --blokhaus-border: hsl(214 32% 91%);
+  --blokhaus-radius: 0.5rem;
+  /* ... see packages/blokhaus/src/styles/tokens.css for the full list */
 }
 ```
 
@@ -121,7 +121,7 @@ bun build            # Build the playground app
 
 ## AI Integration
 
-Scribex is provider-agnostic. Implement the `AIProvider` interface to connect any LLM:
+Blokhaus is provider-agnostic. Implement the `AIProvider` interface to connect any LLM:
 
 ```ts
 const myProvider: AIProvider = {
