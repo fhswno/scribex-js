@@ -11,7 +11,7 @@ export default function HomePage() {
         Open source rich text for Next.js
       </p>
       <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-        Scribex
+        Blokhaus
       </h1>
       <p className="mb-8 max-w-md text-fd-muted-foreground">
         A copy-paste block editor library. You own every component, every node,
