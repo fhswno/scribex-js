@@ -1,5 +1,5 @@
 {
-  "installCommand": "bun install",
-  "buildCommand": "bun run build",
+  "installCommand": "yarn install --no-lockfile",
+  "buildCommand": "next build",
   "framework": "nextjs"
 }
