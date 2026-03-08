@@ -10,8 +10,8 @@ import { Callout } from "fumadocs-ui/components/callout";
 ## Import
 
 ```tsx
-import { MentionNode, $createMentionNode, $isMentionNode } from "@scribex/core";
-import type { MentionPayload } from "@scribex/core";
+import { MentionNode, $createMentionNode, $isMentionNode } from "@blokhaus/core";
+import type { MentionPayload } from "@blokhaus/core";
 ```
 
 ## MentionPayload
@@ -39,7 +39,7 @@ interface MentionPayload {
 Creates a new `MentionNode`. Must be called inside `editor.update()`. Typically invoked by a `MentionProvider`'s `onSelect` callback.
 
 ```ts
-import { $createMentionNode } from "@scribex/core";
+import { $createMentionNode } from "@blokhaus/core";
 
 // Inside a MentionProvider's onSelect:
 const onSelect = (item: MentionItem) => {
@@ -114,8 +114,8 @@ The mention chip is focusable but not editable. When the node is selected (via L
 
 The chip color is determined by the trigger character:
 
-- `#` triggers use the `--scribex-accent` token (blue by default).
-- All other triggers (including `@`) use the `--scribex-ai-stream` token.
+- `#` triggers use the `--blokhaus-accent` token (blue by default).
+- All other triggers (including `@`) use the `--blokhaus-ai-stream` token.
 
 The chip renders with a subtle background tint derived from the accent color using CSS `color-mix()`.
 
@@ -126,8 +126,8 @@ The chip renders with a subtle background tint derived from the accent color usi
 ```tsx title="app/editor/page.tsx"
 "use client";
 
-import { EditorRoot, MentionPlugin, $createMentionNode } from "@scribex/core";
-import type { MentionProvider, MentionItem } from "@scribex/core";
+import { EditorRoot, MentionPlugin, $createMentionNode } from "@blokhaus/core";
+import type { MentionProvider, MentionItem } from "@blokhaus/core";
 
 const userProvider: MentionProvider = {
   trigger: "@",
