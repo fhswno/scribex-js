@@ -30,7 +30,7 @@ import {
   $getSelection,
   $isRangeSelection,
   TextNode,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 import { useCallback, useEffect, useState } from "react";
 import type {
@@ -40,7 +40,7 @@ import type {
   MentionProvider,
   SlashMenuItem,
   LexicalEditor,
-} from "@scribex/core";
+} from "@blokhaus/core";
 
 /** Mock upload handler — simulates a 500ms upload and returns a blob URL.
  *  In production, this would return a CDN URL from your upload service.
@@ -160,13 +160,13 @@ const aiConfig: AIPluginConfig = {
   },
   contextWindowSize: 5,
   onError: (error) => {
-    console.warn("[Scribex AI] Generation failed:", error.message);
+    console.warn("[Blokhaus AI] Generation failed:", error.message);
   },
   onAccept: (content) => {
-    console.log("[Scribex AI] Content accepted:", content.slice(0, 80) + "...");
+    console.log("[Blokhaus AI] Content accepted:", content.slice(0, 80) + "...");
   },
   onDiscard: () => {
-    console.log("[Scribex AI] Content discarded");
+    console.log("[Blokhaus AI] Content discarded");
   },
 };
 
@@ -384,11 +384,11 @@ export default function Page() {
 
   // Expose sanitizePastedHTML on window for Playwright unit tests
   useEffect(() => {
-    (window as unknown as Record<string, unknown>).__scribex_sanitize =
+    (window as unknown as Record<string, unknown>).__blokhaus_sanitize =
       sanitizePastedHTML;
   }, []);
 
-  // Toggle .dark class on <html> and apply scribex tokens
+  // Toggle .dark class on <html> and apply blokhaus tokens
   useEffect(() => {
     const html = document.documentElement;
     if (dark) {
@@ -427,7 +427,7 @@ export default function Page() {
       <nav className="sticky top-0 z-30 flex h-11 items-center justify-between px-3 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-sm border-b border-neutral-100 dark:border-neutral-800 transition-colors">
         <div className="flex items-center gap-2">
           <span className="text-[13px] font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight">
-            Scribex
+            Blokhaus
           </span>
           <span className="text-[11px] text-neutral-300 dark:text-neutral-600">/</span>
           <span className="text-[13px] text-neutral-400 dark:text-neutral-500">Playground</span>
@@ -462,7 +462,7 @@ export default function Page() {
             {sizeKb} KB
           </button>
           <a
-            href="https://github.com/fhswno/scribex-js"
+            href="https://github.com/fhswno/blokhaus-js"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center w-7 h-7 rounded text-neutral-300 dark:text-neutral-600 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
