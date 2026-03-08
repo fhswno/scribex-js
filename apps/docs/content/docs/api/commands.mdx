@@ -31,23 +31,23 @@ import {
 
 ## Command reference
 
-| Command                        | Payload Type                               | Description                                                                                                                                                            |
-| ------------------------------ | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OPEN_SLASH_MENU_COMMAND`      | `void`                                     | Opens the slash menu at the current cursor position. Dispatched by the InputRulePlugin when the user types `/`.                                                        |
-| `INSERT_IMAGE_COMMAND`         | `File`                                     | Triggers the image upload flow. The `ImagePlugin` listens for this command, creates a `LoadingImageNode`, and calls the `UploadHandler`.                               |
-| `OPEN_AI_PROMPT_COMMAND`       | `void`                                     | Opens the AI prompt input popover at the current cursor position. Dispatched by the slash menu's "AI" item.                                                            |
-| `INSERT_AI_PREVIEW_COMMAND`    | `{ prompt: string }`                       | Inserts an `AIPreviewNode` below the current cursor with the given prompt. The `AIPlugin` handles context extraction and node creation.                                |
-| `OPEN_EMOJI_PICKER_COMMAND`    | `void`                                     | Opens the emoji picker dropdown. Dispatched by the slash menu's "Emoji" item or by typing `:` followed by text.                                                        |
-| `OPEN_LINK_INPUT_COMMAND`      | `void`                                     | Opens the link input popover for adding or editing a hyperlink on the current selection. Dispatched by the floating toolbar's link button.                             |
-| `SET_TEXT_COLOR_COMMAND`       | `string`                                   | Sets the text color on the current selection. The payload is a CSS value (e.g., `"var(--blokhaus-text-red)"`) or an empty string to reset to default.                   |
-| `SET_HIGHLIGHT_COLOR_COMMAND`  | `string`                                   | Sets the background highlight color on the current selection. The payload is a CSS value or an empty string to reset.                                                  |
+| Command                         | Payload Type                               | Description                                                                                                                                                             |
+| ------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OPEN_SLASH_MENU_COMMAND`       | `void`                                     | Opens the slash menu at the current cursor position. Dispatched by the InputRulePlugin when the user types `/`.                                                         |
+| `INSERT_IMAGE_COMMAND`          | `File`                                     | Triggers the image upload flow. The `ImagePlugin` listens for this command, creates a `LoadingImageNode`, and calls the `UploadHandler`.                                |
+| `OPEN_AI_PROMPT_COMMAND`        | `void`                                     | Opens the AI prompt input popover at the current cursor position. Dispatched by the slash menu's "AI" item.                                                             |
+| `INSERT_AI_PREVIEW_COMMAND`     | `{ prompt: string }`                       | Inserts an `AIPreviewNode` below the current cursor with the given prompt. The `AIPlugin` handles context extraction and node creation.                                 |
+| `OPEN_EMOJI_PICKER_COMMAND`     | `void`                                     | Opens the emoji picker dropdown. Dispatched by the slash menu's "Emoji" item or by typing `:` followed by text.                                                         |
+| `OPEN_LINK_INPUT_COMMAND`       | `void`                                     | Opens the link input popover for adding or editing a hyperlink on the current selection. Dispatched by the floating toolbar's link button.                              |
+| `SET_TEXT_COLOR_COMMAND`        | `string`                                   | Sets the text color on the current selection. The payload is a CSS value (e.g., `"var(--blokhaus-text-red)"`) or an empty string to reset to default.                   |
+| `SET_HIGHLIGHT_COLOR_COMMAND`   | `string`                                   | Sets the background highlight color on the current selection. The payload is a CSS value or an empty string to reset.                                                   |
 | `INSERT_TABLE_COMMAND_BLOKHAUS` | `{ rows: number; columns: number }`        | Inserts a table at the current cursor position with the specified dimensions. Named with a `_BLOKHAUS` suffix to avoid collision with Lexical's built-in table command. |
-| `INSERT_CALLOUT_COMMAND`       | `{ emoji?: string; colorPreset?: string }` | Inserts a callout block at the current cursor position with optional emoji and color preset.                                                                           |
-| `INSERT_VIDEO_COMMAND`         | `{ file: File } \| { url: string }`        | Inserts a video node. If the payload contains a `file`, it triggers the video upload flow. If it contains a `url`, it parses the URL for embed info.                   |
-| `OPEN_VIDEO_INPUT_COMMAND`     | `void`                                     | Opens the video URL input popover. Dispatched by the slash menu's "Video" item.                                                                                        |
-| `INSERT_TOGGLE_COMMAND`        | `{ isOpen?: boolean } \| undefined`        | Inserts a toggle (collapsible) block at the current cursor position. The `isOpen` field controls whether the toggle starts expanded (default: `true`).                 |
-| `SET_FONT_FAMILY_COMMAND`      | `string`                                   | Sets the font family on the current selection. The payload is a CSS `font-family` value or an empty string to reset to default.                                        |
-| `SET_BLOCK_DIRECTION_COMMAND`  | `'ltr' \| 'rtl'`                           | Sets the text direction on the current block-level element.                                                                                                            |
+| `INSERT_CALLOUT_COMMAND`        | `{ emoji?: string; colorPreset?: string }` | Inserts a callout block at the current cursor position with optional emoji and color preset.                                                                            |
+| `INSERT_VIDEO_COMMAND`          | `{ file: File } \| { url: string }`        | Inserts a video node. If the payload contains a `file`, it triggers the video upload flow. If it contains a `url`, it parses the URL for embed info.                    |
+| `OPEN_VIDEO_INPUT_COMMAND`      | `void`                                     | Opens the video URL input popover. Dispatched by the slash menu's "Video" item.                                                                                         |
+| `INSERT_TOGGLE_COMMAND`         | `{ isOpen?: boolean } \| undefined`        | Inserts a toggle (collapsible) block at the current cursor position. The `isOpen` field controls whether the toggle starts expanded (default: `true`).                  |
+| `SET_FONT_FAMILY_COMMAND`       | `string`                                   | Sets the font family on the current selection. The payload is a CSS `font-family` value or an empty string to reset to default.                                         |
+| `SET_BLOCK_DIRECTION_COMMAND`   | `'ltr' \| 'rtl'`                           | Sets the text direction on the current block-level element.                                                                                                             |
 
 ## Dispatching commands
 
@@ -114,7 +114,7 @@ Lexical commands propagate through registered listeners from highest to lowest p
 | 4 (highest) | `COMMAND_PRIORITY_CRITICAL` | Framework-level overrides. Rarely used.                                                     |
 | 3           | `COMMAND_PRIORITY_HIGH`     | Intercepting commands before plugins handle them.                                           |
 | 2           | `COMMAND_PRIORITY_NORMAL`   | General plugin handlers.                                                                    |
-| 1           | `COMMAND_PRIORITY_LOW`      | Default for most Blokhaus plugins.                                                           |
+| 1           | `COMMAND_PRIORITY_LOW`      | Default for most Blokhaus plugins.                                                          |
 | 0 (lowest)  | `COMMAND_PRIORITY_EDITOR`   | Editor-scoped handlers. Automatically limited to the focused editor in multi-editor setups. |
 
 <Callout type="info">
