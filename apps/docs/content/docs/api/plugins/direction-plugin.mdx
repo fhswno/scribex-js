@@ -8,7 +8,7 @@ import { Callout } from "fumadocs-ui/components/callout";
 ## Import
 
 ```tsx
-import { DirectionPlugin } from "@scribex/core";
+import { DirectionPlugin } from "@blokhaus/core";
 ```
 
 ## Overview
@@ -24,7 +24,7 @@ The `DirectionPlugin` accepts no props. Direction handling is automatic once the
 ```tsx title="app/editor/page.tsx"
 "use client";
 
-import { EditorRoot, DirectionPlugin } from "@scribex/core";
+import { EditorRoot, DirectionPlugin } from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -44,7 +44,7 @@ export default function EditorPage() {
 ### Dispatching programmatically
 
 ```tsx
-import { SET_BLOCK_DIRECTION_COMMAND } from "@scribex/core";
+import { SET_BLOCK_DIRECTION_COMMAND } from "@blokhaus/core";
 
 // Set the current block to RTL
 editor.dispatchCommand(SET_BLOCK_DIRECTION_COMMAND, "rtl");
@@ -104,7 +104,7 @@ The plugin provides the command but not the UI. Here is an example of a directio
 "use client";
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { SET_BLOCK_DIRECTION_COMMAND } from "@scribex/core";
+import { SET_BLOCK_DIRECTION_COMMAND } from "@blokhaus/core";
 import { $getSelection, $isRangeSelection } from "lexical";
 import { useState, useEffect } from "react";
 
@@ -165,7 +165,7 @@ The plugin does not register any keyboard shortcuts by default. If you want to a
 
 ```tsx
 import { COMMAND_PRIORITY_EDITOR, KEY_DOWN_COMMAND } from "lexical";
-import { SET_BLOCK_DIRECTION_COMMAND } from "@scribex/core";
+import { SET_BLOCK_DIRECTION_COMMAND } from "@blokhaus/core";
 
 editor.registerCommand(
   KEY_DOWN_COMMAND,
