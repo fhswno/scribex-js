@@ -3,7 +3,7 @@ title: Code Blocks
 description: Syntax-highlighted code blocks with language selection.
 ---
 
-Scribex includes a `CodeBlockNode` that provides editable code blocks with a language selector, copy button, and optional Shiki-powered syntax highlighting.
+Blokhaus includes a `CodeBlockNode` that provides editable code blocks with a language selector, copy button, and optional Shiki-powered syntax highlighting.
 
 ## Quick start
 
@@ -12,7 +12,7 @@ The `CodeBlockNode` is registered automatically by `EditorRoot`. To enable the m
 ```tsx title="app/editor/page.tsx"
 "use client";
 
-import { EditorRoot, InputRulePlugin, SlashMenu } from "@scribex/core";
+import { EditorRoot, InputRulePlugin, SlashMenu } from "@blokhaus/core";
 
 export default function EditorPage() {
   return (
@@ -42,7 +42,7 @@ interface CodeBlockPayload {
 ### Creating a code block programmatically
 
 ```tsx
-import { $createCodeBlockNode } from "@scribex/core";
+import { $createCodeBlockNode } from "@blokhaus/core";
 
 editor.update(() => {
   const codeBlock = $createCodeBlockNode({
@@ -58,7 +58,7 @@ editor.update(() => {
 ### Type guard
 
 ```tsx
-import { $isCodeBlockNode } from "@scribex/core";
+import { $isCodeBlockNode } from "@blokhaus/core";
 
 if ($isCodeBlockNode(node)) {
   console.log("Language:", node.getLanguage());

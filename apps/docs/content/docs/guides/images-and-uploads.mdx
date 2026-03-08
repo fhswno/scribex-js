@@ -3,7 +3,7 @@ title: Images & Uploads
 description: Handle image uploads with optimistic UI and the UploadHandler interface.
 ---
 
-Scribex provides a complete image upload pipeline with optimistic UI. When a user drops or pastes an image, they see an instant preview with a loading spinner. Once the upload completes, the preview is replaced with the permanent image. No base64 encoding is ever used.
+Blokhaus provides a complete image upload pipeline with optimistic UI. When a user drops or pastes an image, they see an instant preview with a loading spinner. Once the upload completes, the preview is replaced with the permanent image. No base64 encoding is ever used.
 
 ## The `UploadHandler` type
 
@@ -13,14 +13,14 @@ type UploadHandler = (file: File) => Promise<string>;
 // Rejects with an error if the upload fails.
 ```
 
-Scribex provides no default implementation. You provide your own upload logic as a function. This keeps the library decoupled from any specific storage backend.
+Blokhaus provides no default implementation. You provide your own upload logic as a function. This keeps the library decoupled from any specific storage backend.
 
 ## Basic setup
 
 ```tsx title="app/editor/page.tsx"
 "use client";
 
-import { EditorRoot, ImagePlugin } from "@scribex/core";
+import { EditorRoot, ImagePlugin } from "@blokhaus/core";
 
 const uploadHandler = async (file: File): Promise<string> => {
   const formData = new FormData();
@@ -137,7 +137,7 @@ When `ImagePlugin` is included, an "Image" item appears in the slash menu. Selec
 You can also trigger image insertion programmatically:
 
 ```tsx
-import { INSERT_IMAGE_COMMAND } from "@scribex/core";
+import { INSERT_IMAGE_COMMAND } from "@blokhaus/core";
 
 // From a file input or drag event
 editor.dispatchCommand(INSERT_IMAGE_COMMAND, file);
@@ -156,12 +156,12 @@ interface ImagePayload {
 }
 ```
 
-It renders a responsive `<img>` element and supports click-to-select with a selection ring (using the `--scribex-ring` token).
+It renders a responsive `<img>` element and supports click-to-select with a selection ring (using the `--blokhaus-ring` token).
 
 ### Creating an image node programmatically
 
 ```tsx
-import { $createImageNode } from "@scribex/core";
+import { $createImageNode } from "@blokhaus/core";
 
 editor.update(() => {
   const imageNode = $createImageNode({
@@ -177,7 +177,7 @@ editor.update(() => {
 ### Type guard
 
 ```tsx
-import { $isImageNode } from "@scribex/core";
+import { $isImageNode } from "@blokhaus/core";
 
 if ($isImageNode(node)) {
   console.log("Image src:", node.getSrc());
