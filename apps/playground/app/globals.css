@@ -2,9 +2,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@source "../../../packages/blokhaus/src";
+@source "../node_modules/@blokhaus/core/dist";
 
-@import "../../../packages/blokhaus/src/styles/tokens.css";
+@import "@blokhaus/core/styles";
 
 :root {
   --blokhaus-font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
