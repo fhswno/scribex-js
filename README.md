@@ -6,6 +6,8 @@ Built on [Lexical](https://lexical.dev), [Radix UI](https://radix-ui.com), and [
 
 > **Status:** Early development (v0.2.0). API is unstable. Contributions welcome.
 
+[Documentation](https://blokhaus.fhswno.com) | [Playground](https://playground.blokhaus.fhswno.com)
+
 ## What is this?
 
 Blokhaus is a Notion-style editor library designed for Next.js App Router. Instead of installing a black-box package, you copy components into your project and customize them directly — the same approach as [shadcn/ui](https://ui.shadcn.com).
