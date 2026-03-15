@@ -4,6 +4,8 @@ The **shadcn of rich text editors** — composable, block-based Notion-style edi
 
 Zero abstraction. Full ownership. Every component is a composable React plugin you control.
 
+[Documentation](https://blokhaus.fhswno.com) | [Playground](https://playground.blokhaus.fhswno.com)
+
 ## Features
 
 - **Block-based editing** — headings, paragraphs, lists, blockquotes, code blocks, callouts, toggles, tables, horizontal rules
