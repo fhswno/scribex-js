@@ -733,9 +733,11 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
         const range = domSelection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
 
+        const menuWidth = Math.min(248, window.innerWidth - 32);
+        const clampedLeft = Math.min(rect.left, window.innerWidth - menuWidth - 16);
         setPosition({
           top: rect.bottom + 6,
-          left: rect.left,
+          left: Math.max(16, clampedLeft),
         });
         setIsOpen(true);
         setQuery("");
@@ -848,7 +850,7 @@ export function SlashMenu({ items: externalItems }: SlashMenuProps) {
       style={{
         position: "fixed",
         zIndex: 50,
-        width: "248px",
+        width: "min(248px, calc(100vw - 32px))",
         maxHeight: "min(380px, 60vh)",
         overflow: "auto",
         borderRadius: "12px",
