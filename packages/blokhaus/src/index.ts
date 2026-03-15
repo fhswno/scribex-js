@@ -12,6 +12,8 @@ export { MentionPlugin } from './plugins/MentionPlugin';
 export { PastePlugin } from './plugins/PastePlugin';
 export { EmojiPickerPlugin } from './plugins/EmojiPickerPlugin';
 export { LinkPlugin } from './plugins/LinkPlugin';
+export { AutoLinkPlugin } from './plugins/AutoLinkPlugin';
+export type { AutoLinkPluginProps } from './plugins/AutoLinkPlugin';
 export { useEditorState } from './hooks/useEditorState';
 export { useWordCount } from './hooks/useWordCount';
 export { MobileToolbar } from './components/MobileToolbar';
