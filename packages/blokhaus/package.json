@@ -8,7 +8,7 @@
     "url": "https://github.com/fhswno/blokhaus-js.git",
     "directory": "packages/blokhaus"
   },
-  "homepage": "https://github.com/fhswno/blokhaus-js",
+  "homepage": "https://blokhaus.fhswno.com",
   "bugs": "https://github.com/fhswno/blokhaus-js/issues",
   "keywords": [
     "editor",
