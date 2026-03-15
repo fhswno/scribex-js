@@ -1,0 +1,84 @@
+---
+title: AutoLinkPlugin
+description: Automatically converts typed URLs and emails into clickable links.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+## Import
+
+```tsx
+import { AutoLinkPlugin } from "@blokhaus/core";
+```
+
+## Overview
+
+The `AutoLinkPlugin` automatically detects URLs and email addresses as the user types and converts them into clickable links. It uses Lexical's `AutoLinkNode` (distinct from the regular `LinkNode` used by `LinkPlugin`) to differentiate auto-detected links from manually created ones.
+
+By default, it matches:
+- **URLs** -- `https://example.com`, `http://example.com`, `www.example.com`
+- **Emails** -- `user@example.com`
+
+## Props
+
+| Prop       | Type             | Default           | Description                                     |
+| ---------- | ---------------- | ----------------- | ----------------------------------------------- |
+| `matchers` | `LinkMatcher[]`  | URL + email rules | Custom matchers to use instead of the defaults.  |
+
+## Usage
+
+### Basic (default matchers)
+
+```tsx title="app/editor/page.tsx"
+"use client";
+
+import { EditorRoot, AutoLinkPlugin, LinkPlugin } from "@blokhaus/core";
+
+export default function EditorPage() {
+  return (
+    <EditorRoot namespace="my-editor">
+      <LinkPlugin />
+      <AutoLinkPlugin />
+    </EditorRoot>
+  );
+}
+```
+
+With the default configuration, typing `https://github.com` or `hello@example.com` followed by a space will automatically convert the text into a clickable link.
+
+### Custom matchers
+
+You can provide custom matchers to detect additional patterns:
+
+```tsx
+import { AutoLinkPlugin } from "@blokhaus/core";
+import { createLinkMatcherWithRegExp } from "@lexical/react/LexicalAutoLinkPlugin";
+
+const PHONE_REGEX = /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/;
+
+const phoneMatcher = createLinkMatcherWithRegExp(
+  PHONE_REGEX,
+  (text) => `tel:${text.replace(/[-.\s]/g, "")}`,
+);
+
+// Include default matchers + phone matcher
+<AutoLinkPlugin matchers={[...DEFAULT_MATCHERS, phoneMatcher]} />
+```
+
+<Callout type="info">
+  `AutoLinkPlugin` uses `AutoLinkNode` internally, which is distinct from the `LinkNode` used by `LinkPlugin`. Both node types are registered automatically when you use the respective plugins. They can coexist without conflict.
+</Callout>
+
+## Default matchers
+
+The built-in matchers handle two patterns:
+
+| Pattern | Example | Transformed to |
+| ------- | ------- | -------------- |
+| URL     | `https://example.com` | `https://example.com` (unchanged) |
+| URL (www) | `www.example.com` | `https://www.example.com` (https:// prepended) |
+| Email   | `user@example.com` | `mailto:user@example.com` |
+
+## Related
+
+- [LinkPlugin](/docs/api/plugins/link-plugin) -- Manual link creation and editing
