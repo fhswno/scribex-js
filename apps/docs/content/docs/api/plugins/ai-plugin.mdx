@@ -21,25 +21,39 @@ This architecture guarantees zero undo history entries during streaming, and exa
 
 | Prop       | Type             | Default    | Description                                                 |
 | ---------- | ---------------- | ---------- | ----------------------------------------------------------- |
-| `provider` | `AIProvider`     | (required) | The AI streaming provider configuration. See below.         |
+| `provider` | `AIProvider`     | (required) | The AI streaming provider. See below.                       |
 | `config`   | `AIPluginConfig` | `{}`       | Optional configuration for behavior, labels, and callbacks. |
 
 ## The `AIProvider` interface
 
 ```ts
 interface AIProvider {
-  /** The URL to POST the AI prompt to. Must return a streaming text response. */
-  endpoint: string;
+  /** Human-readable name (e.g., "OpenAI", "Mistral", "Ollama") */
+  name: string;
   /**
-   * Optional: custom headers to include with the request.
-   * Use this for authentication tokens.
+   * Called with a prompt, surrounding editor context, and optional model config.
+   * Must return a ReadableStream of text chunks.
+   * The library consumes this stream -- it does not care about the underlying provider.
    */
-  headers?: Record<string, string>;
-  /**
-   * Optional: transform the request body before sending.
-   * Receives { prompt, context } and should return the body object.
-   */
-  transformRequest?: (data: { prompt: string; context: string }) => unknown;
+  generate: (params: AIGenerateParams) => Promise<ReadableStream<string>>;
+}
+
+interface AIGenerateParams {
+  /** The user's prompt text. */
+  prompt: string;
+  /** Surrounding editor content serialized as Markdown. */
+  context: string;
+  /** Optional model-level configuration. */
+  config?: AIGenerateConfig;
+}
+
+interface AIGenerateConfig {
+  /** Sampling temperature (0-2). Lower = more deterministic. */
+  temperature?: number;
+  /** Maximum tokens to generate. */
+  maxTokens?: number;
+  /** System prompt / persona for the model. */
+  systemPrompt?: string;
 }
 ```
 
@@ -47,42 +61,22 @@ interface AIProvider {
 
 ```ts
 interface AIPluginConfig {
-  /** Configuration for the content generation behavior. */
-  generate?: {
-    /** System prompt prepended to every request. */
-    systemPrompt?: string;
-    /** Maximum tokens to generate. */
-    maxTokens?: number;
-  };
-  /** Custom labels for the UI elements. */
-  labels?: {
-    /** Placeholder text in the prompt input. Default: "Ask AI to write..." */
-    promptPlaceholder?: string;
-    /** Accept button text. Default: "Accept" */
-    accept?: string;
-    /** Discard button text. Default: "Discard" */
-    discard?: string;
-    /** Retry button text. Default: "Retry" */
-    retry?: string;
-  };
+  /** Model-level configuration (temperature, maxTokens, systemPrompt). */
+  generate?: AIGenerateConfig;
+  /** Custom labels for the preview node UI. */
+  labels?: AIPreviewLabels;
   /** Retry configuration. */
-  retry?: {
-    /** Maximum number of retries on failure. Default: 0 */
-    maxRetries?: number;
-  };
-  /** Number of surrounding paragraphs to include as context. Default: 3 */
+  retry?: AIRetryConfig;
+  /** Number of preceding blocks to include as context. Default: 3 */
   contextWindowSize?: number;
-  /** Called when the stream endpoint returns an error. */
+  /** Called when the AI stream encounters an error. */
   onError?: (error: Error) => void;
-  /** Called when the user accepts the AI-generated content. */
+  /** Called when the user accepts generated content. */
   onAccept?: (content: string) => void;
-  /** Called when the user discards the AI-generated content. */
+  /** Called when the user discards generated content. */
   onDiscard?: () => void;
-  /**
-   * Optional: custom render function for the prompt input.
-   * Receives a submit callback and should return a React element.
-   */
-  renderPrompt?: (onSubmit: (prompt: string) => void) => React.ReactNode;
+  /** Custom prompt input component. Replaces the built-in prompt input. */
+  renderPrompt?: (props: AIPromptInputRenderProps) => React.ReactElement;
 }
 ```
 
@@ -93,23 +87,39 @@ interface AIPluginConfig {
 ```tsx title="app/editor/page.tsx"
 "use client";
 
-import {
-  EditorRoot,
-  AIPlugin,
-  InputRulePlugin,
-  SlashMenu,
-} from "@blokhaus/core";
+import { EditorRoot, AIPlugin, InputRulePlugin, SlashMenu } from "@blokhaus/core";
+import type { AIProvider } from "@blokhaus/core";
+
+const myProvider: AIProvider = {
+  name: "My AI",
+  generate: async ({ prompt, context }) => {
+    const response = await fetch("/api/ai/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt, context }),
+    });
+
+    if (!response.ok) throw new Error(`AI request failed: ${response.status}`);
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+
+    return new ReadableStream<string>({
+      async pull(controller) {
+        const { done, value } = await reader.read();
+        if (done) { controller.close(); return; }
+        controller.enqueue(decoder.decode(value, { stream: true }));
+      },
+    });
+  },
+};
 
 export default function EditorPage() {
   return (
     <EditorRoot namespace="my-editor">
       <InputRulePlugin />
       <SlashMenu />
-      <AIPlugin
-        provider={{
-          endpoint: "/api/editor/gemini",
-        }}
-      />
+      <AIPlugin provider={myProvider} />
     </EditorRoot>
   );
 }
@@ -119,26 +129,22 @@ export default function EditorPage() {
 
 ```tsx
 <AIPlugin
-  provider={{
-    endpoint: "/api/editor/gemini",
-    headers: {
-      Authorization: `Bearer ${session.token}`,
-    },
-    transformRequest: ({ prompt, context }) => ({
-      prompt,
-      context,
-      model: "gemini-2.0-flash",
-    }),
-  }}
+  provider={myProvider}
   config={{
     generate: {
       systemPrompt: "You are a helpful writing assistant. Respond in Markdown.",
       maxTokens: 2048,
+      temperature: 0.7,
     },
     labels: {
-      promptPlaceholder: "Describe what you want to write...",
+      header: "AI Assistant",
+      streaming: "Writing...",
       accept: "Insert",
       discard: "Cancel",
+      retry: "Try again",
+    },
+    retry: {
+      maxRetries: 3,
     },
     contextWindowSize: 5,
     onAccept: (content) => {
@@ -192,7 +198,7 @@ Serialize context to Markdown via serializeNodesToMarkdown()
 Insert AIPreviewNode -- single editor.update()
   |
   v
-AIPreviewNode mounts, begins fetch to provider.endpoint
+AIPreviewNode mounts, calls provider.generate()
   |
   v
 Tokens stream in --> AIPreviewNode local React state updates
