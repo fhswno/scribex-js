@@ -1,5 +1,5 @@
 // NEXT
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Lora, Caveat } from "next/font/google";
 
 // GLOBALS
@@ -34,6 +34,12 @@ const caveat = Caveat({
 export const metadata: Metadata = {
   title: "Blokhaus Playground",
   description: "Reference implementation of the Blokhaus editor",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
