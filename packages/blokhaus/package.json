@@ -1,6 +1,6 @@
 {
   "name": "@blokhaus/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The shadcn of rich text editors — composable, block-based Notion-style editor components for Next.js, built on Lexical.",
   "license": "MIT",
   "repository": {
