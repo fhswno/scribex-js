@@ -4,7 +4,7 @@ A block-based rich text editor for Next.js. Copy-paste components, own every lin
 
 Built on [Lexical](https://lexical.dev), [Radix UI](https://radix-ui.com), and [Tailwind CSS](https://tailwindcss.com).
 
-> **Status:** Early development (v0.0.1). API is unstable. Contributions welcome.
+> **Status:** Early development (v0.2.0). API is unstable. Contributions welcome.
 
 ## What is this?
 
