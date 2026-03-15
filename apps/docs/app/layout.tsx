@@ -18,6 +18,9 @@ const jetbrainsMono = JetBrains_Mono({
 // ANALYTICS
 import { Analytics } from "@vercel/analytics/react";
 
+// TOAST
+import { Toaster } from "sonner";
+
 // GLOBALS
 import "./globals.css";
 
@@ -31,7 +34,7 @@ export const metadata = {
     "A fully open-source, block-based Notion-style editor library built for Next.js.",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
     <html
       lang="en"
@@ -40,8 +43,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <body className="flex min-h-screen flex-col">
         <RootProvider theme={{ defaultTheme: "dark" }}>{children}</RootProvider>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            className:
+              "border-fd-border bg-fd-card text-fd-foreground shadow-2xl",
+          }}
+        />
         <Analytics />
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;
